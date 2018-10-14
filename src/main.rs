@@ -24,11 +24,11 @@ fn main() {
 		// TODO: record line numbers
 		// TODO: use a better regex to find TODOs
 		// TODO: add more regexs for other languages/patterns
-		let re = Regex::new(r"(?m)^(\s*)// TODO:(.*)$").unwrap();
+		let re = Regex::new(r"(?m)^\s*// (TODO:.*)$").unwrap();
 
 		// TODO: store TODOs in buffer before printing for other uses
 		for todo in re.captures_iter(&file_contents) {
-			println!("{}", &todo[0].trim());
+			println!("{}", &todo[1].trim());
 		}
 	}
 }
