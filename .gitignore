@@ -1,0 +1,5 @@
+/target
+**/*.rs.bk
+
+# don't need lock file for binary
+Cargo.lock
