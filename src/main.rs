@@ -2,12 +2,14 @@ extern crate regex;
 
 mod cli_parser;
 mod parser;
+mod display;
 
 use std::env;
 use std::fs;
 
 use cli_parser::parse_args;
-use parser::find_todos;
+use parser::{Todo, find_todos};
+use display::{print_file_todos};
 
 fn main() {
     // TODO: get list of tracked files from git
@@ -20,6 +22,7 @@ fn main() {
 		let file_contents = fs::read_to_string(file).unwrap();
 
 		// TODO: store TODOs for other uses
-		find_todos(&file_contents);
+		let todos: Vec<Todo> = find_todos(&file_contents);
+		print_file_todos(file, todos);
 	}
 }
