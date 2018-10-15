@@ -1,19 +1,17 @@
 extern crate regex;
 
+mod cli_parser;
+
 use std::env;
 use std::fs;
 use regex::Regex;
 
+use cli_parser::parse_args;
+
 fn main() {
-
-	let mut files = Vec::new();
-
+    // TODO: get list of tracked files from git
     // For now we will just open files given in args
-    // TODO: get list of tracked files
-    for arg in env::args().skip(1) {
-	    println!("{}\n", arg);
-	    files.push(arg)
-	}
+	let mut files = parse_args(env::args());
 
     // open each file and look for TODO comments
 	for file in files.iter() {
