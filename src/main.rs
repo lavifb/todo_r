@@ -1,12 +1,13 @@
 extern crate regex;
 
 mod cli_parser;
+mod parser;
 
 use std::env;
 use std::fs;
-use regex::Regex;
 
 use cli_parser::parse_args;
+use parser::find_todos;
 
 fn main() {
     // TODO: get list of tracked files from git
@@ -18,15 +19,7 @@ fn main() {
 		// TODO: look at file extension to figure out how to parse
 		let file_contents = fs::read_to_string(file).unwrap();
 
-		// TODO: add custom TODO keywords
-		// TODO: record line numbers
-		// TODO: use a better regex to find TODOs
-		// TODO: add more regexs for other languages/patterns
-		let re = Regex::new(r"(?m)^\s*// (TODO:.*)$").unwrap();
-
-		// TODO: store TODOs in buffer before printing for other uses
-		for todo in re.captures_iter(&file_contents) {
-			println!("{}", &todo[1].trim());
-		}
+		// TODO: store TODOs for other uses
+		find_todos(&file_contents);
 	}
 }
