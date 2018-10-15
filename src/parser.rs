@@ -17,10 +17,17 @@ pub fn find_todos(content: &str) {
 	// TODO: record line numbers
 	// TODO: use a better regex to find TODOs
 	// TODO: add more regexs for other languages/patterns
-	let re = Regex::new(r"(?m)^\s*// (TODO:.*)$").unwrap();
+	let re = Regex::new(r"^\s*// TODO:(.*)$").unwrap();
 
-	// TODO: store TODOs in Todo struct
-	for todo in re.captures_iter(content) {
-		println!("{}", &todo[1].trim());
+	let mut line_num: usize = 0;
+
+	for line in content.lines() {
+
+		line_num += 1;
+
+		// TODO: store TODOs in Todo struct
+		for todo in re.captures_iter(line) {
+			println!("{}\tTODO\t{}", line_num, &todo[1].trim());
+		}
 	}
 }

@@ -12,7 +12,7 @@ use parser::find_todos;
 fn main() {
     // TODO: get list of tracked files from git
     // For now we will just open files given in args
-	let mut files = parse_args(env::args());
+	let files = parse_args(env::args());
 
     // open each file and look for TODO comments
 	for file in files.iter() {
