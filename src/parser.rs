@@ -38,7 +38,7 @@ pub fn find_todos(content: &str) -> Vec<Todo> {
 	// TODO: add custom TODO keywords
 	// TODO: use a better regex to find TODOs
 	// TODO: add more regexs for other languages/patterns
-	let re = Regex::new(r"^\s*// TODO:(.*)$").unwrap();
+	let re = Regex::new(r"^\s*//\s*TODO:(.*)$").unwrap();
 
 	let mut todos = Vec::new();
 	let mut line_num: usize = 0;
