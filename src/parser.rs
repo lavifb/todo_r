@@ -30,6 +30,7 @@ impl fmt::Display for Todo {
     }
 }
 
+static TODO_REGEX: &str = r"^\s*//\s*TODO:(.*)$";
 
 /// Creates a list of TODOs found in content
 // TODO: return list of TODOs
@@ -38,7 +39,7 @@ pub fn find_todos(content: &str) -> Vec<Todo> {
 	// TODO: add custom TODO keywords
 	// TODO: use a better regex to find TODOs
 	// TODO: add more regexs for other languages/patterns
-	let re = Regex::new(r"^\s*//\s*TODO:(.*)$").unwrap();
+	let re = Regex::new(TODO_REGEX).unwrap();
 
 	let mut todos = Vec::new();
 	let mut line_num: usize = 0;
@@ -54,4 +55,21 @@ pub fn find_todos(content: &str) -> Vec<Todo> {
 	}
 
 	todos
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn regex_whitespace() {
+		let content = "\t\t\t\t//  TODO:  i3 \t";
+
+		let re = Regex::new(TODO_REGEX).unwrap();
+		let cap = re.captures(content).unwrap();
+
+		let output = cap[1].trim();
+
+		assert_eq!("i3", output);
+	}
 }
