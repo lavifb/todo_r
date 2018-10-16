@@ -2,12 +2,17 @@
 
 use parser::Todo;
 
+use ansi_term::Style;
+use ansi_term::Colour::{Green, Cyan, Fixed};
+
 /// Print filename and a list of Todos to stdout
 // TODO: add colors/color options
 pub fn print_file_todos(filename: &str, todos: Vec<Todo>) {
-	println!("{}", filename);
+	println!("{}", Style::new().underline().paint(filename));
 	for todo in todos {
-		println!("  {}", todo);
+		// TODO: add option for no colors
+		// TODO: format using something other than \t tabs
+		println!("  {}{}\t{}\t{}", Fixed(8).paint("line "), Fixed(8).paint(todo.line.to_string()), Green.paint(todo.todo_type), Cyan.paint(todo.content));
 	}
 }
 

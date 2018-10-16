@@ -1,4 +1,5 @@
 extern crate regex;
+extern crate ansi_term;
 
 mod cli_parser;
 mod parser;

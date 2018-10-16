@@ -5,3 +5,4 @@ authors = ["Lavi <lavifb@gmail.com>"]
 
 [dependencies]
 regex = "1"
+ansi_term = "0.11"

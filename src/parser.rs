@@ -5,9 +5,9 @@ use std::fmt;
 
 /// A struct holding the TODO and all the needed meta-information for it.
 pub struct Todo {
-	line: usize,
-	todo_type: String,
-	content: String,
+	pub line: usize,
+	pub todo_type: String,
+	pub content: String,
 }
 
 impl Todo {
