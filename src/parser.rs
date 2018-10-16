@@ -63,13 +63,25 @@ mod tests {
 
 	#[test]
 	fn regex_whitespace() {
-		let content = "\t\t\t\t//  TODO:  i3 \t";
+		let content = "\t\t\t\t  //  TODO:  item \t";
 
 		let re = Regex::new(TODO_REGEX).unwrap();
 		let cap = re.captures(content).unwrap();
 
 		let output = cap[1].trim();
 
-		assert_eq!("i3", output);
+		assert_eq!("item", output);
+	}
+
+	#[test]
+	fn regex_todo_in_comment() {
+		let content = "//  TODO:  item // TODO: item \t";
+
+		let re = Regex::new(TODO_REGEX).unwrap();
+		let cap = re.captures(content).unwrap();
+
+		let output = cap[1].trim();
+
+		assert_eq!("item // TODO: item", output);
 	}
 }
