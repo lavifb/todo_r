@@ -2,12 +2,13 @@
 
 use regex::Regex;
 use std::fmt;
+use ansi_term::Colour;
 
 /// A struct holding the TODO and all the needed meta-information for it.
 pub struct Todo {
-	pub line: usize,
-	pub todo_type: String,
-	pub content: String,
+	line: usize,
+	todo_type: String,
+	content: String,
 }
 
 impl Todo {
@@ -22,11 +23,19 @@ impl Todo {
 			content,
 		}
 	}
+
+	pub fn color_print(&self, line_color: &Colour, todo_color: &Colour, content_color: &Colour) {
+		println!("  {}{}\t{}\t{}", 
+			line_color.paint("line "), line_color.paint(self.line.to_string()),
+			todo_color.paint(&self.todo_type),
+			content_color.paint(&self.content),
+			);
+	}
 }
 
 impl fmt::Display for Todo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}\t{}\t{}", self.line, self.todo_type, self.content)
+        write!(f, "line {}\t{}\t{}", self.line, self.todo_type, self.content)
     }
 }
 
