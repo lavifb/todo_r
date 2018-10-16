@@ -30,28 +30,27 @@ impl fmt::Display for Todo {
     }
 }
 
+// TODO: add custom TODO keywords
+// TODO: add more regexs for other languages/patterns
+// TODO: use a better regex to find TODOs
 static TODO_REGEX: &str = r"^\s*//\s*TODO:(.*)$";
 
 /// Creates a list of TODOs found in content
-// TODO: return list of TODOs
+// TODO: Maybe return iterator instead of Vec 
 pub fn find_todos(content: &str) -> Vec<Todo> {
 	
-	// TODO: add custom TODO keywords
-	// TODO: use a better regex to find TODOs
-	// TODO: add more regexs for other languages/patterns
 	let re = Regex::new(TODO_REGEX).unwrap();
-
 	let mut todos = Vec::new();
-	let mut line_num: usize = 0;
 
-	for line in content.lines() {
-		line_num += 1;
-
-		for todo_content in re.captures_iter(line) {
-			let todo = Todo::new(line_num, "TODO", todo_content[1].trim());
-
-			todos.push(todo)
-		}
+	for (line_num, line) in content.lines().enumerate() {
+		let todo_content = re.captures(line);
+		match todo_content {
+			Some(todo_content) => {
+				let todo = Todo::new(line_num+1, "TODO", todo_content[1].trim());
+				todos.push(todo);
+			},
+			None => {},
+		};
 	}
 
 	todos
