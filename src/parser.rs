@@ -43,7 +43,7 @@ impl fmt::Display for Todo {
 // TODO: add custom TODO keywords
 // TODO: add more regexs for other languages/patterns
 // TODO: use a better regex to find TODOs
-static TODO_REGEX: &str = r"^\s*//\s*TODO:(.*)$";
+static TODO_REGEX: &str = r"^\s*//\s*TODO\s*:?(.*)$";
 
 /// Creates a list of TODOs found in content
 // TODO: Maybe return iterator instead of Vec 
@@ -85,6 +85,17 @@ mod tests {
 	#[test]
 	fn regex_todo_in_comment() {
 		let content = "//  TODO:  item // TODO: item \t";
+
+		let re = Regex::new(TODO_REGEX).unwrap();
+		let cap = re.captures(content).unwrap();
+
+		let output = cap[1].trim();
+
+		assert_eq!("item // TODO: item", output);
+	}
+	#[test]
+	fn regex_optional_colon() {
+		let content = "//  TODO  item // TODO: item \t";
 
 		let re = Regex::new(TODO_REGEX).unwrap();
 		let cap = re.captures(content).unwrap();
