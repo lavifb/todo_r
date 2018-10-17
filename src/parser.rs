@@ -70,38 +70,27 @@ pub fn find_todos(content: &str) -> Vec<Todo> {
 mod tests {
 	use super::*;
 
-	#[test]
-	fn regex_whitespace() {
-		let content = "\t\t\t\t  //  TODO:  item \t";
-
+	fn test_content(content: &str, exp_result: &str) {
 		let re = Regex::new(TODO_REGEX).unwrap();
 		let cap = re.captures(content).unwrap();
 
-		let output = cap[1].trim();
+		let result = cap[1].trim();
 
-		assert_eq!("item", output);
+		assert_eq!(exp_result, result);
+	}
+
+	#[test]
+	fn regex_whitespace() {
+		test_content("\t\t\t\t  //  TODO:  item \t", "item");
 	}
 
 	#[test]
 	fn regex_todo_in_comment() {
-		let content = "//  TODO:  item // TODO: item \t";
-
-		let re = Regex::new(TODO_REGEX).unwrap();
-		let cap = re.captures(content).unwrap();
-
-		let output = cap[1].trim();
-
-		assert_eq!("item // TODO: item", output);
+		test_content("//  TODO:  item // TODO: item \t", "item // TODO: item");
 	}
+	
 	#[test]
 	fn regex_optional_colon() {
-		let content = "//  TODO  item // TODO: item \t";
-
-		let re = Regex::new(TODO_REGEX).unwrap();
-		let cap = re.captures(content).unwrap();
-
-		let output = cap[1].trim();
-
-		assert_eq!("item // TODO: item", output);
+		test_content("//  TODO  item // TODO: item \t", "item // TODO: item");
 	}
 }
