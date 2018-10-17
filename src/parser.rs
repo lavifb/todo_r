@@ -44,14 +44,15 @@ impl fmt::Display for Todo {
 /// Creates a list of TODOs found in content
 // TODO: Maybe return iterator instead of Vec 
 pub fn find_todos(content: &str) -> Vec<Todo> {
-	let re: Regex = get_regex(vec!["TODO"]);
+	// TODO: add custom TODO keywords
+	let re: Regex = get_regex(vec!["TODO", "fixme"]);
 	let mut todos = Vec::new();
 
 	for (line_num, line) in content.lines().enumerate() {
 		let todo_content = re.captures(line);
 		match todo_content {
 			Some(todo_content) => {
-				let todo = Todo::new(line_num+1, "TODO", todo_content[1].trim());
+				let todo = Todo::new(line_num+1, &todo_content[1].trim().to_uppercase(), todo_content[2].trim());
 				todos.push(todo);
 			},
 			None => {},
@@ -66,12 +67,19 @@ mod tests {
 	use super::*;
 
 	fn test_content(content: &str, exp_result: &str) {
-		let re: Regex = get_regex(vec!["TODO"]);
-		let cap = re.captures(content).unwrap();
+		let re: Regex = get_regex(vec!["TODO", "FIXME"]);
+		let cap = re.captures(content);
+		match cap {
+			Some(cap) => {
+				let result = cap[2].trim();
+				assert_eq!(exp_result, result);
+			}
+			None => {
+				assert_eq!(exp_result, "ERROR");
+			}
+		}
 
-		let result = cap[1].trim();
-
-		assert_eq!(exp_result, result);
+		
 	}
 
 	#[test]
@@ -87,5 +95,15 @@ mod tests {
 	#[test]
 	fn regex_optional_colon() {
 		test_content("//  TODO  item // TODO: item \t", "item // TODO: item");
+	}
+
+	#[test]
+	fn regex_case_insensitive() {
+		test_content("// tODo: case ", "case");
+	}
+
+	#[test]
+	fn regex_todop() {
+		test_content("// todop: nope ", "ERROR");
 	}
 }
