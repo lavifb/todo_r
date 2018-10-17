@@ -21,6 +21,7 @@ fn main() {
     // open each file and look for TODO comments
 	for file in files.iter() {
 		// TODO: look at file extension to figure out how to parse
+		// TODO: handle error when filename is not found
 		let file_contents = fs::read_to_string(file).unwrap();
 
 		// TODO: store TODOs for other uses
