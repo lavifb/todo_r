@@ -4,6 +4,8 @@ use regex::Regex;
 use std::fmt;
 use ansi_term::Colour;
 
+use custom_tags::get_regex;
+
 /// A struct holding the TODO and all the needed meta-information for it.
 pub struct Todo {
 	line: usize,
@@ -13,7 +15,6 @@ pub struct Todo {
 
 impl Todo {
 	fn new(line: usize, todo_type_str: &str, content_str: &str) -> Todo {
-		
 		let todo_type = todo_type_str.to_string();
 		let content = content_str.to_string();
 
@@ -40,16 +41,10 @@ impl fmt::Display for Todo {
     }
 }
 
-// TODO: add custom TODO keywords
-// TODO: add more regexs for other languages/patterns
-// TODO: use a better regex to find TODOs
-static TODO_REGEX: &str = r"^\s*//\s*TODO\s*:?(.*)$";
-
 /// Creates a list of TODOs found in content
 // TODO: Maybe return iterator instead of Vec 
 pub fn find_todos(content: &str) -> Vec<Todo> {
-	
-	let re = Regex::new(TODO_REGEX).unwrap();
+	let re: Regex = get_regex(vec!["TODO"]);
 	let mut todos = Vec::new();
 
 	for (line_num, line) in content.lines().enumerate() {
@@ -71,7 +66,7 @@ mod tests {
 	use super::*;
 
 	fn test_content(content: &str, exp_result: &str) {
-		let re = Regex::new(TODO_REGEX).unwrap();
+		let re: Regex = get_regex(vec!["TODO"]);
 		let cap = re.captures(content).unwrap();
 
 		let result = cap[1].trim();

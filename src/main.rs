@@ -4,6 +4,7 @@ extern crate ansi_term;
 mod cli_parser;
 mod parser;
 mod display;
+mod custom_tags;
 
 use std::env;
 use std::fs;
