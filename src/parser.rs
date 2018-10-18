@@ -111,4 +111,9 @@ mod tests {
 	fn regex_todf() {
 		test_content("// todf: nope ", "ERROR");
 	}
+
+	#[test]
+	fn regex_todofixme() {
+		test_content("// todofixme : nope ", "ERROR");
+	}
 }
