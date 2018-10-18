@@ -106,4 +106,9 @@ mod tests {
 	fn regex_todop() {
 		test_content("// todop: nope ", "ERROR");
 	}
+
+	#[test]
+	fn regex_todf() {
+		test_content("// todf: nope ", "ERROR");
+	}
 }

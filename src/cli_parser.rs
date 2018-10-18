@@ -2,6 +2,7 @@
 use std::env;
 
 // TODO: store configuration in Config struct
+// TODO: use clap crate to handle flags and help
 
 /// Processor for parsing command line arguments
 // TODO: add cli options
