@@ -11,7 +11,7 @@ fn main() {
 	// TODO: add more cli options
 	// TODO: get list of tracked files from git
 	let matches = clap_app!(todo_r =>
-        (version: "1.0")
+        (version: env!("CARGO_PKG_VERSION"))
         (author: "Lavi Blumberg <lavifb@gmail.com>")
         (about: "Lists TODO comments in code")
         (@arg FILE: ... +required "File to search for TODO items.")
