@@ -1,18 +1,21 @@
 // Module for processing command line arguments
-use std::env;
 
 // TODO: store configuration in Config struct
-// TODO: use clap crate to handle flags and help
+// TODO: change crate to lib with bins
 
 /// Processor for parsing command line arguments
-// TODO: add cli options
-// TODO: add cli help
-pub fn parse_args(args: env::Args) -> Vec<String> {
-	let mut files: Vec<String> = Vec::new();
+pub fn parse_args() -> Vec<String> {
+	// TODO: add more cli options
+	let matches = clap_app!(todo_r =>
+        (version: "1.0")
+        (author: "Lavi Blumberg <lavifb@gmail.com>")
+        (about: "Lists TODO comments in code")
+        (@arg FILE: ... +required "File to search for TODO items.")
+    ).get_matches();
 
-	for arg in args.skip(1) {
-	    files.push(arg);
-	}
+	let files: Vec<&str> = matches.values_of("FILE").unwrap().collect();
 
-	files
+	let file_strings = files.iter().map(|s| s.to_string()).collect();
+
+	file_strings
 }

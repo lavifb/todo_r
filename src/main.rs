@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate clap;
 extern crate regex;
 extern crate ansi_term;
 
@@ -6,7 +8,6 @@ mod parser;
 mod display;
 mod custom_tags;
 
-use std::env;
 use std::fs;
 
 use cli_parser::parse_args;
@@ -16,7 +17,7 @@ use display::{print_file_todos};
 fn main() {
     // TODO: get list of tracked files from git
     // For now we will just open files given in args
-	let files = parse_args(env::args());
+	let files = parse_args();
 
     // open each file and look for TODO comments
 	for file in files.iter() {
