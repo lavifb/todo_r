@@ -1,7 +1,8 @@
 // Binary for finding TODOs in specified files
+extern crate todo_r;
+
 #[macro_use]
 extern crate clap;
-extern crate todo_r;
 
 use todo_r::todo_r;
 
