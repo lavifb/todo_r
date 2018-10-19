@@ -1,11 +1,14 @@
-// Module for processing command line arguments
+// Binary for finding TODOs in specified files
+#[macro_use]
+extern crate clap;
+extern crate todo_r;
 
-// TODO: store configuration in Config struct
-// TODO: change crate to lib with bins
+use todo_r::todo_r;
 
 /// Processor for parsing command line arguments
-pub fn parse_args() -> Vec<String> {
+fn main() {
 	// TODO: add more cli options
+	// TODO: get list of tracked files from git
 	let matches = clap_app!(todo_r =>
         (version: "1.0")
         (author: "Lavi Blumberg <lavifb@gmail.com>")
@@ -13,9 +16,9 @@ pub fn parse_args() -> Vec<String> {
         (@arg FILE: ... +required "File to search for TODO items.")
     ).get_matches();
 
-	let files: Vec<&str> = matches.values_of("FILE").unwrap().collect();
+	let files = matches.values_of("FILE").unwrap();
 
-	let file_strings = files.iter().map(|s| s.to_string()).collect();
-
-	file_strings
+	for file in files {
+		todo_r(file);
+	}
 }
