@@ -20,6 +20,6 @@ fn main() {
 	let files = matches.values_of("FILE").unwrap();
 
 	for file in files {
-		todo_r(file);
+		todo_r(file).unwrap();
 	}
 }
