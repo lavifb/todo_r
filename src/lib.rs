@@ -27,6 +27,7 @@ mod errors {
 use errors::*;
 
 /// Searches file for TODOs
+// TODO: add config struct for configurations like colors
 pub fn todo_r(filename: &str) -> Result<()> {
 	// TODO: look at file extension to figure out how to parse
 	let mut file = File::open(filename)?;
