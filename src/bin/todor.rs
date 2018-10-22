@@ -4,7 +4,7 @@ extern crate todo_r;
 #[macro_use(clap_app)]
 extern crate clap;
 
-use todo_r::todo_r;
+use todo_r::{todo_r, print_error};
 
 /// Processor for parsing command line arguments
 fn main() {
@@ -20,6 +20,6 @@ fn main() {
 	let files = matches.values_of("FILE").unwrap();
 
 	for file in files {
-		todo_r(file).unwrap();
+		todo_r(file).unwrap_or_else(|err| print_error(&err));
 	}
 }
