@@ -2,7 +2,7 @@
 
 use regex::Regex;
 use std::fmt;
-use ansi_term::Color;
+use ansi_term::Style;
 
 use custom_tags::get_regex;
 
@@ -27,7 +27,7 @@ impl Todo {
 	}
 
 	/// Returns colored output string
-	pub fn color_string(&self, line_color: &Color, todo_color: &Color, content_color: &Color) -> String {
+	pub fn style_string(&self, line_color: &Style, todo_color: &Style, content_color: &Style) -> String {
 		// TODO: format using something other than \t tabs
 		format!("  {}{}\t{}\t{}", 
 			line_color.paint("line "), line_color.paint(self.line.to_string()),
@@ -69,7 +69,7 @@ mod tests {
 	use super::*;
 
 	fn test_content(content: &str, exp_result: &str) {
-		let re: Regex = get_regex(vec!["TODO", "FIXME"]);
+		let re: Regex = get_regex(&["TODO", "FIXME"]);
 		let cap = re.captures(content);
 		match cap {
 			Some(cap) => {

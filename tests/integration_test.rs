@@ -15,6 +15,6 @@ fn basic() {
         .arg("test1.rs")
         .assert()
         .success()
-        .stdout("test.rs\n  line 2\tTODO\titem\n")
+        .stdout("test1.rs\n  line 2\tTODO\titem\n")
         .stderr("");
 }
