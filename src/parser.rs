@@ -29,8 +29,8 @@ impl Todo {
 	/// Returns colored output string
 	pub fn style_string(&self, line_color: &Style, todo_color: &Style, content_color: &Style) -> String {
 		// TODO: format using something other than \t tabs
-		format!("  {}{}\t{}\t{}", 
-			line_color.paint("line "), line_color.paint(self.line.to_string()),
+		format!("  {}\t{}\t{}", 
+			line_color.paint(format!("line {}", self.line)), 
 			todo_color.paint(&self.todo_type),
 			content_color.paint(&self.content),
 			)

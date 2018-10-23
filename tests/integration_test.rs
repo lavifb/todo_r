@@ -19,3 +19,14 @@ fn basic() {
         .stdout("test1.rs\n  line 2\tTODO\titem\n")
         .stderr("");
 }
+
+#[test]
+fn colors() {
+	let mut cmd = Command::main_binary().unwrap();
+    cmd.current_dir("tests/examples")
+    	.arg("test1.rs")
+        .assert()
+        .success()
+        .stdout("[4mtest1.rs[0m\n  [38;5;8mline 2[0m\t[32mTODO[0m\t[36mitem[0m\n")
+        .stderr("");
+}
