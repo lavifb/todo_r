@@ -2,7 +2,7 @@
 
 use regex::Regex;
 use std::fmt;
-use ansi_term::Colour;
+use ansi_term::Color;
 
 use custom_tags::get_regex;
 
@@ -14,6 +14,7 @@ pub struct Todo {
 }
 
 impl Todo {
+	/// Create new TODO struct
 	fn new(line: usize, todo_type_str: &str, content_str: &str) -> Todo {
 		let todo_type = todo_type_str.to_string();
 		let content = content_str.to_string();
@@ -25,13 +26,14 @@ impl Todo {
 		}
 	}
 
-	pub fn color_print(&self, line_color: &Colour, todo_color: &Colour, content_color: &Colour) {
+	/// Returns colored output string
+	pub fn color_string(&self, line_color: &Color, todo_color: &Color, content_color: &Color) -> String {
 		// TODO: format using something other than \t tabs
-		println!("  {}{}\t{}\t{}", 
+		format!("  {}{}\t{}\t{}", 
 			line_color.paint("line "), line_color.paint(self.line.to_string()),
 			todo_color.paint(&self.todo_type),
 			content_color.paint(&self.content),
-			);
+			)
 	}
 }
 
