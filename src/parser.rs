@@ -47,7 +47,7 @@ impl fmt::Display for Todo {
 // TODO: Maybe return iterator instead of Vec 
 pub fn find_todos(content: &str) -> Vec<Todo> {
 	// TODO: add custom TODO keywords
-	let re: Regex = get_regex(vec!["TODO", "fixme"]);
+	let re: Regex = get_regex(&["TODO", "fixme"]);
 	let mut todos = Vec::new();
 
 	for (line_num, line) in content.lines().enumerate() {

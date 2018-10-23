@@ -43,7 +43,7 @@ pub fn todo_r(filename: &str) -> Result<()> {
 
 	// TODO: store TODOs for other uses
 	let todos: Vec<Todo> = find_todos(&file_contents);
-	print_file_todos(filename, todos);
+	print_file_todos(filename, &todos);
 	Ok(())
 }
 

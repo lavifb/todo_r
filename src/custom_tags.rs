@@ -4,7 +4,7 @@ use regex::Regex;
 
 // TODO: add more regexs for other languages/patterns
 // TODO: use a better regex to find TODOs
-pub fn get_regex(custom_tags: Vec<&str>) -> Regex {
+pub fn get_regex(custom_tags: &[&str]) -> Regex {
 	let tags_string: String = custom_tags.join("|");
 
 	let todo_regex: &str = &format!(r"(?i)^\s*{}\s*({})\s*:?\s+{}$",	// whitespace and optional colon

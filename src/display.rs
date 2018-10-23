@@ -8,7 +8,7 @@ use ansi_term::Color::{Green, Cyan, Fixed};
 /// Print filename and a list of Todos to stdout
 // TODO: add colors/color options
 // TODO: add struct that stores file and its TODOs
-pub fn print_file_todos(filename: &str, todos: Vec<Todo>) {
+pub fn print_file_todos(filename: &str, todos: &[Todo]) {
 	println!("{}", Style::new().underline().paint(filename));
 	for todo in todos {
 		// TODO: add option for no colors
@@ -20,7 +20,7 @@ pub fn print_file_todos(filename: &str, todos: Vec<Todo>) {
 
 /// Print a list of Todos to stdout
 #[allow(dead_code)]
-pub fn print_todos(todos: Vec<Todo>) {
+pub fn print_todos(todos: &[Todo]) {
 	for todo in todos {
 		println!("{}", todo);
 	}
