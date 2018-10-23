@@ -14,7 +14,7 @@ use std::io::Read;
 use ansi_term::Colour::Red;
 
 use parser::{Todo, find_todos};
-use display::{print_file_todos};
+use display::{StyleConfig, print_file_todos};
 
 mod errors {
 	error_chain! {
@@ -26,9 +26,21 @@ mod errors {
 
 use errors::*;
 
+pub struct TodoRConfig {
+	no_style: bool,
+}
+
+impl TodoRConfig {
+	pub fn new(no_style: bool) -> TodoRConfig {
+		TodoRConfig {
+			no_style,
+		}
+	}
+}
+
 /// Searches file for TODOs
 // TODO: add config struct for configurations like colors
-pub fn todo_r(filename: &str) -> Result<()> {
+pub fn todo_r(filename: &str, config: &TodoRConfig) -> Result<()> {
 	// TODO: look at file extension to figure out how to parse
 	let mut file = File::open(filename)?;
 
@@ -43,7 +55,13 @@ pub fn todo_r(filename: &str) -> Result<()> {
 
 	// TODO: store TODOs for other uses
 	let todos: Vec<Todo> = find_todos(&file_contents);
-	print_file_todos(filename, &todos);
+
+	let styles = match config.no_style {
+		true => StyleConfig::no_style(),
+		false => StyleConfig::default(),
+	};
+
+	print_file_todos(filename, &todos, &styles);
 	Ok(())
 }
 

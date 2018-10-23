@@ -6,6 +6,7 @@ use std::process::Command;
 fn todor() -> Command {
     let mut cmd = Command::main_binary().unwrap();
     cmd.current_dir("tests/examples");
+    cmd.arg("--no-style");
     cmd
 }
 

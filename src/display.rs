@@ -14,7 +14,7 @@ pub struct StyleConfig {
 
 impl StyleConfig {
 	/// Creates new StyleConfig with plaintext printing (no colors).
-	fn no_style() -> StyleConfig {
+	pub fn no_style() -> StyleConfig {
 		StyleConfig {
 			filename_style: Style::new(),
 			line_number_style: Style::new(),
@@ -38,11 +38,8 @@ impl Default for StyleConfig {
 }
 
 /// Print filename and a list of Todos to stdout
-// TODO: add ColorConfig options
 // TODO: add struct that stores file and its TODOs
-pub fn print_file_todos(filename: &str, todos: &[Todo]) {
-	let styles = StyleConfig::default();
-
+pub fn print_file_todos(filename: &str, todos: &[Todo], styles: &StyleConfig) {
 	// TODO: lock stdout for faster printing
 	println!("{}", styles.filename_style.paint(filename));
 	for todo in todos {

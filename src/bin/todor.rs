@@ -4,7 +4,7 @@ extern crate todo_r;
 #[macro_use(clap_app)]
 extern crate clap;
 
-use todo_r::{todo_r, print_error};
+use todo_r::{TodoRConfig, todo_r, print_error};
 
 /// Processor for parsing command line arguments
 fn main() {
@@ -15,11 +15,17 @@ fn main() {
         (author: "Lavi Blumberg <lavifb@gmail.com>")
         (about: "Lists TODO comments in code")
         (@arg FILE: ... +required "File to search for TODO items.")
+        (@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
     ).get_matches();
 
 	let files = matches.values_of("FILE").unwrap();
+	let no_style = matches.is_present("NOSTYLE");
+
+	let config:TodoRConfig = TodoRConfig::new(
+		no_style,
+	);
 
 	for file in files {
-		todo_r(file).unwrap_or_else(|err| print_error(&err));
+		todo_r(file, &config).unwrap_or_else(|err| print_error(&err));
 	}
 }
