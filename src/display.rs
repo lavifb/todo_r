@@ -14,7 +14,7 @@ pub struct StyleConfig {
 
 impl StyleConfig {
 	/// Creates new StyleConfig with plaintext printing (no colors).
-	fn no_color() -> StyleConfig {
+	fn no_style() -> StyleConfig {
 		StyleConfig {
 			filename_style: Style::new(),
 			line_number_style: Style::new(),
