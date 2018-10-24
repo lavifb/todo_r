@@ -3,6 +3,7 @@
 use parser::Todo;
 
 use ansi_term::Style;
+use std::io::{self, Write};
 
 /// Struct for holding ansi color printing options
 pub struct StyleConfig {
@@ -40,10 +41,13 @@ impl Default for StyleConfig {
 /// Print filename and a list of Todos to stdout
 // TODO: add struct that stores file and its TODOs
 pub fn print_file_todos(filename: &str, todos: &[Todo], styles: &StyleConfig) {
-	// TODO: lock stdout for faster printing
-	println!("{}", styles.filename_style.paint(filename));
+	// lock stdout to print faster
+	let stdout = io::stdout();
+	let lock = stdout.lock();
+	let mut out_buffer = io::BufWriter::new(lock);
+	writeln!(out_buffer, "{}", styles.filename_style.paint(filename));
 	for todo in todos {
-		println!("{}", todo.style_string(
+		writeln!(out_buffer, "{}", todo.style_string(
 			&styles.line_number_style, 
 			&styles.todo_type_style, 
 			&styles.content_style
