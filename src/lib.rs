@@ -34,14 +34,13 @@ pub fn print_error(err: &Error) {
 }
 
 
-pub struct TodoRConfig {
+pub struct TodoRConfig<'a> {
 	no_style: bool,
-	// TODO: change String to &str
-	todo_words: Vec<String>,
+	todo_words: Vec<&'a str>,
 }
 
-impl TodoRConfig {
-	pub fn new(no_style: bool, todo_words: &[String]) -> TodoRConfig {
+impl<'a> TodoRConfig<'a> {
+	pub fn new(no_style: bool, todo_words: &[&'a str]) -> TodoRConfig<'a> {
 		TodoRConfig {
 			no_style,
 			todo_words: todo_words.to_vec(),

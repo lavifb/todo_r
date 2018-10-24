@@ -20,7 +20,7 @@ fn main() {
     ).get_matches();
 
 	let no_style = matches.is_present("NOSTYLE");
-	let todo_words = vec!["TODO".to_string(), "FIXME".to_string()];
+	let todo_words = ["TODO", "FIXME"];
 
 	let config:TodoRConfig = TodoRConfig::new(
 		no_style,
