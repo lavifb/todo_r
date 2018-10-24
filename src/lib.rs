@@ -36,12 +36,15 @@ pub fn print_error(err: &Error) {
 
 pub struct TodoRConfig {
 	no_style: bool,
+	// TODO: change String to &str
+	todo_words: Vec<String>,
 }
 
 impl TodoRConfig {
-	pub fn new(no_style: bool) -> TodoRConfig {
+	pub fn new(no_style: bool, todo_words: &[String]) -> TodoRConfig {
 		TodoRConfig {
 			no_style,
+			todo_words: todo_words.to_vec(),
 		}
 	}
 }
@@ -62,7 +65,7 @@ pub fn todo_r(filename: &str, config: &TodoRConfig) -> Result<()> {
 	file.read_to_string(&mut file_contents)?;
 
 	// TODO: store TODOs for other uses
-	let todos: Vec<Todo> = find_todos(&file_contents);
+	let todos: Vec<Todo> = find_todos(&file_contents, &["TODO", "FIXME"]);
 
 	let styles = match config.no_style {
 		true => StyleConfig::no_style(),
