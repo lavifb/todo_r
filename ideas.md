@@ -1,4 +1,4 @@
-Design Ideas
+Future Ideas
 ======
 
 - scan through git tracked files in repo and list all TODO comments
