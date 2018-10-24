@@ -64,7 +64,7 @@ pub fn todo_r(filename: &str, config: &TodoRConfig) -> Result<()> {
 	file.read_to_string(&mut file_contents)?;
 
 	// TODO: store TODOs for other uses
-	let todos: Vec<Todo> = find_todos(&file_contents, &["TODO", "FIXME"]);
+	let todos: Vec<Todo> = find_todos(&file_contents, &config.todo_words);
 
 	let styles = match config.no_style {
 		true => StyleConfig::no_style(),
