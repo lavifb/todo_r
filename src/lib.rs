@@ -16,6 +16,7 @@ use ansi_term::Colour::Red;
 use parser::{Todo, find_todos};
 use display::{StyleConfig, print_file_todos};
 
+
 mod errors {
 	error_chain! {
 		foreign_links {
@@ -25,6 +26,13 @@ mod errors {
 }
 
 use errors::*;
+
+pub fn print_error(err: &Error) {
+	match err {
+		_ => eprintln!("{}: {}", Red.paint("[todo_r error]"), err.to_string()),
+	};
+}
+
 
 pub struct TodoRConfig {
 	no_style: bool,
@@ -63,10 +71,4 @@ pub fn todo_r(filename: &str, config: &TodoRConfig) -> Result<()> {
 
 	print_file_todos(filename, &todos, &styles);
 	Ok(())
-}
-
-pub fn print_error(err: &Error) {
-	match err {
-		_ => eprintln!("{}: {}", Red.paint("[todo_r error]"), err.to_string()),
-	};
 }
