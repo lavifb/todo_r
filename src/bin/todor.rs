@@ -24,7 +24,7 @@ fn main() {
 	// TODO: check that tags dont have spaces or punctuation
 	let todo_words = match matches.values_of("TAG") {
 		Some(words_iter) => words_iter.collect(),
-		None => Vec::new(),
+		None => vec!["todo", "fixme"],
 	};
 
 	let config:TodoRConfig = TodoRConfig::new(

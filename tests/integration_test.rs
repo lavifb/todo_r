@@ -39,7 +39,7 @@ fn custom_tags1() {
         .arg("foo")
         .assert()
         .success()
-        .stdout("test1.rs\n  line 2\tTODO\titem\n  line 4\tFOO\tbar\n")
+        .stdout("test1.rs\n  line 4\tFOO\tbar\n")
         .stderr("");
 }
 
@@ -48,6 +48,7 @@ fn custom_tags2() {
     todor()
         .arg("test1.rs")
         .arg("-t")
+        .arg("todo")
         .arg("foo")
         .arg("tag")
         .assert()
