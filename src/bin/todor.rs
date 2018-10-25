@@ -17,10 +17,15 @@ fn main() {
         (about: "Lists TODO comments in code")
         (@arg FILE: ... "File to search for TODO items.")
         (@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
+        (@arg TAG: -t --("tag") +takes_value +multiple "Todo tags to search for.")
     ).get_matches();
 
 	let no_style = matches.is_present("NOSTYLE");
-	let todo_words = ["TODO", "FIXME"];
+	// TODO: check that tags dont have spaces or punctuation
+	let todo_words = match matches.values_of("TAG") {
+		Some(words_iter) => words_iter.collect(),
+		None => Vec::new(),
+	};
 
 	let config:TodoRConfig = TodoRConfig::new(
 		no_style,

@@ -40,10 +40,13 @@ pub struct TodoRConfig<'a> {
 }
 
 impl<'a> TodoRConfig<'a> {
-	pub fn new(no_style: bool, todo_words: &[&'a str]) -> TodoRConfig<'a> {
+	pub fn new(no_style: bool, custom_todo_words: &[&'a str]) -> TodoRConfig<'a> {
+		let mut todo_words = vec!["TODO", "FIXME"];
+		todo_words.extend_from_slice(custom_todo_words);
+
 		TodoRConfig {
 			no_style,
-			todo_words: todo_words.to_vec(),
+			todo_words,
 		}
 	}
 }
