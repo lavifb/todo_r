@@ -12,13 +12,13 @@ use todo_r::{TodoRConfig, todo_r, print_error};
 fn main() {
 	// TODO: add config file option
 	let matches = clap_app!(todo_r =>
-        (version: env!("CARGO_PKG_VERSION"))
-        (author: "Lavi Blumberg <lavifb@gmail.com>")
-        (about: "Lists TODO comments in code")
-        (@arg FILE: ... "File to search for TODO items.")
-        (@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
-        (@arg TAG: -t --("tag") +takes_value +multiple "Todo tags to search for.")
-    ).get_matches();
+		(version: env!("CARGO_PKG_VERSION"))
+		(author: "Lavi Blumberg <lavifb@gmail.com>")
+		(about: "Lists TODO comments in code")
+		(@arg FILE: ... "File to search for TODO items.")
+		(@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
+		(@arg TAG: -t --("tag") +takes_value +multiple "Todo tags to search for.")
+	).get_matches();
 
 	let no_style = matches.is_present("NOSTYLE");
 	let todo_words = match matches.values_of("TAG") {
@@ -41,18 +41,18 @@ fn main() {
 		None => {
 			// try to use git using `git ls-files $(git rev-parse --show-toplevel)`
 			let rev_parse = Command::new("git")
-									.arg("rev-parse")
-									.arg("--show-toplevel")
-									.output()
-									.unwrap();
+			                        .arg("rev-parse")
+			                        .arg("--show-toplevel")
+			                        .output()
+			                        .unwrap();
 
 			let top_level: String = String::from_utf8_lossy(&rev_parse.stdout).into_owned().trim().to_string();
 
 			let output = Command::new("git")
-									.arg("ls-files")
-									.arg(top_level)
-									.output()
-									.unwrap();
+			                        .arg("ls-files")
+			                        .arg(top_level)
+			                        .output()
+			                        .unwrap();
 
 			let files = String::from_utf8_lossy(&output.stdout).into_owned();
 			for file in files.lines() {

@@ -38,9 +38,9 @@ impl Todo {
 }
 
 impl fmt::Display for Todo {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "line {}\t{}\t{}", self.line, self.todo_type, self.content)
-    }
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "line {}\t{}\t{}", self.line, self.todo_type, self.content)
+	}
 }
 
 /// Creates a list of TODOs found in content

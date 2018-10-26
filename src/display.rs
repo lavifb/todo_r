@@ -51,11 +51,13 @@ pub fn print_file_todos(filename: &str, todos: &[Todo], styles: &StyleConfig) {
 	let mut out_buffer = io::BufWriter::new(lock);
 	writeln!(out_buffer, "{}", styles.filename_style.paint(filename));
 	for todo in todos {
-		writeln!(out_buffer, "{}", todo.style_string(
-			&styles.line_number_style, 
-			&styles.todo_type_style, 
-			&styles.content_style
-		));
+		writeln!(out_buffer, "{}", 
+			todo.style_string(
+				&styles.line_number_style, 
+				&styles.todo_type_style, 
+				&styles.content_style
+			)
+		);
 	}
 }
 

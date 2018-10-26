@@ -56,8 +56,8 @@ pub fn todo_r(filename: &str, config: &TodoRConfig) -> Result<()> {
 
 	// check the file is not a directory
 	if file.metadata()?.is_dir() {
-        return Err(format!("'{}' is a directory.", filename).into());
-    }
+		return Err(format!("'{}' is a directory.", filename).into());
+	}
 
 	let mut file_contents = String::new();
 	// TODO: Maybe use buffer in case file is very large
