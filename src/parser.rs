@@ -125,7 +125,17 @@ mod tests {
 	}
 
 	#[test]
-	fn regex_py_in_c() {
+	fn regex_py_in_c_file() {
 		test_content("# todo: item \t ", "NONE", CommentType::C);
+	}
+
+	#[test]
+	fn regex_c_comment_in_py_comment() {
+		test_content("# todo: \\ todo: item \t ", "\\ todo: item", CommentType::Py);
+	}
+
+	#[test]
+	fn regex_c_comment_in_py_comment_in_c_file() {
+		test_content("# todo: \\ todo: item \t ", "NONE", CommentType::C);
 	}
 }
