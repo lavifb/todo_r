@@ -4,7 +4,7 @@ use regex::Regex;
 use std::fmt;
 use ansi_term::Style;
 
-use custom_tags::get_regex;
+use custom_tags::{get_regex, CommentType};
 
 /// A struct holding the TODO and all the needed meta-information for it.
 pub struct Todo {
@@ -47,7 +47,7 @@ impl fmt::Display for Todo {
 // TODO: Maybe return iterator instead of Vec 
 pub fn find_todos(content: &str, todo_words: &[&str]) -> Vec<Todo> {
 	// TODO: add custom TODO keywords
-	let re: Regex = get_regex(todo_words);
+	let re: Regex = get_regex(todo_words, CommentType::C);
 	let mut todos = Vec::new();
 
 	for (line_num, line) in content.lines().enumerate() {
@@ -68,8 +68,8 @@ pub fn find_todos(content: &str, todo_words: &[&str]) -> Vec<Todo> {
 mod tests {
 	use super::*;
 
-	fn test_content(content: &str, exp_result: &str) {
-		let re: Regex = get_regex(&["TODO", "FIXME"]);
+	fn test_content(content: &str, exp_result: &str, comment_type: CommentType) {
+		let re: Regex = get_regex(&["TODO", "FIXME"], comment_type);
 		let cap = re.captures(content);
 		match cap {
 			Some(cap) => {
@@ -77,7 +77,7 @@ mod tests {
 				assert_eq!(exp_result, result);
 			}
 			None => {
-				assert_eq!(exp_result, "ERROR");
+				assert_eq!(exp_result, "NONE");
 			}
 		}
 
@@ -86,36 +86,46 @@ mod tests {
 
 	#[test]
 	fn regex_whitespace() {
-		test_content("\t\t\t\t  //  TODO:  item \t", "item");
+		test_content("\t\t\t\t  //  TODO:  item \t", "item", CommentType::C);
 	}
 
 	#[test]
 	fn regex_todo_in_comment() {
-		test_content("//  TODO:  item // TODO: item \t", "item // TODO: item");
+		test_content("//  TODO:  item // TODO: item \t", "item // TODO: item", CommentType::C);
 	}
 	
 	#[test]
 	fn regex_optional_colon() {
-		test_content("//  TODO  item // TODO: item \t", "item // TODO: item");
+		test_content("//  TODO  item // TODO: item \t", "item // TODO: item", CommentType::C);
 	}
 
 	#[test]
 	fn regex_case_insensitive() {
-		test_content("// tODo: case ", "case");
+		test_content("// tODo: case ", "case", CommentType::C);
 	}
 
 	#[test]
 	fn regex_todop() {
-		test_content("// todop: nope ", "ERROR");
+		test_content("// todop: nope ", "NONE", CommentType::C);
 	}
 
 	#[test]
 	fn regex_todf() {
-		test_content("// todf: nope ", "ERROR");
+		test_content("// todf: nope ", "NONE", CommentType::C);
 	}
 
 	#[test]
 	fn regex_todofixme() {
-		test_content("// todofixme : nope ", "ERROR");
+		test_content("// todofixme : nope ", "NONE", CommentType::C);
+	}
+
+	#[test]
+	fn regex_py_comment() {
+		test_content("# todo: item \t ", "item", CommentType::Py);
+	}
+
+	#[test]
+	fn regex_py_in_c() {
+		test_content("# todo: item \t ", "NONE", CommentType::C);
 	}
 }

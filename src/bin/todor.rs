@@ -10,7 +10,7 @@ use todo_r::{TodoRConfig, todo_r, print_error};
 
 /// Processor for parsing command line arguments
 fn main() {
-	// TODO: add more cli options
+	// TODO: add config file option
 	let matches = clap_app!(todo_r =>
         (version: env!("CARGO_PKG_VERSION"))
         (author: "Lavi Blumberg <lavifb@gmail.com>")
@@ -21,7 +21,6 @@ fn main() {
     ).get_matches();
 
 	let no_style = matches.is_present("NOSTYLE");
-	// TODO: check that tags dont have spaces or punctuation
 	let todo_words = match matches.values_of("TAG") {
 		Some(words_iter) => words_iter.collect(),
 		None => vec!["todo", "fixme"],
