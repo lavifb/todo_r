@@ -4,7 +4,7 @@ use regex::Regex;
 use std::fmt;
 use ansi_term::Style;
 
-use custom_tags::{get_regex, CommentType};
+use custom_tags::{get_regex_string, CommentType};
 
 /// A struct holding the TODO and all the needed meta-information for it.
 pub struct Todo {
@@ -46,8 +46,9 @@ impl fmt::Display for Todo {
 /// Creates a list of TODOs found in content
 // MAYB: return iterator instead of Vec 
 pub fn find_todos(content: &str, todo_words: &[&str]) -> Vec<Todo> {
-	// TODO: use RegexSet to test multiple comment types at once
-	let re: Regex = get_regex(todo_words, CommentType::SSlash);
+	let regex_string = get_regex_string(todo_words, CommentType::SSlash);
+	// TODO: test multiple comment types at once
+	let re = Regex::new(&regex_string).unwrap();
 	let mut todos = Vec::new();
 
 	for (line_num, line) in content.lines().enumerate() {
@@ -69,7 +70,9 @@ mod tests {
 	use super::*;
 
 	fn test_content(content: &str, exp_result: &str, comment_type: CommentType) {
-		let re: Regex = get_regex(&["TODO", "FIXME"], comment_type);
+		let regex_string = get_regex_string(&["TODO", "FIXME"], comment_type);
+		let re = Regex::new(&regex_string).unwrap();
+
 		let cap = re.captures(content);
 		match cap {
 			Some(cap) => {

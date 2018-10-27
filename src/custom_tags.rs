@@ -1,7 +1,5 @@
 // Module for creating regexs for custom tags
 
-use regex::Regex;
-
 /// Enum storing the different supported comment types.
 /// They are named after the comment symbol with the first letter repeated the number of time the symbol is repeated.
 /// For instance, `CommentType::SSlash` refers to `//`
@@ -39,18 +37,14 @@ impl CommentType {
 	}
 }
 
-// TODO: use a better regex to find TODOs
-pub fn get_regex(custom_tags: &[&str], comment_type: CommentType) -> Regex {
+// MAYB: use a better regex to find TODOs
+pub fn get_regex_string(custom_tags: &[&str], comment_type: CommentType) -> String {
 	let tags_string: String = custom_tags.join("|");
 
-	let todo_regex: &str = 
-		&format!(r"(?i)^\s*{}\s*({})\s*:?\s+{}{}",  // whitespace and optional colon
-		         comment_type.prefix(),             // comment prefix token
-		         tags_string,                       // custom tags
-		         r"(.*?)",                          // TODO content
-		         comment_type.suffix(),             // comment prefix token
-		);
-
-	let re = Regex::new(todo_regex).unwrap();
-	re
+	format!(r"(?i)^\s*{}\s*({})\s*:?\s+{}{}",  // whitespace and optional colon
+	         comment_type.prefix(),            // comment prefix token
+	         tags_string,                      // custom tags
+	         r"(.*?)",                         // TODO content
+	         comment_type.suffix(),            // comment prefix token
+	)
 }
