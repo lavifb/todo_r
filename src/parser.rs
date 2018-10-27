@@ -47,7 +47,7 @@ impl fmt::Display for Todo {
 // TODO: Maybe return iterator instead of Vec 
 pub fn find_todos(content: &str, todo_words: &[&str]) -> Vec<Todo> {
 	// TODO: add custom TODO keywords
-	let re: Regex = get_regex(todo_words, CommentType::C);
+	let re: Regex = get_regex(todo_words, CommentType::SSlash);
 	let mut todos = Vec::new();
 
 	for (line_num, line) in content.lines().enumerate() {
@@ -86,56 +86,66 @@ mod tests {
 
 	#[test]
 	fn regex_whitespace() {
-		test_content("\t\t\t\t  //  TODO:  item \t", "item", CommentType::C);
+		test_content("\t\t\t\t  //  TODO:  item \t", "item", CommentType::SSlash);
 	}
 
 	#[test]
 	fn regex_todo_in_comment() {
-		test_content("//  TODO:  item // TODO: item \t", "item // TODO: item", CommentType::C);
+		test_content("//  TODO:  item // TODO: item \t", "item // TODO: item", CommentType::SSlash);
 	}
 	
 	#[test]
 	fn regex_optional_colon() {
-		test_content("//  TODO  item // TODO: item \t", "item // TODO: item", CommentType::C);
+		test_content("//  TODO  item // TODO: item \t", "item // TODO: item", CommentType::SSlash);
 	}
 
 	#[test]
 	fn regex_case_insensitive() {
-		test_content("// tODo: case ", "case", CommentType::C);
+		test_content("// tODo: case ", "case", CommentType::SSlash);
 	}
 
 	#[test]
 	fn regex_todop() {
-		test_content("// todop: nope ", "NONE", CommentType::C);
+		test_content("// todop: nope ", "NONE", CommentType::SSlash);
 	}
 
 	#[test]
 	fn regex_todf() {
-		test_content("// todf: nope ", "NONE", CommentType::C);
+		test_content("// todf: nope ", "NONE", CommentType::SSlash);
 	}
 
 	#[test]
 	fn regex_todofixme() {
-		test_content("// todofixme : nope ", "NONE", CommentType::C);
+		test_content("// todofixme : nope ", "NONE", CommentType::SSlash);
 	}
 
 	#[test]
 	fn regex_py_comment() {
-		test_content("# todo: item \t ", "item", CommentType::Py);
+		test_content("# todo: item \t ", "item", CommentType::Hash);
+	}
+
+	#[test]
+	fn regex_percent_comment() {
+		test_content("% todo: item \t ", "item", CommentType::Percent);
+	}
+
+	#[test]
+	fn regex_ddash_comment() {
+		test_content("-- todo: item \t ", "item", CommentType::DDash);
 	}
 
 	#[test]
 	fn regex_py_in_c_file() {
-		test_content("# todo: item \t ", "NONE", CommentType::C);
+		test_content("# todo: item \t ", "NONE", CommentType::SSlash);
 	}
 
 	#[test]
 	fn regex_c_comment_in_py_comment() {
-		test_content("# todo: \\ todo: item \t ", "\\ todo: item", CommentType::Py);
+		test_content("# todo: \\ todo: item \t ", "\\ todo: item", CommentType::Hash);
 	}
 
 	#[test]
 	fn regex_c_comment_in_py_comment_in_c_file() {
-		test_content("# todo: \\ todo: item \t ", "NONE", CommentType::C);
+		test_content("# todo: \\ todo: item \t ", "NONE", CommentType::SSlash);
 	}
 }

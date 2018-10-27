@@ -2,19 +2,25 @@
 
 use regex::Regex;
 
-/// Enum storing the different supported comment types
+/// Enum storing the different supported comment types.
+/// They are named after the comment symbol with the first letter repeated the number of time the symbol is repeated.
+/// For instance, `CommentType::SSlash` refers to `//`
 // TODO: change to a hashmap to support adding more comment types
 pub enum CommentType {
-	C,
-	Py,
+	SSlash,
+	Hash,
+	Percent,
+	DDash,
 }
 
 // TODO: add more languages/patterns
 impl CommentType {
 	fn prefix(&self) -> &str {
 		match self {
-			CommentType::C =>  "//",
-			CommentType::Py => "#",
+			CommentType::SSlash  => "//",
+			CommentType::Hash    => "#",
+			CommentType::Percent => "%",
+			CommentType::DDash   => "--",
 		}
 	}
 }
