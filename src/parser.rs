@@ -164,4 +164,9 @@ mod tests {
 	fn regex_c_comment_in_py_comment_in_c_file() {
 		test_content("# todo: \\ todo: item \t ", "NONE", CommentType::SSlash);
 	}
+
+	#[test]
+	fn regex_comment_not_on_separate_line() {
+		test_content("do_things(); \\ todo: item", "NONE", CommentType::SSlash);
+	}
 }

@@ -45,7 +45,7 @@ pub fn get_regex_string(custom_tags: &[&str], comment_type: CommentType) -> Stri
 	format!(r"(?i)^\s*{}\s*({})\s*:?\s+{}{}",  // whitespace and optional colon
 	         comment_type.prefix(),            // comment prefix token
 	         tags_string,                      // custom tags
-	         r"(.*?)",                         // TODO content
+	         r"(.*?)",                         // content
 	         comment_type.suffix(),            // comment prefix token
 	)
 }
