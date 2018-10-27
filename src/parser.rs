@@ -44,9 +44,9 @@ impl fmt::Display for Todo {
 }
 
 /// Creates a list of TODOs found in content
-// TODO: Maybe return iterator instead of Vec 
+// MAYB: return iterator instead of Vec 
 pub fn find_todos(content: &str, todo_words: &[&str]) -> Vec<Todo> {
-	// TODO: add custom TODO keywords
+	// TODO: use RegexSet to test multiple comment types at once
 	let re: Regex = get_regex(todo_words, CommentType::SSlash);
 	let mut todos = Vec::new();
 
@@ -80,8 +80,6 @@ mod tests {
 				assert_eq!(exp_result, "NONE");
 			}
 		}
-
-		
 	}
 
 	#[test]
@@ -132,6 +130,21 @@ mod tests {
 	#[test]
 	fn regex_ddash_comment() {
 		test_content("-- todo: item \t ", "item", CommentType::DDash);
+	}
+
+	#[test]
+	fn regex_slashstar_comment() {
+		test_content("/* todo: item \t */ \t ", "item", CommentType::SlashStar);
+	}
+
+	#[test]
+	fn regex_slashstar_comment_double_prefix() {
+		test_content("/* todo: item /* todo: decoy*/\t ", "item /* todo: decoy", CommentType::SlashStar);
+	}
+
+	#[test]
+	fn regex_slashstar_comment_double_suffix() {
+		test_content("/* todo: item */ \t other stuff */ ", "item", CommentType::SlashStar);
 	}
 
 	#[test]
