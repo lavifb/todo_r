@@ -4,6 +4,7 @@
 /// They are named after the comment symbol with the first letter repeated the number of time the symbol is repeated.
 /// For instance, `CommentType::SSlash` refers to `//`
 // TODO: change to a hashmap to support adding more comment types
+// TODO: instead of an enum use a struct that contains a prefix and suffix and is pointed to by a hashmap
 pub enum CommentType {
 	SSlash,
 	Hash,
