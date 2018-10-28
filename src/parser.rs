@@ -28,10 +28,9 @@ impl Todo {
 
 	/// Returns colored output string
 	pub fn style_string(&self, line_style: &Style, todo_style: &Style, content_style: &Style) -> String {
-		// TODO: format using something other than \t tabs
-		format!("  {}\t{}\t{}", 
-			line_style.paint(format!("line {}", self.line)), 
-			todo_style.paint(&self.todo_type),
+		format!("  {}  {}  {}", 
+			line_style.paint(format!("line {:<5}", self.line)), // works up to 100,000 lines which should be a long enough file...
+			todo_style.paint(format!("{:5}", &self.todo_type)),
 			content_style.paint(&self.content),
 			)
 	}
