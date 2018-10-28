@@ -16,7 +16,7 @@ fn basic() {
 		.arg("test1.rs")
 		.assert()
 		.success()
-		.stdout("test1.rs\n  line 2\tTODO\titem\n")
+		.stdout("test1.rs\n  line 2      TODO   item\n")
 		.stderr("");
 }
 
@@ -27,7 +27,7 @@ fn colors() {
 		.arg("test1.rs")
 		.assert()
 		.success()
-		.stdout("[4mtest1.rs[0m\n  [38;5;8mline 2[0m\t[32mTODO[0m\t[36mitem[0m\n")
+		.stdout("[4mtest1.rs[0m\n  [38;5;8mline 2    [0m  [32mTODO [0m  [36mitem[0m\n")
 		.stderr("");
 }
 
@@ -39,7 +39,7 @@ fn custom_tags1() {
 		.arg("foo")
 		.assert()
 		.success()
-		.stdout("test1.rs\n  line 4\tFOO\tbar\n")
+		.stdout("test1.rs\n  line 4      FOO    bar\n")
 		.stderr("");
 }
 
@@ -53,7 +53,7 @@ fn custom_tags2() {
 		.arg("tag")
 		.assert()
 		.success()
-		.stdout("test1.rs\n  line 2\tTODO\titem\n  line 3\tTAG\titem tag\n  line 4\tFOO\tbar\n")
+		.stdout("test1.rs\n  line 2      TODO   item\n  line 3      TAG    item tag\n  line 4      FOO    bar\n")
 		.stderr("");
 }
 
@@ -63,7 +63,7 @@ fn py_extension_temp() {
 		.arg("test2.py")
 		.assert()
 		.success()
-		.stdout("test2.py\n  line 4\tTODO\titem\n")
+		.stdout("test2.py\n  line 4      TODO   item\n")
 		.stderr("");
 }
 
@@ -74,6 +74,6 @@ fn py_extension() {
 		.arg("test2.py")
 		.assert()
 		.success()
-		.stdout("test2.py\n  line 2\tTODO\tdocstring comment\n  line 4\tTODO\titem\n")
+		.stdout("test2.py\n  line 2      TODO   docstring comment\n  line 4      TODO   item\n")
 		.stderr("");
 }
