@@ -45,8 +45,21 @@ impl fmt::Display for Todo {
 
 /// Creates a list of TODOs found in content
 // MAYB: return iterator instead of Vec 
-pub fn find_todos(content: &str, todo_words: &[&str]) -> Vec<Todo> {
-	let regex_string = get_regex_string(todo_words, CommentType::SSlash);
+pub fn find_todos(content: &str, file_ext: &str, todo_words: &[&str]) -> Vec<Todo> {
+	// TODO: replace with hashmap as described in custom_tags.rs
+	let comment_type = match file_ext {
+		"rs" => CommentType::SSlash,
+		"c" => CommentType::SSlash,
+		"cpp" => CommentType::SSlash,
+		"py" => CommentType::Hash,
+		"tex" => CommentType::Percent,
+		"hs" => CommentType::DDash,
+		"sql" => CommentType::DDash,
+		".gitignore" => CommentType::Hash,
+		_ => CommentType::SSlash,
+	};
+
+	let regex_string = get_regex_string(todo_words, comment_type);
 	// TODO: test multiple comment types at once
 	let re = Regex::new(&regex_string).unwrap();
 	let mut todos = Vec::new();

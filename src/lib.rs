@@ -49,9 +49,8 @@ impl<'a> TodoRConfig<'a> {
 }
 
 /// Searches file for TODOs
-// TODO: add config struct for configurations like colors
 pub fn todo_r(filename: &str, config: &TodoRConfig) -> Result<()> {
-	// TODO: look at file extension to figure out how to parse
+	let file_ext = filename.rsplitn(2, '.').next().unwrap();
 	let mut file = File::open(filename)?;
 
 	// check the file is not a directory
@@ -64,7 +63,7 @@ pub fn todo_r(filename: &str, config: &TodoRConfig) -> Result<()> {
 	file.read_to_string(&mut file_contents)?;
 
 	// TODO: store TODOs for other uses
-	let todos: Vec<Todo> = find_todos(&file_contents, &config.todo_words);
+	let todos: Vec<Todo> = find_todos(&file_contents, file_ext, &config.todo_words);
 
 	let styles = match config.no_style {
 		true => StyleConfig::no_style(),

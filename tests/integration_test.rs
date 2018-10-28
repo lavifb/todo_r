@@ -56,3 +56,24 @@ fn custom_tags2() {
 		.stdout("test1.rs\n  line 2\tTODO\titem\n  line 3\tTAG\titem tag\n  line 4\tFOO\tbar\n")
 		.stderr("");
 }
+
+#[test]
+fn py_extension_temp() {
+	todor()
+		.arg("test2.py")
+		.assert()
+		.success()
+		.stdout("test2.py\n  line 4\tTODO\titem\n")
+		.stderr("");
+}
+
+// #[test]
+// TODO: implement comment blocks and then use this test instead of py_extension_temp()
+fn py_extension() {
+	todor()
+		.arg("test2.py")
+		.assert()
+		.success()
+		.stdout("test2.py\n  line 2\tTODO\tdocstring comment\n  line 4\tTODO\titem\n")
+		.stderr("");
+}
