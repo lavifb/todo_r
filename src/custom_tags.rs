@@ -11,6 +11,7 @@ pub enum CommentType {
 	Percent,
 	DDash,
 	SlashStar,
+	QQQuote,
 }
 
 // TODO: add more languages/patterns
@@ -23,6 +24,7 @@ impl CommentType {
 			CommentType::Percent   => "%",
 			CommentType::DDash     => "--",
 			CommentType::SlashStar => r"/\*",
+			CommentType::QQQuote   => "\"\"\"",
 		}
 	}
 
@@ -34,12 +36,13 @@ impl CommentType {
 			CommentType::Percent   => "$",
 			CommentType::DDash     => "$",
 			CommentType::SlashStar => r"\*/",
+			CommentType::QQQuote   => "\"\"\"",
 		}
 	}
 }
 
 // MAYB: use a better regex to find TODOs
-pub fn get_regex_string(custom_tags: &[&str], comment_type: CommentType) -> String {
+pub fn get_regex_string(custom_tags: &[&str], comment_type: &CommentType) -> String {
 	let tags_string: String = custom_tags.join("|");
 
 	format!(r"(?i)^\s*{}\s*({})\s*:?\s+{}{}",  // whitespace and optional colon

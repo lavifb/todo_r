@@ -47,32 +47,38 @@ impl fmt::Display for Todo {
 // MAYB: return iterator instead of Vec 
 pub fn find_todos(content: &str, file_ext: &str, todo_words: &[&str]) -> Vec<Todo> {
 	// TODO: replace with hashmap as described in custom_tags.rs
-	let comment_type = match file_ext {
-		"rs" => CommentType::SSlash,
-		"c" => CommentType::SSlash,
-		"cpp" => CommentType::SSlash,
-		"py" => CommentType::Hash,
-		"tex" => CommentType::Percent,
-		"hs" => CommentType::DDash,
-		"sql" => CommentType::DDash,
-		".gitignore" => CommentType::Hash,
-		_ => CommentType::SSlash,
+	let comment_types: Vec<CommentType> = match file_ext {
+		"rs" => vec![CommentType::SSlash, CommentType::SlashStar],
+		"c" => vec![CommentType::SSlash, CommentType::SlashStar],
+		"cpp" => vec![CommentType::SSlash, CommentType::SlashStar],
+		"py" => vec![CommentType::Hash, CommentType::QQQuote],
+		"tex" => vec![CommentType::Percent],
+		"hs" => vec![CommentType::DDash],
+		"sql" => vec![CommentType::DDash],
+		".gitignore" => vec![CommentType::Hash],
+		_ => vec![CommentType::SSlash],
 	};
 
-	let regex_string = get_regex_string(todo_words, comment_type);
-	// TODO: test multiple comment types at once
-	let re = Regex::new(&regex_string).unwrap();
+	let mut regexs: Vec<Regex> = Vec::new();
+
+	for comment_type in comment_types.iter() {
+		let regex_string = get_regex_string(todo_words, comment_type);
+		regexs.push(Regex::new(&regex_string).unwrap());
+	}
 	let mut todos = Vec::new();
 
 	for (line_num, line) in content.lines().enumerate() {
-		let todo_content = re.captures(line);
-		match todo_content {
-			Some(todo_content) => {
-				let todo = Todo::new(line_num+1, &todo_content[1].trim().to_uppercase(), todo_content[2].trim());
-				todos.push(todo);
-			},
-			None => {},
-		};
+		for re in regexs.iter() {
+			let todo_content = re.captures(line);
+			
+			match todo_content {
+				Some(todo_content) => {
+					let todo = Todo::new(line_num+1, &todo_content[1].trim().to_uppercase(), todo_content[2].trim());
+					todos.push(todo);
+				},
+				None => {},
+			};
+		}
 	}
 
 	todos
@@ -83,7 +89,7 @@ mod tests {
 	use super::*;
 
 	fn test_content(content: &str, exp_result: &str, comment_type: CommentType) {
-		let regex_string = get_regex_string(&["TODO", "FIXME"], comment_type);
+		let regex_string = get_regex_string(&["TODO", "FIXME"], &comment_type);
 		let re = Regex::new(&regex_string).unwrap();
 
 		let cap = re.captures(content);
@@ -161,6 +167,31 @@ mod tests {
 	#[test]
 	fn regex_slashstar_comment_double_suffix() {
 		test_content("/* todo: item */ \t other stuff */ ", "item", CommentType::SlashStar);
+	}
+
+	#[test]
+	fn regex_block_and_line1() {
+		test_content("/* // todo: item */", "NONE", CommentType::SlashStar);
+	}
+
+	#[test]
+	fn regex_block_and_line2() {
+		test_content("/* todo: // item */", "// item", CommentType::SlashStar);
+	}
+
+	#[test]
+	fn regex_block_and_line3() {
+		test_content(" // /* todo: item */", "NONE", CommentType::SlashStar);
+	}
+
+	#[test]
+	fn regex_block_and_line4() {
+		test_content(" //   todo:  /* item */", "/* item */", CommentType::SSlash);
+	}
+
+	#[test]
+	fn regex_block_and_line5() {
+		test_content(" //   todo:  /* item */", "NONE", CommentType::SlashStar);
 	}
 
 	#[test]

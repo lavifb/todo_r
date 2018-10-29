@@ -58,17 +58,6 @@ fn custom_tags2() {
 }
 
 #[test]
-fn py_extension_temp() {
-	todor()
-		.arg("test2.py")
-		.assert()
-		.success()
-		.stdout("test2.py\n  line 4      TODO   item\n")
-		.stderr("");
-}
-
-// #[test]
-// TODO: implement comment blocks and then use this test instead of py_extension_temp()
 fn py_extension() {
 	todor()
 		.arg("test2.py")
