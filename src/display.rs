@@ -41,8 +41,8 @@ impl Default for StyleConfig {
 /// Print filename and a list of Todos to stdout
 // TODO: add struct that stores file and its TODOs
 // MAYB: have different colors for different TODOs
-pub fn print_file_todos(filename: &str, todos: &[Todo], styles: &StyleConfig) {
-	if todos.is_empty() {
+pub fn print_file_todos(filename: &str, todos: &[Todo], styles: &StyleConfig, verbose: bool) {
+	if todos.is_empty() && !verbose {
 		return
 	}
 

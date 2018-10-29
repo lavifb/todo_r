@@ -80,6 +80,6 @@ pub fn todo_r(filename: &str, config: &TodoRConfig) -> Result<()> {
 		false => StyleConfig::default(),
 	};
 
-	print_file_todos(filename, &todos, &styles);
+	print_file_todos(filename, &todos, &styles, config.verbose);
 	Ok(())
 }

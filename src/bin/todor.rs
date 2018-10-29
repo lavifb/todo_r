@@ -29,13 +29,15 @@ fn main() {
 
 	let mut config:TodoRConfig = TodoRConfig::new(&todo_words);
 
-	let verbose: bool = matches.is_present("VERBOSE");
-	if verbose { config.set_verbose(); }
-
 	let no_style = matches.is_present("NOSTYLE");
 	if no_style { config.set_no_style(); }
 
-	// TODO: make this better somehow
+	let verbose: bool = matches.is_present("VERBOSE");
+	if verbose { 
+		config.set_verbose();
+		println!("TODO keywords: {}", todo_words.join(", ").to_uppercase());
+	}
+
 	match matches.values_of("FILE") { 
 		Some(files) => {
 			iter_todo_r(files, &config);
