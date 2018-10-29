@@ -18,18 +18,22 @@ fn main() {
 		(@arg FILE: ... "File to search for TODO items.")
 		(@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
 		(@arg TAG: -t --("tag") +takes_value +multiple "Todo tags to search for.")
+		(@arg VERBOSE: -v --("verbose") "Provide verbose output.")
 	).get_matches();
 
-	let no_style = matches.is_present("NOSTYLE");
+
 	let todo_words = match matches.values_of("TAG") {
 		Some(words_iter) => words_iter.collect(),
 		None => vec!["todo", "fixme"],
 	};
 
-	let config:TodoRConfig = TodoRConfig::new(
-		no_style,
-		&todo_words,
-	);
+	let mut config:TodoRConfig = TodoRConfig::new(&todo_words);
+
+	let verbose: bool = matches.is_present("VERBOSE");
+	if verbose { config.set_verbose(); }
+
+	let no_style = matches.is_present("NOSTYLE");
+	if no_style { config.set_no_style(); }
 
 	// TODO: make this better somehow
 	match matches.values_of("FILE") { 
@@ -44,7 +48,8 @@ fn main() {
 			                        .output()
 			                        .unwrap();
 
-			let top_level: String = String::from_utf8_lossy(&rev_parse.stdout).into_owned().trim().to_string();
+			let top_level: String = String::from_utf8_lossy(&rev_parse.stdout).trim().to_string();
+			if verbose { println!("Searching git repo at {}", top_level); }
 
 			let output = Command::new("git")
 			                        .arg("ls-files")
@@ -52,7 +57,7 @@ fn main() {
 			                        .output()
 			                        .unwrap();
 
-			let files = String::from_utf8_lossy(&output.stdout).into_owned();
+			let files = String::from_utf8_lossy(&output.stdout);
 			iter_todo_r(files.lines(), &config);
 		},
 	}
