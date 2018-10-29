@@ -34,9 +34,7 @@ fn main() {
 	// TODO: make this better somehow
 	match matches.values_of("FILE") { 
 		Some(files) => {
-			for file in files {
-				todo_r(file, &config).unwrap_or_else(|err| print_error(&err));
-			}
+			iter_todo_r(files, &config);
 		},
 		None => {
 			// try to use git using `git ls-files $(git rev-parse --show-toplevel)`
@@ -55,9 +53,16 @@ fn main() {
 			                        .unwrap();
 
 			let files = String::from_utf8_lossy(&output.stdout).into_owned();
-			for file in files.lines() {
-				todo_r(file, &config).unwrap_or_else(|err| print_error(&err));
-			}
+			iter_todo_r(files.lines(), &config);
 		},
+	}
+}
+
+fn iter_todo_r<'a, I>(files: I, config: &'a TodoRConfig) 
+where
+	I: Iterator<Item = &'a str>,
+{
+	for file in files {
+		todo_r(file, config).unwrap_or_else(|err| print_error(&err));
 	}
 }
