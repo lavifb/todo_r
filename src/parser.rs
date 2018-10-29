@@ -88,129 +88,123 @@ pub fn find_todos(content: &str, file_ext: &str, todo_words: &[&str]) -> Vec<Tod
 mod tests {
 	use super::*;
 
-	fn test_content(content: &str, exp_result: &str, comment_type: CommentType) {
-		let regex_string = get_regex_string(&["TODO", "FIXME"], &comment_type);
-		let re = Regex::new(&regex_string).unwrap();
+	fn test_content(content: &str, exp_result: &str, file_ext: &str) {
 
-		let cap = re.captures(content);
-		match cap {
-			Some(cap) => {
-				let result = cap[2].trim();
-				assert_eq!(exp_result, result);
-			}
-			None => {
-				assert_eq!(exp_result, "NONE");
-			}
+		let todos = find_todos(content, file_ext, &["TODO", "FIXME"]);
+		if todos.is_empty() {
+			assert_eq!(exp_result, "NONE");
+		} else {
+			assert_eq!(exp_result, todos[0].content);
 		}
 	}
 
 	#[test]
-	fn regex_whitespace() {
-		test_content("\t\t\t\t  //  TODO:  item \t", "item", CommentType::SSlash);
+	fn find_todos_whitespace() {
+		test_content("\t\t\t\t  //  TODO:  item \t", "item", "rs");
 	}
 
 	#[test]
-	fn regex_todo_in_comment() {
-		test_content("//  TODO:  item // TODO: item \t", "item // TODO: item", CommentType::SSlash);
+	fn find_todos_todo_in_comment() {
+		test_content("//  TODO:  item // TODO: item \t", "item // TODO: item", "rs");
 	}
 	
 	#[test]
-	fn regex_optional_colon() {
-		test_content("//  TODO  item // TODO: item \t", "item // TODO: item", CommentType::SSlash);
+	fn find_todos_optional_colon() {
+		test_content("//  TODO  item // TODO: item \t", "item // TODO: item", "rs");
 	}
 
 	#[test]
-	fn regex_case_insensitive() {
-		test_content("// tODo: case ", "case", CommentType::SSlash);
+	fn find_todos_case_insensitive() {
+		test_content("// tODo: case ", "case", "rs");
 	}
 
 	#[test]
-	fn regex_todop() {
-		test_content("// todop: nope ", "NONE", CommentType::SSlash);
+	fn find_todos_todop() {
+		test_content("// todop: nope ", "NONE", "rs");
 	}
 
 	#[test]
-	fn regex_todf() {
-		test_content("// todf: nope ", "NONE", CommentType::SSlash);
+	fn find_todos_todf() {
+		test_content("// todf: nope ", "NONE", "rs");
 	}
 
 	#[test]
-	fn regex_todofixme() {
-		test_content("// todofixme : nope ", "NONE", CommentType::SSlash);
+	fn find_todos_todofixme() {
+		test_content("// todofixme : nope ", "NONE", "rs");
 	}
 
 	#[test]
-	fn regex_py_comment() {
-		test_content("# todo: item \t ", "item", CommentType::Hash);
+	fn find_todos_py_comment() {
+		test_content("# todo: item \t ", "item", "py");
 	}
 
 	#[test]
-	fn regex_percent_comment() {
-		test_content("% todo: item \t ", "item", CommentType::Percent);
+	fn find_todos_percent_comment() {
+		test_content("% todo: item \t ", "item", "tex");
 	}
 
 	#[test]
-	fn regex_ddash_comment() {
-		test_content("-- todo: item \t ", "item", CommentType::DDash);
+	fn find_todos_ddash_comment() {
+		test_content("-- todo: item \t ", "item", "hs");
 	}
 
 	#[test]
-	fn regex_slashstar_comment() {
-		test_content("/* todo: item \t */ \t ", "item", CommentType::SlashStar);
+	fn find_todos_slashstar_comment() {
+		test_content("/* todo: item \t */ \t ", "item", "rs");
 	}
 
 	#[test]
-	fn regex_slashstar_comment_double_prefix() {
-		test_content("/* todo: item /* todo: decoy*/\t ", "item /* todo: decoy", CommentType::SlashStar);
+	fn find_todos_slashstar_comment_double_prefix() {
+		test_content("/* todo: item /* todo: decoy*/\t ", "item /* todo: decoy", "rs");
 	}
 
 	#[test]
-	fn regex_slashstar_comment_double_suffix() {
-		test_content("/* todo: item */ \t other stuff */ ", "item", CommentType::SlashStar);
+	fn find_todos_slashstar_comment_double_suffix() {
+		test_content("/* todo: item */ \t other stuff */ ", "item", "rs");
 	}
 
 	#[test]
-	fn regex_block_and_line1() {
-		test_content("/* // todo: item */", "NONE", CommentType::SlashStar);
+	fn find_todos_block_and_line1() {
+		test_content("/* // todo: item */", "NONE", "rs");
 	}
 
 	#[test]
-	fn regex_block_and_line2() {
-		test_content("/* todo: // item */", "// item", CommentType::SlashStar);
+	fn find_todos_block_and_line2() {
+		test_content("/* todo: // item */", "// item", "rs");
 	}
 
 	#[test]
-	fn regex_block_and_line3() {
-		test_content(" // /* todo: item */", "NONE", CommentType::SlashStar);
+	fn find_todos_block_and_line3() {
+		test_content(" // /* todo: item */", "NONE", "rs");
 	}
 
 	#[test]
-	fn regex_block_and_line4() {
-		test_content(" //   todo:  /* item */", "/* item */", CommentType::SSlash);
+	fn find_todos_block_and_line4() {
+		test_content(" //   todo:  /* item */", "/* item */", "rs");
 	}
 
 	#[test]
-	fn regex_block_and_line5() {
-		test_content(" //   todo:  /* item */", "NONE", CommentType::SlashStar);
+	fn find_todos_py_in_c_file() {
+		test_content("# todo: item \t ", "NONE", "c");
 	}
 
 	#[test]
-	fn regex_py_in_c_file() {
-		test_content("# todo: item \t ", "NONE", CommentType::SSlash);
+	fn find_todos_c_comment_in_py_comment() {
+		test_content("# todo: \\ todo: item \t ", "\\ todo: item", "py");
 	}
 
 	#[test]
-	fn regex_c_comment_in_py_comment() {
-		test_content("# todo: \\ todo: item \t ", "\\ todo: item", CommentType::Hash);
+	fn find_todos_c_comment_in_py_comment_in_c_file() {
+		test_content("# todo: \\ todo: item \t ", "NONE", "c");
 	}
 
 	#[test]
-	fn regex_c_comment_in_py_comment_in_c_file() {
-		test_content("# todo: \\ todo: item \t ", "NONE", CommentType::SSlash);
+	fn find_todos_comment_not_on_separate_line() {
+		test_content("do_things(); \\ todo: item", "NONE", "rs");
 	}
 
 	#[test]
-	fn regex_comment_not_on_separate_line() {
-		test_content("do_things(); \\ todo: item", "NONE", CommentType::SSlash);
+	fn find_todos_block_todo_before_function() {
+		test_content("/* todo: item */ do_things();", "item", "rs");
 	}
 }
