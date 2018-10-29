@@ -99,71 +99,6 @@ mod tests {
 	}
 
 	#[test]
-	fn find_todos_whitespace() {
-		test_content("\t\t\t\t  //  TODO:  item \t", "item", "rs");
-	}
-
-	#[test]
-	fn find_todos_todo_in_comment() {
-		test_content("//  TODO:  item // TODO: item \t", "item // TODO: item", "rs");
-	}
-	
-	#[test]
-	fn find_todos_optional_colon() {
-		test_content("//  TODO  item // TODO: item \t", "item // TODO: item", "rs");
-	}
-
-	#[test]
-	fn find_todos_case_insensitive() {
-		test_content("// tODo: case ", "case", "rs");
-	}
-
-	#[test]
-	fn find_todos_todop() {
-		test_content("// todop: nope ", "NONE", "rs");
-	}
-
-	#[test]
-	fn find_todos_todf() {
-		test_content("// todf: nope ", "NONE", "rs");
-	}
-
-	#[test]
-	fn find_todos_todofixme() {
-		test_content("// todofixme : nope ", "NONE", "rs");
-	}
-
-	#[test]
-	fn find_todos_py_comment() {
-		test_content("# todo: item \t ", "item", "py");
-	}
-
-	#[test]
-	fn find_todos_percent_comment() {
-		test_content("% todo: item \t ", "item", "tex");
-	}
-
-	#[test]
-	fn find_todos_ddash_comment() {
-		test_content("-- todo: item \t ", "item", "hs");
-	}
-
-	#[test]
-	fn find_todos_slashstar_comment() {
-		test_content("/* todo: item \t */ \t ", "item", "rs");
-	}
-
-	#[test]
-	fn find_todos_slashstar_comment_double_prefix() {
-		test_content("/* todo: item /* todo: decoy*/\t ", "item /* todo: decoy", "rs");
-	}
-
-	#[test]
-	fn find_todos_slashstar_comment_double_suffix() {
-		test_content("/* todo: item */ \t other stuff */ ", "item", "rs");
-	}
-
-	#[test]
 	fn find_todos_block_and_line1() {
 		test_content("/* // todo: item */", "NONE", "rs");
 	}
@@ -196,15 +131,5 @@ mod tests {
 	#[test]
 	fn find_todos_c_comment_in_py_comment_in_c_file() {
 		test_content("# todo: \\ todo: item \t ", "NONE", "c");
-	}
-
-	#[test]
-	fn find_todos_comment_not_on_separate_line() {
-		test_content("do_things(); \\ todo: item", "NONE", "rs");
-	}
-
-	#[test]
-	fn find_todos_block_todo_before_function() {
-		test_content("/* todo: item */ do_things();", "item", "rs");
 	}
 }
