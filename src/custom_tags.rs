@@ -91,6 +91,11 @@ mod tests {
 	}
 
 	#[test]
+	fn regex_fixme() {
+		test_regex("\t\t\t\t  //  fixMe:  item for fix \t", "item for fix", &CommentType::SSlash);
+	}
+
+	#[test]
 	fn regex_todop() {
 		test_regex("// todop: nope ", "NONE", &CommentType::SSlash);
 	}

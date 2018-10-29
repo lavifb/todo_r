@@ -90,7 +90,7 @@ mod tests {
 
 	fn test_content(content: &str, exp_result: &str, file_ext: &str) {
 
-		let todos = find_todos(content, file_ext, &["TODO", "FIXME"]);
+		let todos = find_todos(content, file_ext, &["TODO"]);
 		if todos.is_empty() {
 			assert_eq!(exp_result, "NONE");
 		} else {
