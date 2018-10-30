@@ -35,9 +35,9 @@ pub fn print_error(err: &Error) {
 
 
 pub struct TodoRConfig {
-	no_style: bool,
-	verbose: bool,
-	todo_words: Vec<String>,
+	pub verbose: bool,
+	pub todo_words: Vec<String>,
+	styles: StyleConfig,
 }
 
 impl TodoRConfig {
@@ -45,18 +45,14 @@ impl TodoRConfig {
 		let todo_word_strings: Vec<String> = todo_words.iter().map(|s| s.as_ref().to_string()).collect();
 
 		TodoRConfig {
-			no_style: false,
 			verbose: false,
 			todo_words: todo_word_strings,
+			styles: StyleConfig::default(),
 		}
 	}
 
-	pub fn set_verbose(&mut self) {
-		self.verbose = true;
-	}
-
 	pub fn set_no_style(&mut self) {
-		self.no_style = true;
+		self.styles = StyleConfig::no_style();
 	}
 }
 
@@ -112,11 +108,6 @@ pub fn todo_r(filename: &str, config: &TodoRConfig) -> Result<()> {
 	// TODO: store TODOs for other uses
 	let todos: Vec<Todo> = find_todos(&file_contents, file_ext, &config.todo_words);
 
-	let styles = match config.no_style {
-		true => StyleConfig::no_style(),
-		false => StyleConfig::default(),
-	};
-
-	print_file_todos(filename, &todos, &styles, config.verbose);
+	print_file_todos(filename, &todos, &config.styles, config.verbose);
 	Ok(())
 }
