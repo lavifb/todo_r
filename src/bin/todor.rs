@@ -27,16 +27,15 @@ fn main() {
 		None => vec!["todo", "fixme"],
 	};
 
-	let mut config:TodoRConfig = TodoRConfig::new(&todo_words);
-
-	let no_style = matches.is_present("NOSTYLE");
-	if no_style { config.set_no_style(); }
-
 	let verbose: bool = matches.is_present("VERBOSE");
-	if verbose { 
-		config.set_verbose();
-		println!("TODO keywords: {}", todo_words.join(", ").to_uppercase());
+	if verbose { println!("TODO keywords: {}", todo_words.join(", ").to_uppercase()); }
+
+	let mut config: TodoRConfig = TodoRConfig::new(&todo_words);
+	if matches.is_present("NOSTYLE") {
+		config.set_no_style();
 	}
+	config.verbose = verbose;
+
 
 	match matches.values_of("FILE") { 
 		Some(files) => {
