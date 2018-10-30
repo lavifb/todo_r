@@ -58,9 +58,45 @@ impl<'a> TodoRConfig<'a> {
 	}
 }
 
+struct TodoFile {
+	filename: String,
+	todos: Vec<Todo>,
+}
+
+/// TODO finder that stores all of the found TODOs on a per-file basis.
+pub struct TodoR<'a> {
+	config: TodoRConfig<'a>,
+	todo_files: Vec<TodoFile>,
+}
+
+impl<'a> TodoR<'a> {
+	/// Creates new TodoR struct with provided configuration.
+	/// Note that the configuration `config` is a reference
+	pub fn new(todo_words: &[&'a str]) -> TodoR<'a> {
+		TodoR {
+			config: TodoRConfig::new(todo_words),
+			todo_files: Vec::new(),
+		}
+	}
+
+	/// Opens file at given filename and process it by finding all its TODOs.
+	pub fn open_todos(&mut self, filename: &str) -> Result<()> {
+		// TODO: implement
+		unimplemented!();
+
+
+	}
+
+	/// Prints TODOs to stdout.
+	pub fn print_todos(&self) {
+		// TODO: implement
+		unimplemented!();
+	}
+}
+
 /// Searches file for TODOs
 pub fn todo_r(filename: &str, config: &TodoRConfig) -> Result<()> {
-	let file_ext = filename.rsplitn(2, '.').next().unwrap();
+	let file_ext: &str = filename.rsplitn(2, '.').next().unwrap();
 	let mut file = File::open(filename)?;
 
 	// check the file is not a directory
