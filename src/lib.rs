@@ -35,9 +35,9 @@ pub fn print_error(err: &Error) {
 
 
 pub struct TodoRConfig<'a> {
-	no_style: bool,
-	verbose: bool,
-	todo_words: Vec<&'a str>,
+	pub no_style: bool,
+	pub verbose: bool,
+	pub todo_words: Vec<&'a str>,
 }
 
 impl<'a> TodoRConfig<'a> {
@@ -47,14 +47,6 @@ impl<'a> TodoRConfig<'a> {
 			verbose: false,
 			todo_words: todo_words.to_vec(),
 		}
-	}
-
-	pub fn set_verbose(&mut self) {
-		self.verbose = true;
-	}
-
-	pub fn set_no_style(&mut self) {
-		self.no_style = true;
 	}
 }
 
