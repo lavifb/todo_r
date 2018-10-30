@@ -34,18 +34,20 @@ pub fn print_error(err: &Error) {
 }
 
 
-pub struct TodoRConfig<'a> {
+pub struct TodoRConfig {
 	no_style: bool,
 	verbose: bool,
-	todo_words: Vec<&'a str>,
+	todo_words: Vec<String>,
 }
 
-impl<'a> TodoRConfig<'a> {
-	pub fn new(todo_words: &[&'a str]) -> TodoRConfig<'a> {
+impl TodoRConfig {
+	pub fn new(todo_words: &[&str]) -> TodoRConfig {
+		let todo_word_strings: Vec<String> = todo_words.iter().map(|s| s.to_string()).collect();
+
 		TodoRConfig {
 			no_style: false,
 			verbose: false,
-			todo_words: todo_words.to_vec(),
+			todo_words: todo_word_strings,
 		}
 	}
 
@@ -64,15 +66,15 @@ struct TodoFile {
 }
 
 /// TODO finder that stores all of the found TODOs on a per-file basis.
-pub struct TodoR<'a> {
-	config: TodoRConfig<'a>,
+pub struct TodoR {
+	pub config: TodoRConfig,
 	todo_files: Vec<TodoFile>,
 }
 
-impl<'a> TodoR<'a> {
+impl TodoR {
 	/// Creates new TodoR struct with provided configuration.
 	/// Note that the configuration `config` is a reference
-	pub fn new(todo_words: &[&'a str]) -> TodoR<'a> {
+	pub fn new(todo_words: &[&str]) -> TodoR {
 		TodoR {
 			config: TodoRConfig::new(todo_words),
 			todo_files: Vec::new(),

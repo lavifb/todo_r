@@ -42,7 +42,7 @@ impl CommentType {
 }
 
 // MAYB: use a better regex to find TODOs
-pub fn get_regex_string(custom_tags: &[&str], comment_type: &CommentType) -> String {
+pub fn get_regex_string(custom_tags: &[String], comment_type: &CommentType) -> String {
 	let tags_string: String = custom_tags.join("|");
 
 	format!(r"(?i)^\s*{}\s*({})\s*:?\s+{}{}",  // whitespace and optional colon
@@ -59,7 +59,7 @@ mod tests {
 	use regex::Regex;
 
 	fn test_regex(content: &str, exp_result: &str, comment_type: &CommentType) {
-		let regex_string = get_regex_string(&["TODO", "FIXME"], comment_type);
+		let regex_string = get_regex_string(&["TODO".to_string(), "FIXME".to_string()], comment_type);
 
 		let re = Regex::new(&regex_string).unwrap();
 		let todo_content = re.captures(content);

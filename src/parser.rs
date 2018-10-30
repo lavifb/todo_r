@@ -45,7 +45,7 @@ impl fmt::Display for Todo {
 
 /// Creates a list of TODOs found in content
 // MAYB: return iterator instead of Vec 
-pub fn find_todos(content: &str, file_ext: &str, todo_words: &[&str]) -> Vec<Todo> {
+pub fn find_todos(content: &str, file_ext: &str, todo_words: &[String]) -> Vec<Todo> {
 	// TODO: replace with hashmap as described in custom_tags.rs
 	let comment_types: Vec<CommentType> = match file_ext {
 		"rs" => vec![CommentType::SSlash, CommentType::SlashStar],
@@ -90,7 +90,7 @@ mod tests {
 
 	fn test_content(content: &str, exp_result: &str, file_ext: &str) {
 
-		let todos = find_todos(content, file_ext, &["TODO"]);
+		let todos = find_todos(content, file_ext, &["TODO".to_string()]);
 		if todos.is_empty() {
 			assert_eq!(exp_result, "NONE");
 		} else {
