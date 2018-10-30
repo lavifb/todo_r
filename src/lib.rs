@@ -41,8 +41,8 @@ pub struct TodoRConfig {
 }
 
 impl TodoRConfig {
-	pub fn new(todo_words: &[&str]) -> TodoRConfig {
-		let todo_word_strings: Vec<String> = todo_words.iter().map(|s| s.to_string()).collect();
+	pub fn new<T: AsRef<str>>(todo_words: &[T]) -> TodoRConfig {
+		let todo_word_strings: Vec<String> = todo_words.iter().map(|s| s.as_ref().to_string()).collect();
 
 		TodoRConfig {
 			no_style: false,
@@ -73,8 +73,7 @@ pub struct TodoR {
 
 impl TodoR {
 	/// Creates new TodoR struct with provided configuration.
-	/// Note that the configuration `config` is a reference
-	pub fn new(todo_words: &[&str]) -> TodoR {
+	pub fn new<T: AsRef<str>>(todo_words: &[T]) -> TodoR {
 		TodoR {
 			config: TodoRConfig::new(todo_words),
 			todo_files: Vec::new(),
