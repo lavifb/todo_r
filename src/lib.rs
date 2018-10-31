@@ -98,7 +98,6 @@ impl TodoR {
 	// TODO: make method that writes to anything instead of only printing
 	pub fn print_todos(&self) {
 		for todo_file in &self.todo_files {
-			// TODO: pass TodoFile and TodoRConfig instead off all this stuff
 			print_file_todos(&todo_file, &self.config.styles, self.config.verbose);
 		}
 	}
