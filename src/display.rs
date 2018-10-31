@@ -38,11 +38,28 @@ impl Default for StyleConfig {
 	}
 }
 
-/// Print filename and a list of Todos to stdout
-// TODO: add struct that stores file and its TODOs
+pub struct TodoFile {
+	filename: String,
+	todos: Vec<Todo>,
+}
+
+impl TodoFile {
+	pub fn new(filename: &str) -> TodoFile {
+		TodoFile {
+			filename: filename.to_string(),
+			todos: Vec::with_capacity(0), // do not allocate because it will be replaced
+		}
+	}
+
+	pub fn set_todos(&mut self, todos: Vec<Todo>) {
+		self.todos = todos;
+	}
+}
+
+/// Prints filename and a list of Todos to stdout
 // MAYB: have different colors for different TODOs
-pub fn print_file_todos(filename: &str, todos: &[Todo], styles: &StyleConfig, verbose: bool) {
-	if todos.is_empty() && !verbose {
+pub fn print_file_todos(todo_file: &TodoFile, styles: &StyleConfig, verbose: bool) {
+	if todo_file.todos.is_empty() && !verbose {
 		return
 	}
 
@@ -50,8 +67,8 @@ pub fn print_file_todos(filename: &str, todos: &[Todo], styles: &StyleConfig, ve
 	let stdout = io::stdout();
 	let lock = stdout.lock();
 	let mut out_buffer = io::BufWriter::new(lock);
-	writeln!(out_buffer, "{}", styles.filename_style.paint(filename));
-	for todo in todos {
+	writeln!(out_buffer, "{}", styles.filename_style.paint(&todo_file.filename));
+	for todo in &todo_file.todos {
 		writeln!(out_buffer, "{}", 
 			todo.style_string(
 				&styles.line_number_style, 
@@ -59,13 +76,5 @@ pub fn print_file_todos(filename: &str, todos: &[Todo], styles: &StyleConfig, ve
 				&styles.content_style
 			)
 		);
-	}
-}
-
-/// Print a list of Todos to stdout
-#[allow(dead_code)]
-pub fn print_todos(todos: &[Todo]) {
-	for todo in todos {
-		println!("{}", todo);
 	}
 }

@@ -28,8 +28,8 @@ use std::fs::File;
 use std::io::Read;
 
 use errors::*;
-use parser::{Todo, find_todos};
-use display::{StyleConfig, print_file_todos};
+use parser::find_todos;
+use display::{StyleConfig, print_file_todos, TodoFile};
 
 
 /// Configuration for `TodoR`.
@@ -55,20 +55,6 @@ impl TodoRConfig {
 
 	pub fn set_no_style(&mut self) {
 		self.styles = StyleConfig::no_style();
-	}
-}
-
-struct TodoFile {
-	filename: String,
-	todos: Vec<Todo>,
-}
-
-impl TodoFile {
-	fn new(filename: &str) -> TodoFile {
-		TodoFile {
-			filename: filename.to_string(),
-			todos: Vec::with_capacity(0), // do not allocate because it will be replaced
-		}
 	}
 }
 
@@ -102,7 +88,7 @@ impl TodoR {
 		let mut file_contents = String::new();
 		// TODO: Maybe use buffer in case file is very large
 		file.read_to_string(&mut file_contents)?;
-		todo_file.todos = find_todos(&file_contents, file_ext, &self.config.todo_words);
+		todo_file.set_todos(find_todos(&file_contents, file_ext, &self.config.todo_words));
 
 		self.todo_files.push(todo_file);
 		Ok(())
@@ -113,7 +99,7 @@ impl TodoR {
 	pub fn print_todos(&self) {
 		for todo_file in &self.todo_files {
 			// TODO: pass TodoFile and TodoRConfig instead off all this stuff
-			print_file_todos(&todo_file.filename, &todo_file.todos, &self.config.styles, self.config.verbose);
+			print_file_todos(&todo_file, &self.config.styles, self.config.verbose);
 		}
 	}
 }
