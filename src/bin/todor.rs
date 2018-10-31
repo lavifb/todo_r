@@ -5,10 +5,11 @@ extern crate todo_r;
 extern crate clap;
 
 use std::process::Command;
-use todo_r::{TodoRConfig, todo_r, print_error};
+use todo_r::TodoR;
+use todo_r::errors::eprint_error;
 
 
-/// Processor for parsing command line arguments
+/// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
 	// TODO: add config file option
 	let matches = clap_app!(todo_r =>
@@ -30,16 +31,18 @@ fn main() {
 	let verbose: bool = matches.is_present("VERBOSE");
 	if verbose { println!("TODO keywords: {}", todo_words.join(", ").to_uppercase()); }
 
-	let mut config: TodoRConfig = TodoRConfig::new(&todo_words);
+	let mut todor = TodoR::new(&todo_words);
 	if matches.is_present("NOSTYLE") {
-		config.set_no_style();
+		todor.config.set_no_style();
 	}
-	config.verbose = verbose;
-
+	todor.config.verbose = verbose;
 
 	match matches.values_of("FILE") { 
 		Some(files) => {
-			iter_todo_r(files, &config);
+			for file in files {
+				todor.open_todos(file).unwrap_or_else(|err| eprint_error(&err));
+			}
+			todor.print_todos();
 		},
 		None => {
 			// try to use git using `git ls-files $(git rev-parse --show-toplevel)`
@@ -58,17 +61,11 @@ fn main() {
 			                        .output()
 			                        .unwrap();
 
-			let files = String::from_utf8_lossy(&output.stdout);
-			iter_todo_r(files.lines(), &config);
+			let files_in_lines = String::from_utf8_lossy(&output.stdout);
+			for file in files_in_lines.lines() {
+				todor.open_todos(file).unwrap_or_else(|err| eprint_error(&err));
+			}
+			todor.print_todos();
 		},
-	}
-}
-
-fn iter_todo_r<'a, I>(files: I, config: &'a TodoRConfig) 
-where
-	I: Iterator<Item = &'a str>,
-{
-	for file in files {
-		todo_r(file, config).unwrap_or_else(|err| print_error(&err));
 	}
 }
