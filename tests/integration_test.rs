@@ -66,3 +66,13 @@ fn py_extension() {
 		.stdout("test2.py\n  line 2      TODO   docstring comment\n  line 4      TODO   item\n")
 		.stderr("");
 }
+
+#[test]
+fn dir_todos() {
+	todor()
+		.arg("..")
+		.assert()
+		.success()
+		.stdout("")
+		.stderr("[31m[todo_r error][0m: '..' is a directory.\n");
+}
