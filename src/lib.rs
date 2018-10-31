@@ -28,7 +28,7 @@ use std::fs::File;
 use std::io::Read;
 
 use errors::*;
-use parser::find_todos;
+use parser::parse_content;
 use display::{StyleConfig, print_file_todos, TodoFile};
 
 
@@ -88,10 +88,16 @@ impl TodoR {
 		let mut file_contents = String::new();
 		// TODO: Maybe use buffer in case file is very large
 		file.read_to_string(&mut file_contents)?;
-		todo_file.set_todos(find_todos(&file_contents, file_ext, &self.config.todo_words));
+		todo_file.set_todos(parse_content(&file_contents, file_ext, &self.config.todo_words));
 
 		self.todo_files.push(todo_file);
 		Ok(())
+	}
+
+	/// Finds TODO comments in the given content
+	#[allow(unused)]
+	pub fn find_todos(content: &str) {
+		unimplemented!();
 	}
 
 	/// Prints TODOs to stdout.

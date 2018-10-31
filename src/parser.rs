@@ -43,9 +43,9 @@ impl fmt::Display for Todo {
 	}
 }
 
-/// Creates a list of TODOs found in content
+/// Parses content and Creates a list of TODOs found in content
 // MAYB: return iterator instead of Vec 
-pub fn find_todos(content: &str, file_ext: &str, todo_words: &[String]) -> Vec<Todo> {
+pub fn parse_content(content: &str, file_ext: &str, todo_words: &[String]) -> Vec<Todo> {
 	// TODO: replace with hashmap as described in custom_tags.rs
 	let comment_types: Vec<CommentType> = match file_ext {
 		"rs" => vec![CommentType::SSlash, CommentType::SlashStar],
