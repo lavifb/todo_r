@@ -71,12 +71,9 @@ pub fn parse_content(content: &str, file_ext: &str, todo_words: &[String]) -> Ve
 		for re in regexs.iter() {
 			let todo_content = re.captures(line);
 			
-			match todo_content {
-				Some(todo_content) => {
-					let todo = Todo::new(line_num+1, &todo_content[1].trim().to_uppercase(), todo_content[2].trim());
-					todos.push(todo);
-				},
-				None => {},
+			if let Some(todo_content) = todo_content {
+				let todo = Todo::new(line_num+1, &todo_content[1].trim().to_uppercase(), todo_content[2].trim());
+				todos.push(todo);
 			};
 		}
 	}
@@ -90,7 +87,7 @@ mod tests {
 
 	fn test_content(content: &str, exp_result: &str, file_ext: &str) {
 
-		let todos = find_todos(content, file_ext, &["TODO".to_string()]);
+		let todos = parse_content(content, file_ext, &["TODO".to_string()]);
 		if todos.is_empty() {
 			assert_eq!(exp_result, "NONE");
 		} else {
