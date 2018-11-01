@@ -94,6 +94,12 @@ impl TodoR {
 		Ok(())
 	}
 
+	/// Parses provided content by finding all its TODOs.
+	pub fn parse_todos(content: &str, file_ext: &str) {
+		// TODO: implement
+		unimplemented!();
+	}
+
 	/// Finds TODO comments in the given content
 	#[allow(unused)]
 	pub fn find_todos(content: &str) {
