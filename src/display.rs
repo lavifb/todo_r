@@ -54,10 +54,14 @@ impl TodoFile {
 	pub fn set_todos(&mut self, todos: Vec<Todo>) {
 		self.todos = todos;
 	}
+
+	pub fn is_empty(&self) -> bool {
+		self.todos.is_empty()
+	}
 }
 
+#[allow(dead_code)]
 /// Prints filename and a list of Todos to stdout
-// MAYB: have different colors for different TODOs
 pub fn print_file_todos(todo_file: &TodoFile, styles: &StyleConfig, verbose: bool) {
 	if todo_file.todos.is_empty() && !verbose {
 		return
@@ -67,6 +71,12 @@ pub fn print_file_todos(todo_file: &TodoFile, styles: &StyleConfig, verbose: boo
 	let stdout = io::stdout();
 	let lock = stdout.lock();
 	let mut out_buffer = io::BufWriter::new(lock);
+	write_file_todos(&mut out_buffer, todo_file, styles);
+}
+
+/// Writes filename and a list of Todos to out_buffer
+// MAYB: have different colors for different TODOs
+pub fn write_file_todos(out_buffer: &mut Write, todo_file: &TodoFile, styles: &StyleConfig) {
 	writeln!(out_buffer, "{}", styles.filename_style.paint(&todo_file.filename));
 	for todo in &todo_file.todos {
 		writeln!(out_buffer, "{}", 

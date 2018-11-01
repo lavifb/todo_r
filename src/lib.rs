@@ -25,11 +25,11 @@ pub mod errors {
 }
 
 use std::fs::File;
-use std::io::Read;
+use std::io::{self, Read, Write};
 
 use errors::*;
 use parser::parse_content;
-use display::{StyleConfig, print_file_todos, TodoFile};
+use display::{StyleConfig, write_file_todos, TodoFile};
 
 
 /// Configuration for `TodoR`.
@@ -102,10 +102,23 @@ impl TodoR {
 	}
 
 	/// Prints TODOs to stdout.
-	// TODO: make method that writes to anything instead of only printing
 	pub fn print_todos(&self) {
+		// lock stdout to print faster
+		let stdout = io::stdout();
+		let lock = stdout.lock();
+		let mut out_buffer = io::BufWriter::new(lock);
+
+		self.write_todos(&mut out_buffer);
+	}
+
+	/// Writes TODOs to out_buffer.
+	pub fn write_todos(&self, out_buffer: &mut Write) {
 		for todo_file in &self.todo_files {
-			print_file_todos(&todo_file, &self.config.styles, self.config.verbose);
+			if todo_file.is_empty() && !self.config.verbose {
+				continue
+			}
+
+			write_file_todos(out_buffer, &todo_file, &self.config.styles);
 		}
 	}
 }
