@@ -75,7 +75,6 @@ impl TodoR {
 
 	/// Opens file at given filename and process it by finding all its TODOs.
 	pub fn open_todos(&mut self, filename: &str) -> Result<()> {
-
 		let mut todo_file = TodoFile::new(filename);
 		let file_ext = filename.rsplitn(2, '.').next().unwrap();
 		let mut file = File::open(filename)?;
@@ -94,16 +93,12 @@ impl TodoR {
 		Ok(())
 	}
 
-	/// Parses provided content by finding all its TODOs.
-	pub fn parse_todos(content: &str, file_ext: &str) {
-		// TODO: implement
-		unimplemented!();
-	}
-
 	/// Finds TODO comments in the given content
-	#[allow(unused)]
-	pub fn find_todos(content: &str) {
-		unimplemented!();
+	pub fn find_todos(&mut self, content: &str, file_ext: &str) {
+		let mut todo_file = TodoFile::new("");
+		todo_file.set_todos(parse_content(&content, file_ext, &self.config.todo_words));
+
+		self.todo_files.push(todo_file);
 	}
 
 	/// Prints TODOs to stdout.
