@@ -28,10 +28,10 @@ pub fn get_regex_string(custom_tags: &[String], comment_type: &CommentType) -> S
 	let tags_string: String = custom_tags.join("|");
 
 	format!(r"(?i)^\s*{}\s*({})\s*:?\s+{}{}",  // whitespace and optional colon
-	         comment_type.prefix,            // comment prefix token
+	         comment_type.prefix,              // comment prefix token
 	         tags_string,                      // custom tags
 	         r"(.*?)",                         // content
-	         comment_type.suffix,            // comment prefix token
+	         comment_type.suffix,              // comment prefix token
 	)
 }
 
