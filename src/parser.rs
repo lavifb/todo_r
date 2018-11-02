@@ -46,17 +46,17 @@ impl fmt::Display for Todo {
 /// Parses content and Creates a list of TODOs found in content
 // MAYB: return iterator instead of Vec 
 pub fn parse_content(content: &str, file_ext: &str, todo_words: &[String]) -> Vec<Todo> {
-	// TODO: replace with hashmap as described in custom_tags.rs
+	// TODO: change to a hashmap to support adding more comment types
+	// TODO: only store pointers to CommentType to avoid so much repitition in hashmap
 	let comment_types: Vec<CommentType> = match file_ext {
-		"rs" => vec![CommentType::SSlash, CommentType::SlashStar],
-		"c" => vec![CommentType::SSlash, CommentType::SlashStar],
-		"cpp" => vec![CommentType::SSlash, CommentType::SlashStar],
-		"py" => vec![CommentType::Hash, CommentType::QQQuote],
-		"tex" => vec![CommentType::Percent],
-		"hs" => vec![CommentType::DDash],
-		"sql" => vec![CommentType::DDash],
-		".gitignore" => vec![CommentType::Hash],
-		_ => vec![CommentType::SSlash],
+		"rs" | "c" | "cpp" => vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")],
+		"py" => vec![CommentType::new_one_line("#"), CommentType::new_block("\"\"\"", "\"\"\"")],
+		"tex" => vec![CommentType::new_one_line("%")],
+		"hs" => vec![CommentType::new_one_line("--")],
+		"sql" => vec![CommentType::new_one_line("--")],
+		"html" | "md" => vec![CommentType::new_block("<!--", "-->")],
+		".gitignore" => vec![CommentType::new_one_line("#")],
+		_ => vec![CommentType::new_one_line("//")],
 	};
 
 	let mut regexs: Vec<Regex> = Vec::new();
@@ -97,7 +97,8 @@ mod tests {
 
 	#[test]
 	fn find_todos_block_and_line1() {
-		test_content("/* // todo: item */", "NONE", "rs");
+		test_content("/* // todo: i
+			tem */", "NONE", "rs");
 	}
 
 	#[test]

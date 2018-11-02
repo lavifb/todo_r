@@ -1,42 +1,24 @@
 // Module for creating regexs for custom tags
 
-/// Enum storing the different supported comment types.
-/// They are named after the comment symbol with the first letter repeated the number of time the symbol is repeated.
-/// For instance, `CommentType::SSlash` refers to `//`
-// TODO: change to a hashmap to support adding more comment types
-// TODO: instead of an enum use a struct that contains a prefix and suffix and is pointed to by a hashmap
-pub enum CommentType {
-	SSlash,
-	Hash,
-	Percent,
-	DDash,
-	SlashStar,
-	QQQuote,
+use regex::escape;
+
+pub struct CommentType {
+	prefix: String,
+	suffix: String,
 }
 
-// TODO: add more languages/patterns
 impl CommentType {
-	/// Returns comment prefix token
-	fn prefix(&self) -> &str {
-		match self {
-			CommentType::SSlash    => "//",
-			CommentType::Hash      => "#",
-			CommentType::Percent   => "%",
-			CommentType::DDash     => "--",
-			CommentType::SlashStar => r"/\*",
-			CommentType::QQQuote   => "\"\"\"",
+	pub fn new_one_line(prefix: &str) -> CommentType {
+		CommentType {
+			prefix: escape(prefix),
+			suffix: "$".to_string(),
 		}
 	}
 
-	/// Returns comment suffix token. Single line comments have an EOL `$` as their suffix
-	fn suffix(&self) -> &str {
-		match self {
-			CommentType::SSlash    => "$",
-			CommentType::Hash      => "$",
-			CommentType::Percent   => "$",
-			CommentType::DDash     => "$",
-			CommentType::SlashStar => r"\*/",
-			CommentType::QQQuote   => "\"\"\"",
+	pub fn new_block(prefix: &str, suffix: &str) -> CommentType {
+		CommentType {
+			prefix: escape(prefix),
+			suffix: escape(suffix),
 		}
 	}
 }
@@ -46,10 +28,10 @@ pub fn get_regex_string(custom_tags: &[String], comment_type: &CommentType) -> S
 	let tags_string: String = custom_tags.join("|");
 
 	format!(r"(?i)^\s*{}\s*({})\s*:?\s+{}{}",  // whitespace and optional colon
-	         comment_type.prefix(),            // comment prefix token
+	         comment_type.prefix,            // comment prefix token
 	         tags_string,                      // custom tags
 	         r"(.*?)",                         // content
-	         comment_type.suffix(),            // comment prefix token
+	         comment_type.suffix,            // comment prefix token
 	)
 }
 
@@ -72,81 +54,81 @@ mod tests {
 
 	#[test]
 	fn regex_whitespace() {
-		test_regex("\t\t\t\t  //  TODO:  item \t", "item", &CommentType::SSlash);
+		test_regex("\t\t\t\t  //  TODO:  item \t", "item", &CommentType::new_one_line("//"));
 	}
 
 	#[test]
 	fn regex_todo_in_comment() {
-		test_regex("//  TODO:  item // TODO: item \t", "item // TODO: item", &CommentType::SSlash);
+		test_regex("//  TODO:  item // TODO: item \t", "item // TODO: item", &CommentType::new_one_line("//"));
 	}
 	
 	#[test]
 	fn regex_optional_colon() {
-		test_regex("//  TODO  item // TODO: item \t", "item // TODO: item", &CommentType::SSlash);
+		test_regex("//  TODO  item // TODO: item \t", "item // TODO: item", &CommentType::new_one_line("//"));
 	}
 
 	#[test]
 	fn regex_case_insensitive() {
-		test_regex("// tODo: case ", "case", &CommentType::SSlash);
+		test_regex("// tODo: case ", "case", &CommentType::new_one_line("//"));
 	}
 
 	#[test]
 	fn regex_fixme() {
-		test_regex("\t\t\t\t  //  fixMe:  item for fix \t", "item for fix", &CommentType::SSlash);
+		test_regex("\t\t\t\t  //  fixMe:  item for fix \t", "item for fix", &CommentType::new_one_line("//"));
 	}
 
 	#[test]
 	fn regex_todop() {
-		test_regex("// todop: nope ", "NONE", &CommentType::SSlash);
+		test_regex("// todop: nope ", "NONE", &CommentType::new_one_line("//"));
 	}
 
 	#[test]
 	fn regex_todf() {
-		test_regex("// todf: nope ", "NONE", &CommentType::SSlash);
+		test_regex("// todf: nope ", "NONE", &CommentType::new_one_line("//"));
 	}
 
 	#[test]
 	fn regex_todofixme() {
-		test_regex("// todofixme : nope ", "NONE", &CommentType::SSlash);
+		test_regex("// todofixme : nope ", "NONE", &CommentType::new_one_line("//"));
 	}
 
 	#[test]
 	fn regex_py_comment() {
-		test_regex("# todo: item \t ", "item", &CommentType::Hash);
+		test_regex("# todo: item \t ", "item", &CommentType::new_one_line("#"));
 	}
 
 	#[test]
 	fn regex_percent_comment() {
-		test_regex("% todo: item \t ", "item", &CommentType::Percent);
+		test_regex("% todo: item \t ", "item", &CommentType::new_one_line("%"));
 	}
 
 	#[test]
 	fn regex_ddash_comment() {
-		test_regex("-- todo: item \t ", "item", &CommentType::DDash);
+		test_regex("-- todo: item \t ", "item", &CommentType::new_one_line("--"));
 	}
 
 	#[test]
 	fn regex_slashstar_comment() {
-		test_regex("/* todo: item \t */ \t ", "item", &CommentType::SlashStar);
+		test_regex("/* todo: item \t */ \t ", "item", &CommentType::new_block("/*", "*/"));
 	}
 
 	#[test]
 	fn regex_slashstar_comment_double_prefix() {
-		test_regex("/* todo: item /* todo: decoy*/\t ", "item /* todo: decoy", &CommentType::SlashStar);
+		test_regex("/* todo: item /* todo: decoy*/\t ", "item /* todo: decoy", &CommentType::new_block("/*", "*/"));
 	}
 
 	#[test]
 	fn regex_slashstar_comment_double_suffix() {
-		test_regex("/* todo: item */ \t other stuff */ ", "item", &CommentType::SlashStar);
+		test_regex("/* todo: item */ \t other stuff */ ", "item", &CommentType::new_block("/*", "*/"));
 	}
 
 	#[test]
 	fn regex_comment_not_on_separate_line() {
-		test_regex("do_things(); \\ todo: item", "NONE", &CommentType::SSlash);
+		test_regex("do_things(); \\ todo: item", "NONE", &CommentType::new_one_line("//"));
 	}
 
 	#[test]
 	fn regex_block_todo_before_function() {
-		test_regex("/* todo: item */ do_things();", "item", &CommentType::SlashStar);
+		test_regex("/* todo: item */ do_things();", "item", &CommentType::new_block("/*", "*/"));
 	}
 }
