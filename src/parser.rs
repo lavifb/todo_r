@@ -45,7 +45,7 @@ impl fmt::Display for Todo {
 
 /// Parses content and Creates a list of TODOs found in content
 // MAYB: return iterator instead of Vec 
-pub fn parse_content(content: &str, comment_types: &Vec<CommentType>, todo_words: &[String]) -> Vec<Todo> {
+pub fn parse_content(content: &str, comment_types: &[CommentType], todo_words: &[String]) -> Vec<Todo> {
 	let mut regexs: Vec<Regex> = Vec::new();
 
 	for comment_type in comment_types.iter() {

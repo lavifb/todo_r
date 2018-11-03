@@ -42,16 +42,33 @@ pub struct TodoRConfig {
 	pub verbose: bool,
 	pub todo_words: Vec<String>,
 	styles: StyleConfig,
+	ext_to_comment_types: HashMap<String, Vec<CommentType>>,
+	default_comment_types: Vec<CommentType>,
 }
 
 impl TodoRConfig {
 	pub fn new<T: AsRef<str>>(todo_words: &[T]) -> TodoRConfig {
 		let todo_word_strings: Vec<String> = todo_words.iter().map(|s| s.as_ref().to_string()).collect();
 
+		// TODO: move default CommentTypes into predefined ones in custom_tags
+		let mut comment_types_map = HashMap::new();
+		comment_types_map.insert("c".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+		comment_types_map.insert("rs".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+		comment_types_map.insert("cpp".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+		comment_types_map.insert("py".to_string(), vec![CommentType::new_one_line("#"), CommentType::new_block("\"\"\"", "\"\"\"")]);
+		comment_types_map.insert("tex".to_string(), vec![CommentType::new_one_line("%")]);
+		comment_types_map.insert("hs".to_string(), vec![CommentType::new_one_line("--")]);
+		comment_types_map.insert("sql".to_string(), vec![CommentType::new_one_line("--")]);
+		comment_types_map.insert("html".to_string(), vec![CommentType::new_block("<!--", "-->")]);
+		comment_types_map.insert("md".to_string(), vec![CommentType::new_block("<!--", "-->")]);
+		comment_types_map.insert("gitignore".to_string(), vec![CommentType::new_one_line("#")]);
+
 		TodoRConfig {
 			verbose: false,
 			todo_words: todo_word_strings,
 			styles: StyleConfig::default(),
+			ext_to_comment_types: comment_types_map,
+			default_comment_types: vec![CommentType::new_one_line("#")],
 		}
 	}
 
@@ -79,25 +96,7 @@ impl TodoR {
 	pub fn open_todos(&mut self, filename: &str) -> Result<()> {
 		let mut todo_file = TodoFile::new(filename);
 		let file_ext = filename.rsplitn(2, '.').next().unwrap();
-
-		// TODO: move default CommentTypes into predefined ones in custom_tags
-		let default_comment_types: Vec<CommentType> = vec![CommentType::new_one_line("#")];
-		let mut comment_types_map = HashMap::new();
-		comment_types_map.insert("c".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-		comment_types_map.insert("rs".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-		comment_types_map.insert("cpp".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-		comment_types_map.insert("py".to_string(), vec![CommentType::new_one_line("#"), CommentType::new_block("\"\"\"", "\"\"\"")]);
-		comment_types_map.insert("tex".to_string(), vec![CommentType::new_one_line("%")]);
-		comment_types_map.insert("hs".to_string(), vec![CommentType::new_one_line("--")]);
-		comment_types_map.insert("sql".to_string(), vec![CommentType::new_one_line("--")]);
-		comment_types_map.insert("html".to_string(), vec![CommentType::new_block("<!--", "-->")]);
-		comment_types_map.insert("md".to_string(), vec![CommentType::new_block("<!--", "-->")]);
-		comment_types_map.insert("gitignore".to_string(), vec![CommentType::new_one_line("#")]);
-
-		let comment_types = match comment_types_map.get(file_ext) {
-			Some(comment_types) => comment_types,
-			None => &default_comment_types,
-		};
+		let comment_types = self.config.ext_to_comment_types.get(file_ext).unwrap_or(&self.config.default_comment_types);
 		
 		let mut file = File::open(filename)?;
 
@@ -116,7 +115,7 @@ impl TodoR {
 	}
 
 	/// Finds TODO comments in the given content
-	pub fn find_todos(&mut self, content: &str, comment_types: &Vec<CommentType>) {
+	pub fn find_todos(&mut self, content: &str, comment_types: &[CommentType]) {
 		let mut todo_file = TodoFile::new("");
 		todo_file.set_todos(parse_content(&content, comment_types, &self.config.todo_words));
 
