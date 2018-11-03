@@ -3,7 +3,6 @@
 use regex::Regex;
 use ansi_term::Style;
 use std::fmt;
-use std::collections::HashMap;
 
 use custom_tags::{get_regex_string, CommentType};
 
@@ -46,28 +45,7 @@ impl fmt::Display for Todo {
 
 /// Parses content and Creates a list of TODOs found in content
 // MAYB: return iterator instead of Vec 
-pub fn parse_content(content: &str, file_ext: &str, todo_words: &[String]) -> Vec<Todo> {
-	let default_comment_types: Vec<CommentType> = vec![CommentType::new_one_line("#")];
-
-	// TODO: move hashmap into todor struct
-	// TODO: move default CommentTypes into predefined ones in custom_tags
-	let mut comment_types_map = HashMap::new();
-	comment_types_map.insert("c".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("rs".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("cpp".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("py".to_string(), vec![CommentType::new_one_line("#"), CommentType::new_block("\"\"\"", "\"\"\"")]);
-	comment_types_map.insert("tex".to_string(), vec![CommentType::new_one_line("%")]);
-	comment_types_map.insert("hs".to_string(), vec![CommentType::new_one_line("--")]);
-	comment_types_map.insert("sql".to_string(), vec![CommentType::new_one_line("--")]);
-	comment_types_map.insert("html".to_string(), vec![CommentType::new_block("<!--", "-->")]);
-	comment_types_map.insert("md".to_string(), vec![CommentType::new_block("<!--", "-->")]);
-	comment_types_map.insert("gitignore".to_string(), vec![CommentType::new_one_line("#")]);
-
-	let comment_types = match comment_types_map.get(file_ext) {
-		Some(comment_types) => comment_types,
-		None => &default_comment_types,
-	};
-
+pub fn parse_content(content: &str, comment_types: &Vec<CommentType>, todo_words: &[String]) -> Vec<Todo> {
 	let mut regexs: Vec<Regex> = Vec::new();
 
 	for comment_type in comment_types.iter() {
@@ -95,8 +73,14 @@ mod tests {
 	use super::*;
 
 	fn test_content(content: &str, exp_result: &str, file_ext: &str) {
+		let comment_types = match file_ext {
+			"rs" => vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")],
+			"c"  => vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")],
+			"py" => vec![CommentType::new_one_line("#"), CommentType::new_block("\"\"\"", "\"\"\"")],
+			_    => vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")],
+		};
 
-		let todos = parse_content(content, file_ext, &["TODO".to_string()]);
+		let todos = parse_content(content, &comment_types, &["TODO".to_string()]);
 		if todos.is_empty() {
 			assert_eq!(exp_result, "NONE");
 		} else {
@@ -106,8 +90,7 @@ mod tests {
 
 	#[test]
 	fn find_todos_block_and_line1() {
-		test_content("/* // todo: i
-			tem */", "NONE", "rs");
+		test_content("/* // todo: item */", "NONE", "rs");
 	}
 
 	#[test]

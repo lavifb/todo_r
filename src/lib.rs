@@ -26,10 +26,12 @@ pub mod errors {
 
 use std::fs::File;
 use std::io::{self, Read, Write};
+use std::collections::HashMap;
 
 use errors::*;
 use parser::parse_content;
 use display::{StyleConfig, write_file_todos, TodoFile};
+use custom_tags::CommentType;
 
 
 /// Configuration for `TodoR`.
@@ -77,6 +79,26 @@ impl TodoR {
 	pub fn open_todos(&mut self, filename: &str) -> Result<()> {
 		let mut todo_file = TodoFile::new(filename);
 		let file_ext = filename.rsplitn(2, '.').next().unwrap();
+
+		// TODO: move default CommentTypes into predefined ones in custom_tags
+		let default_comment_types: Vec<CommentType> = vec![CommentType::new_one_line("#")];
+		let mut comment_types_map = HashMap::new();
+		comment_types_map.insert("c".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+		comment_types_map.insert("rs".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+		comment_types_map.insert("cpp".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+		comment_types_map.insert("py".to_string(), vec![CommentType::new_one_line("#"), CommentType::new_block("\"\"\"", "\"\"\"")]);
+		comment_types_map.insert("tex".to_string(), vec![CommentType::new_one_line("%")]);
+		comment_types_map.insert("hs".to_string(), vec![CommentType::new_one_line("--")]);
+		comment_types_map.insert("sql".to_string(), vec![CommentType::new_one_line("--")]);
+		comment_types_map.insert("html".to_string(), vec![CommentType::new_block("<!--", "-->")]);
+		comment_types_map.insert("md".to_string(), vec![CommentType::new_block("<!--", "-->")]);
+		comment_types_map.insert("gitignore".to_string(), vec![CommentType::new_one_line("#")]);
+
+		let comment_types = match comment_types_map.get(file_ext) {
+			Some(comment_types) => comment_types,
+			None => &default_comment_types,
+		};
+		
 		let mut file = File::open(filename)?;
 
 		// check the file is not a directory
@@ -87,16 +109,16 @@ impl TodoR {
 		let mut file_contents = String::new();
 		// TODO: Maybe use buffer in case file is very large
 		file.read_to_string(&mut file_contents)?;
-		todo_file.set_todos(parse_content(&file_contents, file_ext, &self.config.todo_words));
+		todo_file.set_todos(parse_content(&file_contents, &comment_types, &self.config.todo_words));
 
 		self.todo_files.push(todo_file);
 		Ok(())
 	}
 
 	/// Finds TODO comments in the given content
-	pub fn find_todos(&mut self, content: &str, file_ext: &str) {
+	pub fn find_todos(&mut self, content: &str, comment_types: &Vec<CommentType>) {
 		let mut todo_file = TodoFile::new("");
-		todo_file.set_todos(parse_content(&content, file_ext, &self.config.todo_words));
+		todo_file.set_todos(parse_content(&content, comment_types, &self.config.todo_words));
 
 		self.todo_files.push(todo_file);
 	}
