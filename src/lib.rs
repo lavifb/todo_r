@@ -51,6 +51,7 @@ impl TodoRConfig {
 		let todo_word_strings: Vec<String> = todo_words.iter().map(|s| s.as_ref().to_string()).collect();
 
 		// TODO: move default CommentTypes into predefined ones in custom_tags
+		// MAYB: Use a Box or something to not alloc the same Vec over and over again
 		let mut comment_types_map = HashMap::new();
 		comment_types_map.insert("c".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
 		comment_types_map.insert("rs".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
