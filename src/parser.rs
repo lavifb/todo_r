@@ -3,6 +3,7 @@
 use regex::Regex;
 use ansi_term::Style;
 use std::fmt;
+use std::io::BufRead;
 
 use custom_tags::{get_regex_string, CommentType};
 
@@ -44,8 +45,10 @@ impl fmt::Display for Todo {
 }
 
 /// Parses content and Creates a list of TODOs found in content
-// MAYB: return iterator instead of Vec 
-pub fn parse_content(content: &str, comment_types: &[CommentType], todo_words: &[String]) -> Vec<Todo> {
+pub fn parse_content<B>(content_buf: &mut B, comment_types: &[CommentType], todo_words: &[String]) -> Result<Vec<Todo>, std::io::Error>
+where
+	B: BufRead,
+{
 	let mut regexs: Vec<Regex> = Vec::new();
 
 	for comment_type in comment_types.iter() {
@@ -54,21 +57,24 @@ pub fn parse_content(content: &str, comment_types: &[CommentType], todo_words: &
 	}
 	let mut todos = Vec::new();
 
-	for (line_num, line) in content.lines().enumerate() {
+	for (line_num, line_result) in content_buf.lines().enumerate() {
+		let line = line_result?;
+
 		for re in regexs.iter() {
-			if let Some(todo_content) = re.captures(line) {
+			if let Some(todo_content) = re.captures(&line) {
 				let todo = Todo::new(line_num+1, &todo_content[1].trim().to_uppercase(), todo_content[2].trim());
 				todos.push(todo);
 			};
 		}
 	}
 
-	todos
+	Ok(todos)
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use std::io::Cursor;
 
 	fn test_content(content: &str, exp_result: &str, file_ext: &str) {
 		let comment_types = match file_ext {
@@ -78,7 +84,8 @@ mod tests {
 			_    => vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")],
 		};
 
-		let todos = parse_content(content, &comment_types, &["TODO".to_string()]);
+		let mut content_buf = Cursor::new(content);
+		let todos = parse_content(&mut content_buf, &comment_types, &["TODO".to_string()]).unwrap();
 		if todos.is_empty() {
 			assert_eq!(exp_result, "NONE");
 		} else {
