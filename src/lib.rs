@@ -49,26 +49,12 @@ pub struct TodoRConfig {
 impl TodoRConfig {
 	pub fn new<T: AsRef<str>>(todo_words: &[T]) -> TodoRConfig {
 		let todo_word_strings: Vec<String> = todo_words.iter().map(|s| s.as_ref().to_string()).collect();
-
-		// TODO: move default CommentTypes into predefined ones in custom_tags
-		// MAYB: Use a Box or something to not alloc the same Vec over and over again
-		let mut comment_types_map = HashMap::new();
-		comment_types_map.insert("c".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-		comment_types_map.insert("rs".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-		comment_types_map.insert("cpp".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-		comment_types_map.insert("py".to_string(), vec![CommentType::new_one_line("#"), CommentType::new_block("\"\"\"", "\"\"\"")]);
-		comment_types_map.insert("tex".to_string(), vec![CommentType::new_one_line("%")]);
-		comment_types_map.insert("hs".to_string(), vec![CommentType::new_one_line("--")]);
-		comment_types_map.insert("sql".to_string(), vec![CommentType::new_one_line("--")]);
-		comment_types_map.insert("html".to_string(), vec![CommentType::new_block("<!--", "-->")]);
-		comment_types_map.insert("md".to_string(), vec![CommentType::new_block("<!--", "-->")]);
-		comment_types_map.insert("gitignore".to_string(), vec![CommentType::new_one_line("#")]);
-
+		
 		TodoRConfig {
 			verbose: false,
 			todo_words: todo_word_strings,
 			styles: StyleConfig::default(),
-			ext_to_comment_types: comment_types_map,
+			ext_to_comment_types: default_comment_types_map(),
 			default_comment_types: vec![CommentType::new_one_line("#")],
 		}
 	}
@@ -143,4 +129,50 @@ impl TodoR {
 			write_file_todos(out_buffer, &todo_file, &self.config.styles);
 		}
 	}
+}
+
+fn default_comment_types_map() -> HashMap<String, Vec<CommentType>> {
+	// TODO: move default CommentTypes into predefined ones in custom_tags
+	// MAYB: Use a Box or something to not alloc the same Vec over and over again
+	let mut comment_types_map = HashMap::new();
+
+	comment_types_map.insert("rs".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("c".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("h".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("cpp".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("cs".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("go".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("java".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("js".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("es".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("es6".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("ts".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("tsx".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("styl".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("swift".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("less".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("scss".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("sass".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("m".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("mm".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("php".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
+	comment_types_map.insert("py".to_string(), vec![CommentType::new_one_line("#"), CommentType::new_block("\"\"\"", "\"\"\"")]);
+	comment_types_map.insert("rb".to_string(), vec![CommentType::new_one_line("#")]);
+	comment_types_map.insert("pl".to_string(), vec![CommentType::new_one_line("#")]);
+	comment_types_map.insert("pm".to_string(), vec![CommentType::new_one_line("#")]);
+	comment_types_map.insert("coffee".to_string(), vec![CommentType::new_one_line("#")]);
+	comment_types_map.insert("tex".to_string(), vec![CommentType::new_one_line("%")]);
+	comment_types_map.insert("hs".to_string(), vec![CommentType::new_one_line("--")]);
+	comment_types_map.insert("sql".to_string(), vec![CommentType::new_one_line("--")]);
+	comment_types_map.insert("html".to_string(), vec![CommentType::new_block("<!--", "-->")]);
+	comment_types_map.insert("htm".to_string(), vec![CommentType::new_block("<!--", "-->")]);
+	comment_types_map.insert("md".to_string(), vec![CommentType::new_block("<!--", "-->")]);
+	comment_types_map.insert("gitignore".to_string(), vec![CommentType::new_one_line("#")]);
+	comment_types_map.insert("yaml".to_string(), vec![CommentType::new_one_line("#")]);
+	comment_types_map.insert("yml".to_string(), vec![CommentType::new_one_line("#")]);
+	comment_types_map.insert("sh".to_string(), vec![CommentType::new_one_line("#")]);
+	comment_types_map.insert("bash".to_string(), vec![CommentType::new_one_line("#")]);
+	comment_types_map.insert("zsh".to_string(), vec![CommentType::new_one_line("#")]);
+
+	comment_types_map
 }
