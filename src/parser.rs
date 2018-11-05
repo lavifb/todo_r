@@ -56,9 +56,7 @@ pub fn parse_content(content: &str, comment_types: &[CommentType], todo_words: &
 
 	for (line_num, line) in content.lines().enumerate() {
 		for re in regexs.iter() {
-			let todo_content = re.captures(line);
-			
-			if let Some(todo_content) = todo_content {
+			if let Some(todo_content) = re.captures(line) {
 				let todo = Todo::new(line_num+1, &todo_content[1].trim().to_uppercase(), todo_content[2].trim());
 				todos.push(todo);
 			};
