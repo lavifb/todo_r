@@ -9,3 +9,10 @@ ansi_term = "~0.11"
 clap = "~2.32.0"
 error-chain = "~0.12"
 assert_cmd = "~0.10.1"
+
+[dev-dependencies]
+criterion = "0.2"
+
+[[bench]]
+name = "bench"
+harness = false
