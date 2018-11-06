@@ -99,10 +99,10 @@ impl TodoR {
 	}
 
 	/// Finds TODO comments in the given content
-	pub fn find_todos(&mut self, content: &str, comment_types: &[CommentType]) -> Result<()> {
+	pub fn find_todos(&mut self, content: &str) -> Result<()> {
 		let mut todo_file = TodoFile::new("");
 		let mut content_buf = Cursor::new(content);
-		todo_file.set_todos(parse_content(&mut content_buf, &comment_types, &self.config.todo_words)?);
+		todo_file.set_todos(parse_content(&mut content_buf, &self.config.default_comment_types, &self.config.todo_words)?);
 
 		self.todo_files.push(todo_file);
 		Ok(())

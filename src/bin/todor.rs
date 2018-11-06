@@ -43,7 +43,6 @@ fn main() {
 			for file in files {
 				todor.open_todos(file).unwrap_or_else(|err| eprint_error(&err));
 			}
-			todor.print_todos();
 		},
 		None => {
 			// try to use git using `git ls-files $(git rev-parse --show-toplevel)`
@@ -66,7 +65,8 @@ fn main() {
 			for file in files_in_lines.lines() {
 				todor.open_todos(file).unwrap_or_else(|err| eprint_error(&err));
 			}
-			todor.print_todos();
 		},
 	}
+
+	todor.print_todos();
 }
