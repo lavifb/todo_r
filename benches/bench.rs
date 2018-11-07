@@ -5,15 +5,6 @@ extern crate todo_r;
 use criterion::Criterion;
 use todo_r::TodoR;
 use todo_r::errors::eprint_error;
-// use assert_cmd::prelude::*;
-// use std::process::Command;
-
-// fn todor_cmd(input: &str) -> Command {
-// 	let mut cmd = Command::cargo_bin("todor").unwrap();
-// 	cmd.current_dir("benches/inputs");
-// 	cmd.arg(input);
-// 	cmd
-// }
 
 fn bench_jquery(c: &mut Criterion) {
     c.bench_function("jquery", |b| b.iter(|| {
