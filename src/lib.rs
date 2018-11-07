@@ -1,5 +1,4 @@
 #[macro_use] extern crate failure;
-
 extern crate regex;
 extern crate ansi_term;
 
@@ -10,8 +9,10 @@ mod custom_tags;
 pub mod errors {
 	use failure::Error;
 
+	/// Custom Errors for TodoR
 	#[derive(Debug, Fail)]
 	pub enum TodoRError {
+		/// Error for when provided filename is a directory
 		#[fail(display = "'{}' is a directory.", filename)]
 		FileIsDir {
 			filename: String,
@@ -20,6 +21,7 @@ pub mod errors {
 
 	use ansi_term::Colour::Red;
 
+	/// Prints err to stderr
 	pub fn eprint_error(err: &Error) {
 		match err {
 			_ => eprintln!("{}: {}", Red.paint("[todo_r error]"), err.to_string()),
@@ -31,8 +33,8 @@ use std::fs::File;
 use std::io::{self, Write, BufReader, Cursor};
 use std::collections::HashMap;
 
-use errors::TodoRError;
 use failure::Error;
+use errors::TodoRError;
 
 use parser::parse_content;
 use display::{StyleConfig, write_file_todos, TodoFile};
