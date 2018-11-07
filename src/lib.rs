@@ -1,5 +1,4 @@
-#[macro_use]
-extern crate error_chain;
+#[macro_use] extern crate failure;
 
 extern crate regex;
 extern crate ansi_term;
@@ -9,10 +8,14 @@ mod display;
 mod custom_tags;
 
 pub mod errors {
-	error_chain! {
-		foreign_links {
-			Error(::std::io::Error);
-		}
+	use failure::Error;
+
+	#[derive(Debug, Fail)]
+	pub enum TodoRError {
+		#[fail(display = "'{}' is a directory.", filename)]
+		FileIsDir {
+			filename: String,
+		},
 	}
 
 	use ansi_term::Colour::Red;
@@ -28,7 +31,9 @@ use std::fs::File;
 use std::io::{self, Write, BufReader, Cursor};
 use std::collections::HashMap;
 
-use errors::*;
+use errors::TodoRError;
+use failure::Error;
+
 use parser::parse_content;
 use display::{StyleConfig, write_file_todos, TodoFile};
 use custom_tags::CommentType;
@@ -80,7 +85,7 @@ impl TodoR {
 	}
 
 	/// Opens file at given filename and process it by finding all its TODOs.
-	pub fn open_todos(&mut self, filename: &str) -> Result<()> {
+	pub fn open_todos(&mut self, filename: &str) -> Result<(), Error> {
 		let mut todo_file = TodoFile::new(filename);
 		let file_ext = filename.rsplitn(2, '.').next().unwrap();
 		let comment_types = self.config.ext_to_comment_types.get(file_ext).unwrap_or(&self.config.default_comment_types);
@@ -88,7 +93,9 @@ impl TodoR {
 		let file = File::open(filename)?;
 		// check the file is not a directory
 		if file.metadata()?.is_dir() {
-			return Err(format!("'{}' is a directory.", filename).into());
+			return Err(TodoRError::FileIsDir {
+				filename: filename.to_string()
+			}.into());
 		}
 
 		let mut file_reader = BufReader::new(file);
@@ -99,7 +106,7 @@ impl TodoR {
 	}
 
 	/// Finds TODO comments in the given content
-	pub fn find_todos(&mut self, content: &str) -> Result<()> {
+	pub fn find_todos(&mut self, content: &str) -> Result<(), Error> {
 		let mut todo_file = TodoFile::new("");
 		let mut content_buf = Cursor::new(content);
 		todo_file.set_todos(parse_content(&mut content_buf, &self.config.default_comment_types, &self.config.todo_words)?);

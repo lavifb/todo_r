@@ -7,7 +7,7 @@ authors = ["Lavi Blumberg <lavifb@gmail.com>"]
 regex = "~1"
 ansi_term = "~0.11"
 clap = "~2.32.0"
-error-chain = "~0.12"
+failure = "~0.1"
 
 [dev-dependencies]
 criterion = "~0.2"
