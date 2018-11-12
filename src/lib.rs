@@ -86,6 +86,9 @@ impl TodoRConfig {
 
 		Ok(())
 	}
+
+	// TODO: function to add comment types
+	// TODO: function to add default comment types (not by ext)
 }
 
 /// Parser for finding TODOs in comments and storing them on a per-file basis.
