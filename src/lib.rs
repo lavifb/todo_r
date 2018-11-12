@@ -12,10 +12,10 @@ pub mod errors {
 	/// Custom Errors for TodoR
 	#[derive(Debug, Fail)]
 	pub enum TodoRError {
-		/// Error for when provided filename is a directory
-		#[fail(display = "'{}' is a directory.", filename)]
+		/// Error for when provided file path is a directory
+		#[fail(display = "'{}' is a directory.", filepath)]
 		FileIsDir {
-			filename: String,
+			filepath: String,
 		},
 	}
 
@@ -31,6 +31,7 @@ pub mod errors {
 
 use std::fs::File;
 use std::path::Path;
+use std::ffi::OsStr;
 use std::io::{self, Write, BufReader, Cursor};
 use std::collections::HashMap;
 
@@ -87,22 +88,22 @@ impl TodoR {
 		}
 	}
 
-	/// Opens file at given filename and process it by finding all its TODOs.
-	pub fn open_todos(&mut self, filename: &Path) -> Result<(), Error> {
-		let mut todo_file = TodoFile::new(filename);
+	/// Opens file at given filepath and process it by finding all its TODOs.
+	pub fn open_todos(&mut self, filepath: &Path) -> Result<(), Error> {
+		let mut todo_file = TodoFile::new(filepath);
 
 		// Make sure the file is not a directory
-		if filename.metadata()?.is_dir() {
+		if filepath.metadata()?.is_dir() {
 			return Err(TodoRError::FileIsDir {
-				filename: filename.to_string_lossy().to_string()
+				filepath: filepath.to_string_lossy().to_string()
 			}.into());
 		}
 
-		let file_ext = filename.extension().unwrap();
+		let file_ext = filepath.extension().unwrap_or(OsStr::new(".sh"));
 		let comment_types = self.config.ext_to_comment_types.get(file_ext.to_str().unwrap())
 								.unwrap_or(&self.config.default_comment_types);
 		
-		let file = File::open(filename)?;
+		let file = File::open(filepath)?;
 		let mut file_reader = BufReader::new(file);
 		todo_file.set_todos(parse_content(&mut file_reader, &comment_types, &self.config.todo_words)?);
 

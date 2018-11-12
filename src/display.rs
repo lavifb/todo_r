@@ -8,7 +8,7 @@ use std::io::{self, Write};
 
 /// Struct for holding ansi color printing options
 pub struct StyleConfig {
-	filename_style: Style,
+	filepath_style: Style,
 	line_number_style: Style,
 	todo_type_style: Style,
 	content_style: Style,
@@ -18,7 +18,7 @@ impl StyleConfig {
 	/// Creates new StyleConfig with plaintext printing (no colors).
 	pub fn no_style() -> StyleConfig {
 		StyleConfig {
-			filename_style: Style::new(),
+			filepath_style: Style::new(),
 			line_number_style: Style::new(),
 			todo_type_style: Style::new(),
 			content_style: Style::new(),
@@ -31,7 +31,7 @@ impl Default for StyleConfig {
 	/// Creates new StyleConfig with the default color printing style.
 	fn default() -> StyleConfig {
 		StyleConfig {
-			filename_style: Style::new().underline(),
+			filepath_style: Style::new().underline(),
 			line_number_style: Style::from(Fixed(8)),
 			todo_type_style: Style::from(Green),
 			content_style: Style::from(Cyan),
@@ -40,14 +40,14 @@ impl Default for StyleConfig {
 }
 
 pub struct TodoFile {
-	filename: PathBuf,
+	filepath: PathBuf,
 	todos: Vec<Todo>,
 }
 
 impl TodoFile {
-	pub fn new(filename: &Path) -> TodoFile {
+	pub fn new(filepath: &Path) -> TodoFile {
 		TodoFile {
-			filename: filename.to_path_buf(),
+			filepath: filepath.to_path_buf(),
 			todos: Vec::with_capacity(0), // do not allocate because it will be replaced
 		}
 	}
@@ -62,7 +62,7 @@ impl TodoFile {
 }
 
 #[allow(dead_code)]
-/// Prints filename and a list of Todos to stdout
+/// Prints file path and a list of Todos to stdout
 pub fn print_file_todos(todo_file: &TodoFile, styles: &StyleConfig, verbose: bool) {
 	if todo_file.todos.is_empty() && !verbose {
 		return
@@ -75,10 +75,10 @@ pub fn print_file_todos(todo_file: &TodoFile, styles: &StyleConfig, verbose: boo
 	write_file_todos(&mut out_buffer, todo_file, styles);
 }
 
-/// Writes filename and a list of Todos to out_buffer
+/// Writes file path and a list of Todos to out_buffer
 // MAYB: have different colors for different TODOs
 pub fn write_file_todos(out_buffer: &mut Write, todo_file: &TodoFile, styles: &StyleConfig) {
-	writeln!(out_buffer, "{}", styles.filename_style.paint(todo_file.filename.to_str().unwrap()));
+	writeln!(out_buffer, "{}", styles.filepath_style.paint(todo_file.filepath.to_str().unwrap()));
 	for todo in &todo_file.todos {
 		writeln!(out_buffer, "{}", 
 			todo.style_string(
