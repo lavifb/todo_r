@@ -2,6 +2,7 @@
 
 use regex::escape;
 
+#[derive(Clone)]
 pub struct CommentType {
 	prefix: String,
 	suffix: String,

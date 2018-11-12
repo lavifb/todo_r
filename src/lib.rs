@@ -17,6 +17,11 @@ pub mod errors {
 		FileIsDir {
 			filepath: String,
 		},
+		/// Error for when provided file extension is not supported
+		#[fail(display = "'{}' is an invalid extension.", ext)]
+		InvalidExtension {
+			ext: String,
+		},
 	}
 
 	use ansi_term::Colour::Red;
@@ -70,6 +75,16 @@ impl TodoRConfig {
 
 	pub fn set_no_style(&mut self) {
 		self.styles = StyleConfig::no_style();
+	}
+
+	pub fn set_default_ext(&mut self, ext: &str) -> Result<(), Error> {
+		self.default_comment_types = self.ext_to_comment_types.get(ext).ok_or(
+			TodoRError::InvalidExtension {
+				ext: ext.to_string()
+			}
+		).unwrap().to_vec();
+
+		Ok(())
 	}
 }
 
