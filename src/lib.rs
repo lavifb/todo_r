@@ -90,19 +90,19 @@ impl TodoR {
 	/// Opens file at given filename and process it by finding all its TODOs.
 	pub fn open_todos(&mut self, filename: &Path) -> Result<(), Error> {
 		let mut todo_file = TodoFile::new(filename);
-		let file_ext = filename.extension().unwrap();
-		let comment_types = self.config.ext_to_comment_types.get(file_ext.to_str().unwrap())
-								.unwrap_or(&self.config.default_comment_types);
-		
-		let file = File::open(filename)?;
-		// check the file is not a directory
-		// TODO: use Path metadata
-		if file.metadata()?.is_dir() {
+
+		// Make sure the file is not a directory
+		if filename.metadata()?.is_dir() {
 			return Err(TodoRError::FileIsDir {
 				filename: filename.to_string_lossy().to_string()
 			}.into());
 		}
 
+		let file_ext = filename.extension().unwrap();
+		let comment_types = self.config.ext_to_comment_types.get(file_ext.to_str().unwrap())
+								.unwrap_or(&self.config.default_comment_types);
+		
+		let file = File::open(filename)?;
 		let mut file_reader = BufReader::new(file);
 		todo_file.set_todos(parse_content(&mut file_reader, &comment_types, &self.config.todo_words)?);
 
