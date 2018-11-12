@@ -4,6 +4,7 @@ extern crate todo_r;
 #[macro_use(clap_app)]
 extern crate clap;
 
+use std::path::Path;
 use std::process::Command;
 use todo_r::TodoR;
 use todo_r::errors::eprint_error;
@@ -41,7 +42,7 @@ fn main() {
 	match matches.values_of("FILE") { 
 		Some(files) => {
 			for file in files {
-				todor.open_todos(file).unwrap_or_else(|err| eprint_error(&err));
+				todor.open_todos(Path::new(file)).unwrap_or_else(|err| eprint_error(&err));
 			}
 		},
 		None => {
@@ -63,7 +64,7 @@ fn main() {
 
 			let files_in_lines = String::from_utf8_lossy(&output.stdout);
 			for file in files_in_lines.lines() {
-				todor.open_todos(file).unwrap_or_else(|err| eprint_error(&err));
+				todor.open_todos(Path::new(file)).unwrap_or_else(|err| eprint_error(&err));
 			}
 		},
 	}

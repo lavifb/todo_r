@@ -2,6 +2,7 @@
 
 use parser::Todo;
 
+use std::path::{Path, PathBuf};
 use ansi_term::Style;
 use std::io::{self, Write};
 
@@ -39,14 +40,14 @@ impl Default for StyleConfig {
 }
 
 pub struct TodoFile {
-	filename: String,
+	filename: PathBuf,
 	todos: Vec<Todo>,
 }
 
 impl TodoFile {
-	pub fn new(filename: &str) -> TodoFile {
+	pub fn new(filename: &Path) -> TodoFile {
 		TodoFile {
-			filename: filename.to_string(),
+			filename: filename.to_path_buf(),
 			todos: Vec::with_capacity(0), // do not allocate because it will be replaced
 		}
 	}
@@ -77,7 +78,7 @@ pub fn print_file_todos(todo_file: &TodoFile, styles: &StyleConfig, verbose: boo
 /// Writes filename and a list of Todos to out_buffer
 // MAYB: have different colors for different TODOs
 pub fn write_file_todos(out_buffer: &mut Write, todo_file: &TodoFile, styles: &StyleConfig) {
-	writeln!(out_buffer, "{}", styles.filename_style.paint(&todo_file.filename));
+	writeln!(out_buffer, "{}", styles.filename_style.paint(todo_file.filename.to_str().unwrap()));
 	for todo in &todo_file.todos {
 		writeln!(out_buffer, "{}", 
 			todo.style_string(

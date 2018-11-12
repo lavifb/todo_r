@@ -30,6 +30,7 @@ pub mod errors {
 }
 
 use std::fs::File;
+use std::path::Path;
 use std::io::{self, Write, BufReader, Cursor};
 use std::collections::HashMap;
 
@@ -87,16 +88,18 @@ impl TodoR {
 	}
 
 	/// Opens file at given filename and process it by finding all its TODOs.
-	pub fn open_todos(&mut self, filename: &str) -> Result<(), Error> {
+	pub fn open_todos(&mut self, filename: &Path) -> Result<(), Error> {
 		let mut todo_file = TodoFile::new(filename);
-		let file_ext = filename.rsplitn(2, '.').next().unwrap();
-		let comment_types = self.config.ext_to_comment_types.get(file_ext).unwrap_or(&self.config.default_comment_types);
+		let file_ext = filename.extension().unwrap();
+		let comment_types = self.config.ext_to_comment_types.get(file_ext.to_str().unwrap())
+								.unwrap_or(&self.config.default_comment_types);
 		
 		let file = File::open(filename)?;
 		// check the file is not a directory
+		// TODO: use Path metadata
 		if file.metadata()?.is_dir() {
 			return Err(TodoRError::FileIsDir {
-				filename: filename.to_string()
+				filename: filename.to_string_lossy().to_string()
 			}.into());
 		}
 
@@ -109,7 +112,7 @@ impl TodoR {
 
 	/// Finds TODO comments in the given content
 	pub fn find_todos(&mut self, content: &str) -> Result<(), Error> {
-		let mut todo_file = TodoFile::new("");
+		let mut todo_file = TodoFile::new(Path::new(""));
 		let mut content_buf = Cursor::new(content);
 		todo_file.set_todos(parse_content(&mut content_buf, &self.config.default_comment_types, &self.config.todo_words)?);
 
