@@ -31,7 +31,7 @@ where
 	B: BufRead,
 	W: Write,
 {
-	let mut orig_lines = orig.lines();
+	let orig_lines = orig.lines();
 	let mut line_skip_iter = orig_lines.enumerate()
 		.filter(|&(i, _)| i != line_number-1)
 		.map(|(_, l)| l);
@@ -42,7 +42,7 @@ where
 			Some(first_line) => first_line?,
 			None => return Ok(()), // Input is empty
 		};
-		
+
 		copy.write(&first_line.into_bytes())?;
 	}
 
