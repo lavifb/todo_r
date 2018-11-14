@@ -14,6 +14,7 @@ use todo_r::errors::eprint_error;
 fn main() {
 	// TODO: add config file option
 	// TODO: add subcommand for just content so it can be piped
+	// TODO: add subcommand for removing TODOs
 	let matches = clap_app!(todo_r =>
 		(version: env!("CARGO_PKG_VERSION"))
 		(author: "Lavi Blumberg <lavifb@gmail.com>")

@@ -47,6 +47,7 @@ use errors::TodoRError;
 use parser::parse_content;
 use display::{StyleConfig, write_file_todos, TodoFile};
 use custom_tags::CommentType;
+use remover::remove_todo_by_index;
 
 
 /// Configuration for `TodoR`.
@@ -159,6 +160,19 @@ impl TodoR {
 
 			write_file_todos(out_buffer, &todo_file, &self.config.styles);
 		}
+	}
+
+	/// Deletes TODO line from given filepath corresponding to the given index.
+	pub fn remove_todo(&mut self, filepath: &Path, todo_number: usize) -> Result<(), Error> {
+		for mut todo_file in &mut self.todo_files {
+			if filepath == todo_file.filepath {
+				remove_todo_by_index(&mut todo_file, todo_number)?;
+
+				return Ok(());
+			}
+		}
+
+		Ok(())
 	}
 }
 

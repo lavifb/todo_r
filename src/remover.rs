@@ -20,6 +20,8 @@ pub fn remove_todo_by_index(todo_file: &mut TodoFile, ind: usize) -> Result<(), 
 	let todo_line = todo_file.todos.remove(ind).line;
 	copy_except_line(&mut file_reader, &mut file_writer, todo_line)?;
 
+	// TODO: decrement the rest of the line numbers
+
 	// replace old file with temp file
 	rename(temp_filepath, &todo_file.filepath)?;
 
@@ -78,15 +80,15 @@ mod tests {
 		let orig_text = 
 "code.run()
 // regular comment
-// TODO: item
-// TODO: item2
+// item
+// item2
 other.stuff()
 // another comment";
 
 		let expected_out_text = 
 "code.run()
 // regular comment
-// TODO: item2
+// item2
 other.stuff()
 // another comment";
 		
@@ -99,15 +101,15 @@ other.stuff()
 		let orig_text = 
 "code.run()
 // regular comment
-// TODO: item
-// TODO: item2
+// item
+// item2
 other.stuff()
 // another comment";
 
 		let expected_out_text = 
 "// regular comment
-// TODO: item
-// TODO: item2
+// item
+// item2
 other.stuff()
 // another comment";
 		
@@ -120,16 +122,16 @@ other.stuff()
 		let orig_text = 
 "code.run()
 // regular comment
-// TODO: item
-// TODO: item2
+// item
+// item2
 other.stuff()
 // another comment";
 
 		let expected_out_text = 
 "code.run()
 // regular comment
-// TODO: item
-// TODO: item2
+// item
+// item2
 other.stuff()";
 		
 		assert_copy(orig_text, expected_out_text, todo_line);
@@ -141,16 +143,16 @@ other.stuff()";
 		let orig_text = 
 "code.run()
 // regular comment
-// TODO: item
-// TODO: item2
+// item
+// item2
 other.stuff()
 // another comment";
 
 		let expected_out_text = 
 "code.run()
 // regular comment
-// TODO: item
-// TODO: item2
+// item
+// item2
 other.stuff()
 // another comment";
 		
