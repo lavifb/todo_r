@@ -5,6 +5,7 @@ extern crate ansi_term;
 mod parser;
 mod display;
 mod custom_tags;
+mod remover;
 
 pub mod errors {
 	use failure::Error;

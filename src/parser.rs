@@ -9,7 +9,7 @@ use custom_tags::{get_regex_string, CommentType};
 
 /// A struct holding the TODO and all the needed meta-information for it.
 pub struct Todo {
-	line: usize,
+	pub line: usize,
 	todo_type: String,
 	content: String,
 }

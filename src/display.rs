@@ -40,8 +40,8 @@ impl Default for StyleConfig {
 }
 
 pub struct TodoFile {
-	filepath: PathBuf,
-	todos: Vec<Todo>,
+	pub filepath: PathBuf,
+	pub todos: Vec<Todo>,
 }
 
 impl TodoFile {
