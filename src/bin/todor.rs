@@ -23,6 +23,13 @@ fn main() {
 		(@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
 		(@arg TAG: -t --("tag") +takes_value +multiple "Todo tags to search for.")
 		(@arg VERBOSE: -v --("verbose") "Provide verbose output.")
+		(@subcommand remove =>
+			(version: "0.0.1")
+			(about: "Removes TODO comments from the code")
+			(author: "Lavi Blumberg <lavifb@gmail.com>")
+			(@arg FILE: +required ... "File to remove TODO items from.")
+			(@arg LINE: -l +takes_value +required "Index of TODO to remove.")
+		)
 	).get_matches();
 
 
@@ -71,4 +78,16 @@ fn main() {
 	}
 
 	todor.print_todos();
+
+	// handle remove subcommand
+	if let Some(matches) = matches.subcommand_matches("remove") {
+		let line: usize = matches.value_of("LINE").unwrap().parse().unwrap();
+		let file = matches.value_of("FILE").unwrap();
+
+		println!("\n Removing TODO comment {} in {}\n", line, file);
+
+		todor.remove_todo(Path::new(file), line-1).unwrap_or_else(|err| eprint_error(&err));
+
+		todor.print_todos();
+	}
 }
