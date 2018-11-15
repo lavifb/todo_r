@@ -45,14 +45,14 @@ where
 			None => return Ok(()), // Input is empty
 		};
 
-		copy.write(&first_line.into_bytes())?;
+		copy.write_all(&first_line.into_bytes())?;
 	}
 
 	// iterate skipping the line with the TODO
 	for line in line_skip_iter {
 		let l: String = line?;
-		copy.write(b"\n")?;
-		copy.write(&l.into_bytes())?;
+		copy.write_all(b"\n")?;
+		copy.write_all(&l.into_bytes())?;
 	}
 
 	Ok(())

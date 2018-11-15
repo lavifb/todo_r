@@ -119,7 +119,7 @@ impl TodoR {
 			}.into());
 		}
 
-		let file_ext = filepath.extension().unwrap_or(OsStr::new(".sh"));
+		let file_ext = filepath.extension().unwrap_or_else(|| OsStr::new(".sh"));
 		let comment_types = self.config.ext_to_comment_types.get(file_ext.to_str().unwrap())
 								.unwrap_or(&self.config.default_comment_types);
 		

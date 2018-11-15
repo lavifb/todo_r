@@ -5,6 +5,7 @@ use parser::Todo;
 use std::path::{Path, PathBuf};
 use ansi_term::Style;
 use std::io::{self, Write};
+use std::borrow::Cow;
 
 /// Struct for holding ansi color printing options
 pub struct StyleConfig {
@@ -45,9 +46,12 @@ pub struct TodoFile {
 }
 
 impl TodoFile {
-	pub fn new(filepath: &Path) -> TodoFile {
+	pub fn new<'a, P>(filepath: P) -> TodoFile
+	where
+		P: Into<Cow<'a, Path>>,
+	{
 		TodoFile {
-			filepath: filepath.to_path_buf(),
+			filepath: filepath.into().into_owned(),
 			todos: Vec::with_capacity(0), // do not allocate because it will be replaced
 		}
 	}
@@ -78,7 +82,7 @@ pub fn print_file_todos(todo_file: &TodoFile, styles: &StyleConfig, verbose: boo
 /// Writes file path and a list of Todos to out_buffer
 // MAYB: have different colors for different TODOs
 pub fn write_file_todos(out_buffer: &mut Write, todo_file: &TodoFile, styles: &StyleConfig) {
-	writeln!(out_buffer, "{}", styles.filepath_style.paint(todo_file.filepath.to_str().unwrap()));
+	writeln!(out_buffer, "{}", styles.filepath_style.paint(todo_file.filepath.to_string_lossy()));
 	for todo in &todo_file.todos {
 		writeln!(out_buffer, "{}", 
 			todo.style_string(

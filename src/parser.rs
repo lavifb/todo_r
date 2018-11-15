@@ -4,6 +4,7 @@ use regex::Regex;
 use ansi_term::Style;
 use std::fmt;
 use std::io::BufRead;
+use std::borrow::Cow;
 
 use custom_tags::{get_regex_string, CommentType};
 
@@ -16,14 +17,14 @@ pub struct Todo {
 
 impl Todo {
 	/// Create new TODO struct
-	fn new(line: usize, todo_type_str: &str, content_str: &str) -> Todo {
-		let todo_type = todo_type_str.to_string();
-		let content = content_str.to_string();
-
+	fn new<'a, S>(line: usize, todo_type_str: &str, content_str: S) -> Todo 
+	where
+		S: Into<Cow<'a, str>>,
+	{
 		Todo {
 			line,
-			todo_type,
-			content,
+			todo_type: todo_type_str.to_uppercase(),
+			content: content_str.into().into_owned(),
 		}
 	}
 
@@ -62,7 +63,7 @@ where
 
 		for re in regexs.iter() {
 			if let Some(todo_content) = re.captures(&line) {
-				let todo = Todo::new(line_num+1, &todo_content[1].trim().to_uppercase(), todo_content[2].trim());
+				let todo = Todo::new(line_num+1, todo_content[1].trim(), todo_content[2].trim());
 				todos.push(todo);
 			};
 		}
