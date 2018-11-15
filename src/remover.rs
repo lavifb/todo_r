@@ -30,6 +30,11 @@ pub fn remove_todo_by_index(todo_file: &mut TodoFile, ind: usize) -> Result<(), 
 	Ok(())
 }
 
+// TODO: implement
+pub fn remove_todo_by_line(_todo_file: &mut TodoFile, _line: usize) -> Result<(), Error> {
+	unimplemented!();
+}
+
 fn copy_except_line<B, W>(orig: &mut B, copy: &mut W, line_number: usize) -> Result<(), Error>
 where
 	B: BufRead,

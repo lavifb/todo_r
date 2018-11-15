@@ -23,6 +23,11 @@ pub mod errors {
 		InvalidExtension {
 			ext: String,
 		},
+		/// Error for when provided filepath for modification is not tracked
+		#[fail(display = "'{}' is not a tracked file.", filepath)]
+		FileNotTracked {
+			filepath: String,
+		},
 	}
 
 	use ansi_term::Colour::Red;
@@ -47,7 +52,6 @@ use errors::TodoRError;
 use parser::parse_content;
 use display::{StyleConfig, write_file_todos, TodoFile};
 use custom_tags::CommentType;
-use remover::remove_todo_by_index;
 
 
 /// Configuration for `TodoR`.
@@ -166,13 +170,30 @@ impl TodoR {
 	pub fn remove_todo(&mut self, filepath: &Path, todo_number: usize) -> Result<(), Error> {
 		for mut todo_file in &mut self.todo_files {
 			if filepath == todo_file.filepath {
-				remove_todo_by_index(&mut todo_file, todo_number)?;
+				remover::remove_todo_by_index(&mut todo_file, todo_number)?;
 
 				return Ok(());
 			}
 		}
 
-		Ok(())
+		Err(TodoRError::FileNotTracked {
+			filepath: filepath.to_string_lossy().to_string()
+		}.into())
+	}
+
+	/// Deletes TODO line from given filepath corresponding to the given line.
+	pub fn remove_todo_line(&mut self, filepath: &Path, line: usize) -> Result<(), Error> {
+		for mut todo_file in &mut self.todo_files {
+			if filepath == todo_file.filepath {
+				remover::remove_todo_by_line(&mut todo_file, line)?;
+
+				return Ok(());
+			}
+		}
+
+		Err(TodoRError::FileNotTracked {
+			filepath: filepath.to_string_lossy().to_string()
+		}.into())
 	}
 }
 
