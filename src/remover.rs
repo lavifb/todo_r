@@ -20,7 +20,9 @@ pub fn remove_todo_by_index(todo_file: &mut TodoFile, ind: usize) -> Result<(), 
 	let todo_line = todo_file.todos.remove(ind).line;
 	copy_except_line(&mut file_reader, &mut file_writer, todo_line)?;
 
-	// TODO: decrement the rest of the line numbers
+	for todo in &mut todo_file.todos[ind..] {
+		todo.line -= 1;
+	}
 
 	// replace old file with temp file
 	rename(temp_filepath, &todo_file.filepath)?;
