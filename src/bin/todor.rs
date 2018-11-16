@@ -22,6 +22,7 @@ fn main() {
 		(@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
 		(@arg TAG: -t --("tag") +takes_value +multiple "Todo tags to search for.")
 		(@arg VERBOSE: -v --("verbose") "Provide verbose output.")
+		// TODO: use dialoguer to make interactive deleting
 		(@subcommand remove =>
 			(version: "0.0.1")
 			(about: "Removes TODO comments from the code")
