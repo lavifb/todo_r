@@ -1,6 +1,6 @@
 [package]
 name = "todo_r"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Lavi Blumberg <lavifb@gmail.com>"]
 
 [dependencies]

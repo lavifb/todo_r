@@ -26,7 +26,7 @@ fn main() {
 		(@arg VERBOSE: -v --("verbose") "Provide verbose output.")
 		(@arg DELETE_MODE: -d --("delete") "Interactive delete mode.")
 		(@subcommand remove =>
-			(version: "0.0.1")
+			(version: "0.1")
 			(about: "Removes TODO comments from the code")
 			(author: "Lavi Blumberg <lavifb@gmail.com>")
 			(@arg FILE: +required ... "File to remove TODO items from.")
