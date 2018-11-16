@@ -28,6 +28,11 @@ pub mod errors {
 		FileNotTracked {
 			filepath: String,
 		},
+		/// Error for when provided TODO line is not found
+		#[fail(display = "TODO comment not found in line {}.", line)]
+		TodoNotFound {
+			line: usize
+		},
 	}
 
 	use ansi_term::Colour::Red;
@@ -167,10 +172,10 @@ impl TodoR {
 	}
 
 	/// Deletes TODO line from given filepath corresponding to the given index.
-	pub fn remove_todo(&mut self, filepath: &Path, todo_number: usize) -> Result<(), Error> {
+	pub fn remove_todo(&mut self, filepath: &Path, todo_index: usize) -> Result<(), Error> {
 		for mut todo_file in &mut self.todo_files {
 			if filepath == todo_file.filepath {
-				remover::remove_todo_by_index(&mut todo_file, todo_number)?;
+				remover::remove_todo_by_index(&mut todo_file, todo_index)?;
 
 				return Ok(());
 			}

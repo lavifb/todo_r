@@ -4,7 +4,7 @@ use failure::Error;
 use std::fs::{File, rename};
 use std::io::{BufReader, BufRead, BufWriter, Write};
 
-// use parser::Todo;
+use errors::TodoRError;
 use display::TodoFile;
 
 pub fn remove_todo_by_index(todo_file: &mut TodoFile, ind: usize) -> Result<(), Error> {
@@ -30,9 +30,44 @@ pub fn remove_todo_by_index(todo_file: &mut TodoFile, ind: usize) -> Result<(), 
 	Ok(())
 }
 
-// TODO: implement
-pub fn remove_todo_by_line(_todo_file: &mut TodoFile, _line: usize) -> Result<(), Error> {
-	unimplemented!();
+pub fn remove_todo_by_line(todo_file: &mut TodoFile, line: usize) -> Result<(), Error> {
+	let del_index: usize;
+	// Kind of annoyed there is no retain_mut() to make this easier...
+	{
+		let mut todos = todo_file.todos.iter_mut().enumerate().skip_while(|(_, t)| t.line < line);
+
+		let (i, todo_to_check) = match todos.next() {
+			Some((i, todo_to_check)) => (i, todo_to_check),
+			None => return Err(TodoRError::TodoNotFound{line}.into()),
+		};
+
+		// line not found in TODOs
+		if todo_to_check.line > line {
+			return Err(TodoRError::TodoNotFound{line}.into());
+		}
+
+		del_index = i;
+
+		let old_file = File::open(&todo_file.filepath)?;
+		let temp_filepath = todo_file.filepath.with_extension("tmp");
+		let temp_file = File::create(&temp_filepath)?;
+		
+		let mut file_reader = BufReader::new(old_file);
+		let mut file_writer = BufWriter::new(temp_file);
+
+		copy_except_line(&mut file_reader, &mut file_writer, line)?;
+
+		// replace old file with temp file
+		rename(temp_filepath, &todo_file.filepath)?;
+
+		for (_, todo) in todos {
+			todo.line -= 1;
+		}
+	}
+
+	todo_file.todos.remove(del_index);
+
+	Ok(())
 }
 
 fn copy_except_line<B, W>(orig: &mut B, copy: &mut W, line_number: usize) -> Result<(), Error>
