@@ -13,7 +13,7 @@ use todo_r::errors::eprint_error;
 /// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
 	// TODO: add config file option
-	// TODO: add subcommand for removing TODOs
+	// TODO: add subcommand for just content so it can be piped
 	let matches = clap_app!(todo_r =>
 		(version: env!("CARGO_PKG_VERSION"))
 		(author: "Lavi Blumberg <lavifb@gmail.com>")
@@ -85,7 +85,7 @@ fn main() {
 
 		println!("\n Removing TODO comment {} in {}\n", line, file);
 
-		todor.remove_todo_line(Path::new(file), line-1).unwrap_or_else(|err| eprint_error(&err));
+		todor.remove_todo_line(Path::new(file), line).unwrap_or_else(|err| eprint_error(&err));
 
 		todor.print_todos();
 	}
