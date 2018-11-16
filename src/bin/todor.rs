@@ -1,11 +1,13 @@
 // Binary for finding TODOs in specified files
 extern crate todo_r;
 
-#[macro_use(clap_app)]
-extern crate clap;
+#[macro_use(clap_app)] extern crate clap;
+extern crate dialoguer;
 
 use std::path::Path;
 use std::process::Command;
+use dialoguer::Select;
+
 use todo_r::TodoR;
 use todo_r::errors::eprint_error;
 
@@ -22,7 +24,7 @@ fn main() {
 		(@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
 		(@arg TAG: -t --("tag") +takes_value +multiple "Todo tags to search for.")
 		(@arg VERBOSE: -v --("verbose") "Provide verbose output.")
-		// TODO: use dialoguer to make interactive deleting
+		(@arg DELETE_MODE: -d --("delete") "Interactive delete mode.")
 		(@subcommand remove =>
 			(version: "0.0.1")
 			(about: "Removes TODO comments from the code")
@@ -77,7 +79,34 @@ fn main() {
 		},
 	}
 
-	todor.print_todos();
+	if matches.is_present("DELETE_MODE") {
+		let file_selection = match select_file(&todor){
+			Some(file_selection) => file_selection,
+			None => return,
+		};
+
+		let mut todos_buf: Vec<u8> = Vec::new();
+		todor.write_todos_from_file(Path::new(&file_selection), &mut todos_buf);
+
+		let todos_string = String::from_utf8_lossy(&todos_buf);
+		let mut todos_lines = todos_string.lines();
+		let styled_filename = todos_lines.next().unwrap();
+
+		let todos_items: Vec<&str> = todos_lines.collect();
+
+		let mut todo_selector = Select::new();
+		todo_selector.with_prompt(styled_filename)
+		             .items(&todos_items)
+		             .default(0);
+
+		let todo_ind = todo_selector.interact().unwrap();
+
+		todor.remove_todo(Path::new(&file_selection), todo_ind).unwrap_or_else(|err| eprint_error(&err));
+		println!("Comment removed");
+
+	} else {
+		todor.print_todos();
+	}
 
 	// handle remove subcommand
 	if let Some(matches) = matches.subcommand_matches("remove") {
@@ -90,4 +119,21 @@ fn main() {
 
 		todor.print_todos();
 	}
+}
+
+fn select_file(todor: &TodoR) -> Option<String> {
+	let mut tracked_files = todor.get_tracked_files();
+	tracked_files.push("QUIT");
+
+	let mut file_selector = Select::new();
+	file_selector.with_prompt("Pick a file")
+	             .items(&tracked_files)
+	             .default(0);
+
+	let file_ind = file_selector.interact().unwrap();
+	if file_ind+1 == tracked_files.len() {
+		return None;
+	}
+
+	Some(tracked_files[file_ind].to_string())
 }

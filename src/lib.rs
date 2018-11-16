@@ -117,6 +117,26 @@ impl TodoR {
 		}
 	}
 
+	/// Returns the number of files currently tracked by TodoR
+	pub fn num_files(&self) -> usize {
+		self.todo_files.len()
+	}
+
+	/// Returns all tracked files that contain TODOs
+	pub fn get_tracked_files<'a>(&'a self) -> Vec<&'a str> {
+		self.todo_files.iter()
+			.filter(|tf| tf.todos.len() > 0)
+			.map(|tf| tf.filepath.to_str().unwrap())
+			.collect()
+	}
+
+	/// Returns all tracked files even if they have no TODOs
+	pub fn get_all_tracked_files<'a>(&'a self) -> Vec<&'a str> {
+		self.todo_files.iter()
+			.map(|tf| tf.filepath.to_str().unwrap())
+			.collect()
+	}
+
 	/// Opens file at given filepath and process it by finding all its TODOs.
 	pub fn open_todos(&mut self, filepath: &Path) -> Result<(), Error> {
 		let mut todo_file = TodoFile::new(filepath);
@@ -168,6 +188,17 @@ impl TodoR {
 			}
 
 			write_file_todos(out_buffer, &todo_file, &self.config.styles);
+		}
+	}
+
+	/// Writes TODOs to out_buffer.
+	// MAYB: change self.todo_files to Hashmap for easier finding
+	pub fn write_todos_from_file(&self, filepath: &Path, out_buffer: &mut Write) {
+		for todo_file in &self.todo_files {
+			if todo_file.filepath == filepath {
+				write_file_todos(out_buffer, &todo_file, &self.config.styles);
+				break;
+			}
 		}
 	}
 
