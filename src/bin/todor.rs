@@ -80,28 +80,19 @@ fn main() {
 	}
 
 	if matches.is_present("DELETE_MODE") {
-		let file_selection = match select_file(&todor){
+		let file_selection = match select_file(&todor) {
 			Some(file_selection) => file_selection,
 			None => return,
 		};
 
-		let mut todos_buf: Vec<u8> = Vec::new();
-		todor.write_todos_from_file(Path::new(&file_selection), &mut todos_buf);
+		// TODO: have a loop to implement back
+		let filepath = Path::new(&file_selection);
+		let todo_ind = match select_todo(&todor, filepath) {
+			Some(todo_ind) => todo_ind,
+			None => return,
+		};
 
-		let todos_string = String::from_utf8_lossy(&todos_buf);
-		let mut todos_lines = todos_string.lines();
-		let styled_filename = todos_lines.next().unwrap();
-
-		let todos_items: Vec<&str> = todos_lines.collect();
-
-		let mut todo_selector = Select::new();
-		todo_selector.with_prompt(styled_filename)
-		             .items(&todos_items)
-		             .default(0);
-
-		let todo_ind = todo_selector.interact().unwrap();
-
-		todor.remove_todo(Path::new(&file_selection), todo_ind).unwrap_or_else(|err| eprint_error(&err));
+		todor.remove_todo(filepath, todo_ind).unwrap_or_else(|err| eprint_error(&err));
 		println!("Comment removed");
 
 	} else {
@@ -131,9 +122,34 @@ fn select_file(todor: &TodoR) -> Option<String> {
 	             .default(0);
 
 	let file_ind = file_selector.interact().unwrap();
-	if file_ind+1 == tracked_files.len() {
+	if file_ind + 1 == tracked_files.len() {
 		return None;
 	}
 
 	Some(tracked_files[file_ind].to_string())
+}
+
+fn select_todo(todor: &TodoR, filepath : &Path) -> Option<usize> {
+	let mut todos_buf: Vec<u8> = Vec::new();
+	todor.write_todos_from_file(filepath, &mut todos_buf);
+
+	let todos_string = String::from_utf8_lossy(&todos_buf);
+	let mut todos_lines = todos_string.lines();
+	let styled_filename = todos_lines.next().unwrap();
+
+	let mut todos_items: Vec<&str> = todos_lines.collect();
+	// TODO: change to BACK
+	todos_items.push("QUIT");
+
+	let mut todo_selector = Select::new();
+	todo_selector.with_prompt(styled_filename)
+	             .items(&todos_items)
+	             .default(0);
+
+	let todo_ind = todo_selector.interact().unwrap();
+	if todo_ind + 1 == todos_items.len() {
+		return None;
+	}
+
+	Some(todo_ind)
 }
