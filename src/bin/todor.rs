@@ -80,21 +80,23 @@ fn main() {
 	}
 
 	if matches.is_present("DELETE_MODE") {
-		let file_selection = match select_file(&todor) {
-			Some(file_selection) => file_selection,
-			None => return,
-		};
+		loop {
+			let file_selection = match select_file(&todor) {
+				Some(file_selection) => file_selection,
+				None => return,
+			};
+			
+			let filepath = Path::new(&file_selection);
+			let selected_todo = select_todo(&todor, filepath);
 
-		// TODO: have a loop to implement back
-		let filepath = Path::new(&file_selection);
-		let todo_ind = match select_todo(&todor, filepath) {
-			Some(todo_ind) => todo_ind,
-			None => return,
-		};
+			let todo_ind = match selected_todo {
+				Some(todo_ind) => todo_ind,
+				None => continue,
+			};
 
-		todor.remove_todo(filepath, todo_ind).unwrap_or_else(|err| eprint_error(&err));
-		println!("Comment removed");
-
+			todor.remove_todo(filepath, todo_ind).unwrap_or_else(|err| eprint_error(&err));
+			println!("Comment removed");
+		}
 	} else {
 		todor.print_todos();
 	}
@@ -117,7 +119,7 @@ fn select_file(todor: &TodoR) -> Option<String> {
 	tracked_files.push("QUIT");
 
 	let mut file_selector = Select::new();
-	file_selector.with_prompt("Pick a file")
+	file_selector.with_prompt("Pick a file to delete comment")
 	             .items(&tracked_files)
 	             .default(0);
 
@@ -138,8 +140,7 @@ fn select_todo(todor: &TodoR, filepath : &Path) -> Option<usize> {
 	let styled_filename = todos_lines.next().unwrap();
 
 	let mut todos_items: Vec<&str> = todos_lines.collect();
-	// TODO: change to BACK
-	todos_items.push("QUIT");
+	todos_items.push("BACK");
 
 	let mut todo_selector = Select::new();
 	todo_selector.with_prompt(styled_filename)
