@@ -3,10 +3,12 @@ extern crate todo_r;
 
 #[macro_use(clap_app)] extern crate clap;
 extern crate dialoguer;
+extern crate ansi_term;
 
 use std::path::Path;
 use std::process::Command;
 use dialoguer::Select;
+use ansi_term::Color::Red;
 
 use todo_r::TodoR;
 use todo_r::errors::eprint_error;
@@ -115,8 +117,9 @@ fn main() {
 }
 
 fn select_file(todor: &TodoR) -> Option<String> {
+	let option_quit = format!("{}", Red.paint("QUIT"));
 	let mut tracked_files = todor.get_tracked_files();
-	tracked_files.push("QUIT");
+	tracked_files.push(&option_quit);
 
 	let mut file_selector = Select::new();
 	file_selector.with_prompt("Pick a file to delete comment")
@@ -139,8 +142,9 @@ fn select_todo(todor: &TodoR, filepath : &Path) -> Option<usize> {
 	let mut todos_lines = todos_string.lines();
 	let styled_filename = todos_lines.next().unwrap();
 
+	let option_back = format!("{}", Red.paint("BACK"));
 	let mut todos_items: Vec<&str> = todos_lines.collect();
-	todos_items.push("BACK");
+	todos_items.push(&option_back);
 
 	let mut todo_selector = Select::new();
 	todo_selector.with_prompt(styled_filename)
