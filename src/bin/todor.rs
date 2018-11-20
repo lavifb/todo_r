@@ -4,11 +4,13 @@ extern crate todo_r;
 #[macro_use(clap_app)] extern crate clap;
 extern crate dialoguer;
 extern crate ansi_term;
+extern crate config;
 
 use std::path::Path;
 use std::process::Command;
 use dialoguer::Select;
 use ansi_term::Color::Red;
+use config::{File, Config};
 
 use todo_r::TodoR;
 use todo_r::errors::eprint_error;
@@ -23,6 +25,7 @@ fn main() {
 		(author: "Lavi Blumberg <lavifb@gmail.com>")
 		(about: "Lists TODO comments in code")
 		(@arg FILE: ... "File to search for TODO items.")
+		(@arg CONFIG: -c --("config") +takes_value "Takes configuration from file.")
 		(@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
 		(@arg TAG: -t --("tag") +takes_value +multiple "Todo tags to search for.")
 		(@arg VERBOSE: -v --("verbose") "Provide verbose output.")
@@ -36,11 +39,23 @@ fn main() {
 		)
 	).get_matches();
 
+// FIX: test
+// MAYB: this
+	let mut todo_words: Vec<String> = Vec::new();
 
-	let todo_words = match matches.values_of("TAG") {
-		Some(words_iter) => words_iter.collect(),
-		None => vec!["todo", "fixme"],
+	let mut settings = Config::default();
+	if matches.is_present("CONFIG") {
+		settings.merge(File::with_name(matches.value_of("CONFIG").unwrap())).unwrap();
+		for tag in settings.get_array("tags").unwrap() {
+			todo_words.push(tag.into_str().unwrap());
+		}
+	}
+
+	let mut added_todo_words = match matches.values_of("TAG") {
+		Some(words_iter) => words_iter.map(|s| s.to_string()).collect(),
+		None => vec!["todo".to_string(), "fixme".to_string()],
 	};
+	todo_words.append(&mut added_todo_words);
 
 	let verbose: bool = matches.is_present("VERBOSE");
 	if verbose { println!("TODO keywords: {}", todo_words.join(", ").to_uppercase()); }
