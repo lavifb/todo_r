@@ -82,6 +82,7 @@ impl TodoRConfig {
 		}
 	}
 
+	// TODO: take String or &str using Cow or something
 	pub fn with_todo_words(todo_words: &[String]) -> TodoRConfig {
 		// let todo_word_strings: Vec<String> = .collect();
 		

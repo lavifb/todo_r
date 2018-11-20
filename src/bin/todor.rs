@@ -131,6 +131,7 @@ fn main() {
 	}
 }
 
+// TODO: move into TodoRConfig
 fn load_config_file(config_path: &Path) -> TodoRConfig {
 	let mut config_from_file = Config::new();
 	config_from_file.merge(File::from(config_path)).unwrap();
