@@ -12,7 +12,7 @@ use dialoguer::Select;
 use ansi_term::Color::Red;
 use config::{File, Config};
 
-use todo_r::TodoR;
+use todo_r::{TodoR, TodoRConfig};
 use todo_r::errors::eprint_error;
 
 
@@ -40,31 +40,32 @@ fn main() {
 		)
 	).get_matches();
 
-	let mut todo_words: Vec<String> = Vec::new();
 
-	let mut settings = Config::default();
-	if matches.is_present("CONFIG") {
-		settings.merge(File::with_name(matches.value_of("CONFIG").unwrap())).unwrap();
-		for tag in settings.get_array("tags").unwrap() {
-			todo_words.push(tag.into_str().unwrap());
-		}
-	}
-
-	let mut added_todo_words = match matches.values_of("TAG") {
-		Some(words_iter) => words_iter.map(|s| s.to_string()).collect(),
-		None => vec!["todo".to_string(), "fixme".to_string()],
+	let mut config = match matches.value_of("CONFIG") {
+		Some(config_path) => load_config_file(Path::new(config_path)),
+		None => TodoRConfig::new(),
 	};
-	todo_words.append(&mut added_todo_words);
+
+	match matches.values_of("TAG") {
+		Some(words_iter) => {
+			let mut added_todo_words = words_iter.map(|s| s.to_string()).collect();
+			config.todo_words.append(&mut added_todo_words);
+		},
+		None => {
+			let mut added_todo_words = vec!["todo".to_string(), "fixme".to_string()];
+			config.todo_words.append(&mut added_todo_words);
+		},
+	}
 
 	let verbose: bool = matches.is_present("VERBOSE");
-	if verbose { println!("TODO keywords: {}", todo_words.join(", ").to_uppercase()); }
+	if verbose { println!("TODO keywords: {}", config.todo_words.join(", ").to_uppercase()); }
 
-	let mut todor = TodoR::new(&todo_words);
 	if matches.is_present("NOSTYLE") {
-		todor.config.set_no_style();
+		config.set_no_style();
 	}
-	todor.config.verbose = verbose;
+	config.verbose = verbose;
 
+	let mut todor = TodoR::with_config(config);
 	match matches.values_of("FILE") { 
 		Some(files) => {
 			for file in files {
@@ -128,6 +129,18 @@ fn main() {
 
 		todor.print_todos();
 	}
+}
+
+fn load_config_file(config_path: &Path) -> TodoRConfig {
+	let mut config_from_file = Config::new();
+	config_from_file.merge(File::from(config_path)).unwrap();
+
+	let todo_words: Vec<String> = config_from_file.get_array("tags").unwrap()
+	                                .into_iter()
+	                                .map(|t| t.into_str().unwrap())
+	                                .collect();
+
+	TodoRConfig::with_todo_words(&todo_words)
 }
 
 fn select_file(todor: &TodoR) -> Option<String> {

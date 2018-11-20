@@ -72,12 +72,22 @@ pub struct TodoRConfig {
 }
 
 impl TodoRConfig {
-	pub fn new<T: AsRef<str>>(todo_words: &[T]) -> TodoRConfig {
-		let todo_word_strings: Vec<String> = todo_words.iter().map(|s| s.as_ref().to_string()).collect();
+	pub fn new() -> TodoRConfig {
+		TodoRConfig {
+			verbose: false,
+			todo_words: Vec::new(),
+			styles: StyleConfig::default(),
+			ext_to_comment_types: default_comment_types_map(),
+			default_comment_types: vec![CommentType::new_one_line("#")],
+		}
+	}
+
+	pub fn with_todo_words(todo_words: &[String]) -> TodoRConfig {
+		// let todo_word_strings: Vec<String> = .collect();
 		
 		TodoRConfig {
 			verbose: false,
-			todo_words: todo_word_strings,
+			todo_words: todo_words.to_vec(),
 			styles: StyleConfig::default(),
 			ext_to_comment_types: default_comment_types_map(),
 			default_comment_types: vec![CommentType::new_one_line("#")],
@@ -110,9 +120,24 @@ pub struct TodoR {
 
 impl TodoR {
 	/// Creates new TodoR that looks for provided keywords.
-	pub fn new<T: AsRef<str>>(todo_words: &[T]) -> TodoR {
+	pub fn new() -> TodoR {
 		TodoR {
-			config: TodoRConfig::new(todo_words),
+			config: TodoRConfig::new(),
+			todo_files: Vec::new(),
+		}
+	}
+
+	pub fn with_todo_words(todo_words: &[String]) -> TodoR {
+		TodoR {
+			config: TodoRConfig::with_todo_words(todo_words),
+			todo_files: Vec::new(),
+		}
+	}
+
+	/// Creates new TodoR using given configuration.
+	pub fn with_config(config: TodoRConfig) -> TodoR {
+		TodoR {
+			config,
 			todo_files: Vec::new(),
 		}
 	}
