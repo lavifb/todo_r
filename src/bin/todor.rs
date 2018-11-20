@@ -120,6 +120,7 @@ fn select_file(todor: &TodoR) -> Option<String> {
 	let option_quit = format!("{}", Red.paint("QUIT"));
 	let mut tracked_files = todor.get_tracked_files();
 	tracked_files.push(&option_quit);
+	// IMPR: Cache tracked_files for when you go back
 
 	let mut file_selector = Select::new();
 	file_selector.with_prompt("Pick a file to delete comment")
