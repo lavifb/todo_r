@@ -82,13 +82,15 @@ impl TodoRConfig {
 		}
 	}
 
-	// TODO: take String or &str using Cow or something
-	pub fn with_todo_words(todo_words: &[String]) -> TodoRConfig {
-		// let todo_word_strings: Vec<String> = .collect();
+	pub fn with_todo_words<S: AsRef<str>>(todo_words: &[S]) -> TodoRConfig {
+		let todo_word_strings: Vec<String> = todo_words
+			.iter()
+			.map(|s| s.as_ref().to_string())
+			.collect();
 		
 		TodoRConfig {
 			verbose: false,
-			todo_words: todo_words.to_vec(),
+			todo_words: todo_word_strings,
 			styles: StyleConfig::default(),
 			ext_to_comment_types: default_comment_types_map(),
 			default_comment_types: vec![CommentType::new_one_line("#")],
@@ -128,7 +130,7 @@ impl TodoR {
 		}
 	}
 
-	pub fn with_todo_words(todo_words: &[String]) -> TodoR {
+	pub fn with_todo_words<S: AsRef<str>>(todo_words: &[S]) -> TodoR {
 		TodoR {
 			config: TodoRConfig::with_todo_words(todo_words),
 			todo_files: Vec::new(),
