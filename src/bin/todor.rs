@@ -40,7 +40,7 @@ fn main() {
 
 
 	let mut config = match matches.value_of("CONFIG") {
-		Some(config_path) => TodoRConfig::with_config_file(Path::new(config_path)),
+		Some(config_path) => TodoRConfig::with_config_file(Path::new(config_path)).unwrap(),
 		None => TodoRConfig::new(),
 	};
 

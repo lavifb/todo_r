@@ -101,17 +101,18 @@ impl TodoRConfig {
 	}
 
 	/// Creates new TodoR configuration from the given configuration file.
-	pub fn with_config_file(config_path: &Path) -> TodoRConfig {
+	pub fn with_config_file(config_path: &Path) -> Result<TodoRConfig, Error> {
 		let mut config_from_file = config::Config::new();
-		config_from_file.merge(config::File::from(config_path)).unwrap();
+		config_from_file.merge(config::File::from(config_path))?;
 
 		let todo_words: Vec<String> = config_from_file
-			.get_array("tags").unwrap()
+			.get_array("tags").unwrap_or(Vec::with_capacity(0))
 			.into_iter()
 			.map(|t| t.into_str().unwrap())
 			.collect();
 
-		TodoRConfig::with_todo_words(&todo_words)
+		let config = TodoRConfig::with_todo_words(&todo_words);
+		Ok(config)
 	}
 
 	/// Sets output to be without colors or styles.
