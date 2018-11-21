@@ -1,6 +1,7 @@
 #[macro_use] extern crate failure;
 extern crate regex;
 extern crate ansi_term;
+extern crate config;
 
 mod parser;
 mod display;
@@ -72,6 +73,7 @@ pub struct TodoRConfig {
 }
 
 impl TodoRConfig {
+	/// Creates new TodoR configuration with the default parameters.
 	pub fn new() -> TodoRConfig {
 		TodoRConfig {
 			verbose: false,
@@ -82,6 +84,7 @@ impl TodoRConfig {
 		}
 	}
 
+	/// Creates new TodoR configuration with the given TODO comment types.
 	pub fn with_todo_words<S: AsRef<str>>(todo_words: &[S]) -> TodoRConfig {
 		let todo_word_strings: Vec<String> = todo_words
 			.iter()
@@ -97,10 +100,26 @@ impl TodoRConfig {
 		}
 	}
 
+	/// Creates new TodoR configuration from the given configuration file.
+	pub fn with_config_file(config_path: &Path) -> TodoRConfig {
+		let mut config_from_file = config::Config::new();
+		config_from_file.merge(config::File::from(config_path)).unwrap();
+
+		let todo_words: Vec<String> = config_from_file
+			.get_array("tags").unwrap()
+			.into_iter()
+			.map(|t| t.into_str().unwrap())
+			.collect();
+
+		TodoRConfig::with_todo_words(&todo_words)
+	}
+
+	/// Sets output to be without colors or styles.
 	pub fn set_no_style(&mut self) {
 		self.styles = StyleConfig::no_style();
 	}
 
+	/// Sets the default fall-back extension.
 	pub fn set_default_ext(&mut self, ext: &str) -> Result<(), Error> {
 		self.default_comment_types = self.ext_to_comment_types.get(ext).ok_or(
 			TodoRError::InvalidExtension {

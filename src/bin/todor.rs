@@ -4,13 +4,11 @@ extern crate todo_r;
 #[macro_use(clap_app)] extern crate clap;
 extern crate dialoguer;
 extern crate ansi_term;
-extern crate config;
 
 use std::path::Path;
 use std::process::Command;
 use dialoguer::Select;
 use ansi_term::Color::Red;
-use config::{File, Config};
 
 use todo_r::{TodoR, TodoRConfig};
 use todo_r::errors::eprint_error;
@@ -42,7 +40,7 @@ fn main() {
 
 
 	let mut config = match matches.value_of("CONFIG") {
-		Some(config_path) => load_config_file(Path::new(config_path)),
+		Some(config_path) => TodoRConfig::with_config_file(Path::new(config_path)),
 		None => TodoRConfig::new(),
 	};
 
@@ -129,19 +127,6 @@ fn main() {
 
 		todor.print_todos();
 	}
-}
-
-// TODO: move into TodoRConfig
-fn load_config_file(config_path: &Path) -> TodoRConfig {
-	let mut config_from_file = Config::new();
-	config_from_file.merge(File::from(config_path)).unwrap();
-
-	let todo_words: Vec<String> = config_from_file.get_array("tags").unwrap()
-	                                .into_iter()
-	                                .map(|t| t.into_str().unwrap())
-	                                .collect();
-
-	TodoRConfig::with_todo_words(&todo_words)
 }
 
 fn select_file(todor: &TodoR) -> Option<String> {
