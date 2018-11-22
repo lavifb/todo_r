@@ -115,8 +115,10 @@ impl TodoRConfig {
 		Ok(config)
 	}
 
-	pub fn write_default_config(out_buffer: &mut Write) {
-		out_buffer.write_all(default_config_file());
+	/// Writes the default configuration file to out_buffer.
+	pub fn write_default_config(out_buffer: &mut Write) -> Result<(), Error> {
+		out_buffer.write_all(default_config_file().as_bytes())?;
+		Ok(())
 	}
 
 	/// Sets output to be without colors or styles.
