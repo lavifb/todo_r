@@ -115,6 +115,10 @@ impl TodoRConfig {
 		Ok(config)
 	}
 
+	pub fn write_default_config(out_buffer: &mut Write) {
+		out_buffer.write_all(default_config_file());
+	}
+
 	/// Sets output to be without colors or styles.
 	pub fn set_no_style(&mut self) {
 		self.styles = StyleConfig::no_style();
@@ -325,4 +329,9 @@ fn default_comment_types_map() -> HashMap<String, Vec<CommentType>> {
 	comment_types_map.insert("zsh".to_string(), vec![CommentType::new_one_line("#")]);
 
 	comment_types_map
+}
+
+fn default_config_file() -> &'static str {
+r#"
+tags: [ "todo", "fixme", "fix" ]"#
 }
