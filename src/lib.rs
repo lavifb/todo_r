@@ -85,10 +85,10 @@ impl TodoRConfig {
 	}
 
 	/// Creates new TodoR configuration with the given TODO comment types.
-	pub fn with_todo_words<S: AsRef<str>>(todo_words: &[S]) -> TodoRConfig {
+	pub fn with_todo_words<S: ToString>(todo_words: &[S]) -> TodoRConfig {
 		let todo_word_strings: Vec<String> = todo_words
 			.iter()
-			.map(|s| s.as_ref().to_string())
+			.map(|s| s.to_string())
 			.collect();
 		
 		TodoRConfig {
@@ -170,7 +170,7 @@ impl TodoR {
 		}
 	}
 
-	pub fn with_todo_words<S: AsRef<str>>(todo_words: &[S]) -> TodoR {
+	pub fn with_todo_words<S: ToString>(todo_words: &[S]) -> TodoR {
 		TodoR {
 			config: TodoRConfig::with_todo_words(todo_words),
 			todo_files: Vec::new(),
