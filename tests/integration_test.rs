@@ -76,3 +76,15 @@ fn dir_todos() {
 		.stdout("")
 		.stderr("[31m[todo_r error][0m: '..' is a directory.\n");
 }
+
+#[test]
+fn config() {
+	todor()
+		.arg("test1.rs")
+		.arg("-c")
+		.arg("config.toml")
+		.assert()
+		.success()
+		.stdout("test1.rs\n  line 2      TODO   item\n  line 4      FOO    bar\n")
+		.stderr("");
+}
