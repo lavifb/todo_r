@@ -1,3 +1,32 @@
 
-tags = [ "todo", "fixme", "foo" ]
+tags = ["todo", "fixme", "foo"]
 
+[[comment]]
+ext = "rs"
+
+	[[comment.single_line]]
+	token = "//"
+
+	[[comment.multi_line]]
+	start = "/*"
+	end   = "*/"
+
+[[comment]]
+ext = "c"
+
+	[[comment.single_line]]
+	token = "//"
+
+	[[comment.multi_line]]
+	start = "/*"
+	end   = "*/"
+
+[[comment]]
+ext = "py"
+
+	[[comment.single_line]]
+	token = "#"
+
+	[[comment.multi_line]]
+	start = "\"\"\""
+	end   = "\"\"\""

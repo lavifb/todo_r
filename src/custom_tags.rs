@@ -2,6 +2,7 @@
 
 use regex::escape;
 
+// MAYB: seperate single-line and block comments for potential different treatment later...
 #[derive(Clone)]
 pub struct CommentType {
 	prefix: String,
@@ -9,14 +10,14 @@ pub struct CommentType {
 }
 
 impl CommentType {
-	pub fn new_one_line(prefix: &str) -> CommentType {
+	pub fn single_line(prefix: &str) -> CommentType {
 		CommentType {
 			prefix: escape(prefix),
 			suffix: "$".to_string(),
 		}
 	}
 
-	pub fn new_block(prefix: &str, suffix: &str) -> CommentType {
+	pub fn block(prefix: &str, suffix: &str) -> CommentType {
 		CommentType {
 			prefix: escape(prefix),
 			suffix: escape(suffix),
@@ -55,81 +56,81 @@ mod tests {
 
 	#[test]
 	fn regex_whitespace() {
-		test_regex("\t\t\t\t  //  TODO:  item \t", "item", &CommentType::new_one_line("//"));
+		test_regex("\t\t\t\t  //  TODO:  item \t", "item", &CommentType::single_line("//"));
 	}
 
 	#[test]
 	fn regex_todo_in_comment() {
-		test_regex("//  TODO:  item // TODO: item \t", "item // TODO: item", &CommentType::new_one_line("//"));
+		test_regex("//  TODO:  item // TODO: item \t", "item // TODO: item", &CommentType::single_line("//"));
 	}
 	
 	#[test]
 	fn regex_optional_colon() {
-		test_regex("//  TODO  item // TODO: item \t", "item // TODO: item", &CommentType::new_one_line("//"));
+		test_regex("//  TODO  item // TODO: item \t", "item // TODO: item", &CommentType::single_line("//"));
 	}
 
 	#[test]
 	fn regex_case_insensitive() {
-		test_regex("// tODo: case ", "case", &CommentType::new_one_line("//"));
+		test_regex("// tODo: case ", "case", &CommentType::single_line("//"));
 	}
 
 	#[test]
 	fn regex_fixme() {
-		test_regex("\t\t\t\t  //  fixMe:  item for fix \t", "item for fix", &CommentType::new_one_line("//"));
+		test_regex("\t\t\t\t  //  fixMe:  item for fix \t", "item for fix", &CommentType::single_line("//"));
 	}
 
 	#[test]
 	fn regex_todop() {
-		test_regex("// todop: nope ", "NONE", &CommentType::new_one_line("//"));
+		test_regex("// todop: nope ", "NONE", &CommentType::single_line("//"));
 	}
 
 	#[test]
 	fn regex_todf() {
-		test_regex("// todf: nope ", "NONE", &CommentType::new_one_line("//"));
+		test_regex("// todf: nope ", "NONE", &CommentType::single_line("//"));
 	}
 
 	#[test]
 	fn regex_todofixme() {
-		test_regex("// todofixme : nope ", "NONE", &CommentType::new_one_line("//"));
+		test_regex("// todofixme : nope ", "NONE", &CommentType::single_line("//"));
 	}
 
 	#[test]
 	fn regex_py_comment() {
-		test_regex("# todo: item \t ", "item", &CommentType::new_one_line("#"));
+		test_regex("# todo: item \t ", "item", &CommentType::single_line("#"));
 	}
 
 	#[test]
 	fn regex_percent_comment() {
-		test_regex("% todo: item \t ", "item", &CommentType::new_one_line("%"));
+		test_regex("% todo: item \t ", "item", &CommentType::single_line("%"));
 	}
 
 	#[test]
 	fn regex_ddash_comment() {
-		test_regex("-- todo: item \t ", "item", &CommentType::new_one_line("--"));
+		test_regex("-- todo: item \t ", "item", &CommentType::single_line("--"));
 	}
 
 	#[test]
 	fn regex_slashstar_comment() {
-		test_regex("/* todo: item \t */ \t ", "item", &CommentType::new_block("/*", "*/"));
+		test_regex("/* todo: item \t */ \t ", "item", &CommentType::block("/*", "*/"));
 	}
 
 	#[test]
 	fn regex_slashstar_comment_double_prefix() {
-		test_regex("/* todo: item /* todo: decoy*/\t ", "item /* todo: decoy", &CommentType::new_block("/*", "*/"));
+		test_regex("/* todo: item /* todo: decoy*/\t ", "item /* todo: decoy", &CommentType::block("/*", "*/"));
 	}
 
 	#[test]
 	fn regex_slashstar_comment_double_suffix() {
-		test_regex("/* todo: item */ \t other stuff */ ", "item", &CommentType::new_block("/*", "*/"));
+		test_regex("/* todo: item */ \t other stuff */ ", "item", &CommentType::block("/*", "*/"));
 	}
 
 	#[test]
 	fn regex_comment_not_on_separate_line() {
-		test_regex("do_things(); \\ todo: item", "NONE", &CommentType::new_one_line("//"));
+		test_regex("do_things(); \\ todo: item", "NONE", &CommentType::single_line("//"));
 	}
 
 	#[test]
 	fn regex_block_todo_before_function() {
-		test_regex("/* todo: item */ do_things();", "item", &CommentType::new_block("/*", "*/"));
+		test_regex("/* todo: item */ do_things();", "item", &CommentType::block("/*", "*/"));
 	}
 }

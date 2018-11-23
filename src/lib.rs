@@ -80,7 +80,7 @@ impl TodoRConfig {
 			todo_words: Vec::new(),
 			styles: StyleConfig::default(),
 			ext_to_comment_types: default_comment_types_map(),
-			default_comment_types: vec![CommentType::new_one_line("#")],
+			default_comment_types: vec![CommentType::single_line("#")],
 		}
 	}
 
@@ -96,7 +96,7 @@ impl TodoRConfig {
 			todo_words: todo_word_strings,
 			styles: StyleConfig::default(),
 			ext_to_comment_types: default_comment_types_map(),
-			default_comment_types: vec![CommentType::new_one_line("#")],
+			default_comment_types: vec![CommentType::single_line("#")],
 		}
 	}
 
@@ -110,6 +110,8 @@ impl TodoRConfig {
 			.into_iter()
 			.map(|t| t.into_str().unwrap())
 			.collect();
+
+		// TODO: add config parsing for new comment types
 
 		let config = TodoRConfig::with_todo_words(&todo_words);
 		Ok(config)
@@ -126,7 +128,10 @@ impl TodoRConfig {
 		self.styles = StyleConfig::no_style();
 	}
 
-	/// Sets the default fall-back extension.
+	/// Sets the default fall-back extension for comments.
+	///
+	/// For instance if you want to parse unknown extensions using C style comments,
+	/// use `todor.set_default_ext("c")`.
 	pub fn set_default_ext(&mut self, ext: &str) -> Result<(), Error> {
 		self.default_comment_types = self.ext_to_comment_types.get(ext).ok_or(
 			TodoRError::InvalidExtension {
@@ -137,7 +142,16 @@ impl TodoRConfig {
 		Ok(())
 	}
 
-	// TODO: function to add comment types
+	/// Sets the comment tokens for the provided extension
+	pub fn set_extension_comment_tokens<S, T>(&mut self, ext: &str, singles: &[S], blocks: &[(T, T)])
+	where
+		S: AsRef<str>,
+		T: AsRef<str>,
+	{
+		// TODO: implement
+		unimplemented!();
+	}
+
 	// TODO: function to add default comment types (not by ext)
 }
 
@@ -292,43 +306,43 @@ fn default_comment_types_map() -> HashMap<String, Vec<CommentType>> {
 	// MAYB: Use a Box or something to not alloc the same Vec over and over again
 	let mut comment_types_map = HashMap::new();
 
-	comment_types_map.insert("rs".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("c".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("h".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("cpp".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("cs".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("go".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("java".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("js".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("es".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("es6".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("ts".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("tsx".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("styl".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("swift".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("less".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("scss".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("sass".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("m".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("mm".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("php".to_string(), vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")]);
-	comment_types_map.insert("py".to_string(), vec![CommentType::new_one_line("#"), CommentType::new_block("\"\"\"", "\"\"\"")]);
-	comment_types_map.insert("rb".to_string(), vec![CommentType::new_one_line("#")]);
-	comment_types_map.insert("pl".to_string(), vec![CommentType::new_one_line("#")]);
-	comment_types_map.insert("pm".to_string(), vec![CommentType::new_one_line("#")]);
-	comment_types_map.insert("coffee".to_string(), vec![CommentType::new_one_line("#")]);
-	comment_types_map.insert("tex".to_string(), vec![CommentType::new_one_line("%")]);
-	comment_types_map.insert("hs".to_string(), vec![CommentType::new_one_line("--")]);
-	comment_types_map.insert("sql".to_string(), vec![CommentType::new_one_line("--")]);
-	comment_types_map.insert("html".to_string(), vec![CommentType::new_block("<!--", "-->")]);
-	comment_types_map.insert("htm".to_string(), vec![CommentType::new_block("<!--", "-->")]);
-	comment_types_map.insert("md".to_string(), vec![CommentType::new_block("<!--", "-->")]);
-	comment_types_map.insert("gitignore".to_string(), vec![CommentType::new_one_line("#")]);
-	comment_types_map.insert("yaml".to_string(), vec![CommentType::new_one_line("#")]);
-	comment_types_map.insert("yml".to_string(), vec![CommentType::new_one_line("#")]);
-	comment_types_map.insert("sh".to_string(), vec![CommentType::new_one_line("#")]);
-	comment_types_map.insert("bash".to_string(), vec![CommentType::new_one_line("#")]);
-	comment_types_map.insert("zsh".to_string(), vec![CommentType::new_one_line("#")]);
+	comment_types_map.insert("rs".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("c".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("h".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("cpp".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("cs".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("go".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("java".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("js".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("es".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("es6".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("ts".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("tsx".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("styl".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("swift".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("less".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("scss".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("sass".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("m".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("mm".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("php".to_string(), vec![CommentType::single_line("//"), CommentType::block("/*", "*/")]);
+	comment_types_map.insert("py".to_string(), vec![CommentType::single_line("#"), CommentType::block("\"\"\"", "\"\"\"")]);
+	comment_types_map.insert("rb".to_string(), vec![CommentType::single_line("#")]);
+	comment_types_map.insert("pl".to_string(), vec![CommentType::single_line("#")]);
+	comment_types_map.insert("pm".to_string(), vec![CommentType::single_line("#")]);
+	comment_types_map.insert("coffee".to_string(), vec![CommentType::single_line("#")]);
+	comment_types_map.insert("tex".to_string(), vec![CommentType::single_line("%")]);
+	comment_types_map.insert("hs".to_string(), vec![CommentType::single_line("--")]);
+	comment_types_map.insert("sql".to_string(), vec![CommentType::single_line("--")]);
+	comment_types_map.insert("html".to_string(), vec![CommentType::block("<!--", "-->")]);
+	comment_types_map.insert("htm".to_string(), vec![CommentType::block("<!--", "-->")]);
+	comment_types_map.insert("md".to_string(), vec![CommentType::block("<!--", "-->")]);
+	comment_types_map.insert("gitignore".to_string(), vec![CommentType::single_line("#")]);
+	comment_types_map.insert("yaml".to_string(), vec![CommentType::single_line("#")]);
+	comment_types_map.insert("yml".to_string(), vec![CommentType::single_line("#")]);
+	comment_types_map.insert("sh".to_string(), vec![CommentType::single_line("#")]);
+	comment_types_map.insert("bash".to_string(), vec![CommentType::single_line("#")]);
+	comment_types_map.insert("zsh".to_string(), vec![CommentType::single_line("#")]);
 
 	comment_types_map
 }

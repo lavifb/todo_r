@@ -79,10 +79,10 @@ mod tests {
 
 	fn test_content(content: &str, exp_result: &str, file_ext: &str) {
 		let comment_types = match file_ext {
-			"rs" => vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")],
-			"c"  => vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")],
-			"py" => vec![CommentType::new_one_line("#"), CommentType::new_block("\"\"\"", "\"\"\"")],
-			_    => vec![CommentType::new_one_line("//"), CommentType::new_block("/*", "*/")],
+			"rs" => vec![CommentType::single_line("//"), CommentType::block("/*", "*/")],
+			"c"  => vec![CommentType::single_line("//"), CommentType::block("/*", "*/")],
+			"py" => vec![CommentType::single_line("#"), CommentType::block("\"\"\"", "\"\"\"")],
+			_    => vec![CommentType::single_line("//"), CommentType::block("/*", "*/")],
 		};
 
 		let mut content_buf = Cursor::new(content);
