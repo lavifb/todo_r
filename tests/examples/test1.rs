@@ -1,5 +1,5 @@
 fn main() {
 	// TODO: item
-	// TAG: item tag
+	/* TAG: item tag */
 	// FOO: bar
 }
