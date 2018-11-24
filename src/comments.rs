@@ -5,8 +5,8 @@ use regex::escape;
 
 // MAYB: May need to be enum to really treat single and block separately
 pub trait CommentType {
-	fn prefix<'a>(&'a self) -> &'a str;
-	fn suffix<'a>(&'a self) -> &'a str;
+	fn prefix(&self) -> &str;
+	fn suffix(&self) -> &str;
 }
 
 /// Struct for storing a type of single-line comment.
@@ -25,11 +25,11 @@ impl SingleLineComment {
 }
 
 impl CommentType for SingleLineComment {
-	fn prefix<'a>(&'a self) -> &'a str {
+	fn prefix(&self) -> &str {
 		&self.token
 	}
 
-	fn suffix<'a>(&'a self) -> &'a str {
+	fn suffix(&self) -> &str {
 		"$"
 	}
 }
@@ -52,11 +52,11 @@ impl BlockComment {
 }
 
 impl CommentType for BlockComment {
-	fn prefix<'a>(&'a self) -> &'a str {
+	fn prefix(&self) -> &str {
 		&self.prefix
 	}
 
-	fn suffix<'a>(&'a self) -> &'a str {
+	fn suffix(&self) -> &str {
 		&self.suffix
 	}
 }
@@ -101,6 +101,12 @@ impl CommentTypes {
 	/// Returns an iterator over all of the comment types in the struct.
 	pub fn iter_comment_types<'a>(&'a self) -> Box<Iterator<Item = &CommentType> + 'a> {
 		Box::new(self.single.iter().map(|c| c as &CommentType).chain(self.block.iter().map(|c| c as &CommentType)))
+	}
+}
+
+impl Default for CommentTypes {
+	fn default() -> CommentTypes {
+		Self::new()
 	}
 }
 

@@ -108,7 +108,7 @@ impl TodoRConfig {
 		config_from_file.merge(config::File::from(config_path))?;
 
 		let todo_words: Vec<String> = config_from_file
-			.get_array("tags").unwrap_or(Vec::with_capacity(0))
+			.get_array("tags").unwrap_or_else(|_| Vec::with_capacity(0))
 			.into_iter()
 			.map(|t| t.into_str().unwrap())
 			.collect();
@@ -116,7 +116,7 @@ impl TodoRConfig {
 		let mut config = TodoRConfig::with_todo_words(&todo_words);
 
 		let comment_types = config_from_file
-			.get_array("comments").unwrap_or(Vec::with_capacity(0));
+			.get_array("comments").unwrap_or_else(|_| Vec::with_capacity(0));
 
 		for comment_type in comment_types {
 			let comment_config: CommentsConfig = comment_type.try_into()?;
@@ -159,6 +159,12 @@ impl TodoRConfig {
 	}
 }
 
+impl Default for TodoRConfig {
+	fn default() -> TodoRConfig {
+		Self::new()
+	}
+}
+
 /// Parser for finding TODOs in comments and storing them on a per-file basis.
 pub struct TodoR {
 	pub config: TodoRConfig,
@@ -197,7 +203,7 @@ impl TodoR {
 	/// Returns all tracked files that contain TODOs
 	pub fn get_tracked_files<'a>(&'a self) -> Vec<&'a str> {
 		self.todo_files.iter()
-			.filter(|tf| tf.todos.len() > 0)
+			.filter(|tf| !tf.todos.is_empty())
 			.map(|tf| tf.filepath.to_str().unwrap())
 			.collect()
 	}
@@ -302,6 +308,12 @@ impl TodoR {
 		Err(TodoRError::FileNotTracked {
 			filepath: filepath.to_string_lossy().to_string()
 		}.into())
+	}
+}
+
+impl Default for TodoR {
+	fn default() -> TodoR {
+		Self::new()
 	}
 }
 
