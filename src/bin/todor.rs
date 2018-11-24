@@ -16,7 +16,6 @@ use todo_r::errors::eprint_error;
 
 /// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
-	// TODO: add config file option
 	// TODO: add subcommand for just content so it can be piped
 	let matches = clap_app!(todo_r =>
 		(version: env!("CARGO_PKG_VERSION"))

@@ -322,7 +322,6 @@ fn default_comment_types_map() -> HashMap<String, CommentTypes> {
 	let mut comment_types_map = HashMap::new();
 
 	comment_types_map.insert("rs".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("rs".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
 	comment_types_map.insert("c".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
 	comment_types_map.insert("h".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
 	comment_types_map.insert("cpp".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
