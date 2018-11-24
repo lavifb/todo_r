@@ -1,4 +1,5 @@
 #[macro_use] extern crate failure;
+#[macro_use] extern crate serde_derive;
 extern crate regex;
 extern crate ansi_term;
 extern crate config;
@@ -58,7 +59,7 @@ use errors::TodoRError;
 
 use parser::parse_content;
 use display::{StyleConfig, write_file_todos, TodoFile};
-use comments::CommentTypes;
+use comments::{CommentTypes, CommentsConfig};
 
 
 /// Configuration for `TodoR`.
@@ -112,9 +113,18 @@ impl TodoRConfig {
 			.map(|t| t.into_str().unwrap())
 			.collect();
 
-		// TODO: add config parsing for new comment types
+		let mut config = TodoRConfig::with_todo_words(&todo_words);
 
-		let config = TodoRConfig::with_todo_words(&todo_words);
+		let comment_types = config_from_file
+			.get_array("comments").unwrap_or(Vec::with_capacity(0));
+
+		for comment_type in comment_types {
+			let comment_config: CommentsConfig = comment_type.try_into()?;
+			let ext = comment_config.ext.clone();
+
+			config.set_ext_comment_types(&ext, CommentTypes::from_config(comment_config));
+		}
+
 		Ok(config)
 	}
 
@@ -143,17 +153,10 @@ impl TodoRConfig {
 		Ok(())
 	}
 
-	/// Sets the comment tokens for the provided extension
-	pub fn set_extension_comment_tokens<S, T>(&mut self, ext: &str, singles: &[S], blocks: &[(T, T)])
-	where
-		S: AsRef<str>,
-		T: AsRef<str>,
-	{
-		// TODO: implement
-		unimplemented!();
+	/// Sets the comment tokens for the provided extension.
+	pub fn set_ext_comment_types(&mut self, ext: &str, comment_types: CommentTypes) {
+		self.ext_to_comment_types.insert(ext.to_string(), comment_types);
 	}
-
-	// TODO: function to add default comment types (not by ext)
 }
 
 /// Parser for finding TODOs in comments and storing them on a per-file basis.

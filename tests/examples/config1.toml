@@ -1,0 +1,32 @@
+
+tags = ["todo", "fixme", "foo"]
+
+[[comments]]
+ext = "rs"
+
+	[[comments.single]]
+	token = "//"
+
+	[[comments.block]]
+	prefix = "/*"
+	suffix = "*/"
+
+[[comments]]
+ext = "c"
+
+	[[comments.single]]
+	token = "//"
+
+	[[comments.block]]
+	prefix = "/*"
+	suffix = "*/"
+
+[[comments]]
+ext = "py"
+
+	[[comments.single]]
+	token = "#"
+
+	[[comments.block]]
+	prefix = "\"\"\""
+	suffix = "\"\"\""

@@ -26,7 +26,8 @@ fn main() {
 		// TODO: make default config file
 		(@arg CONFIG: -c --("config") +takes_value "Takes configuration from file.")
 		(@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
-		(@arg TAG: -t --("tag") +takes_value +multiple "Todo tags to search for.")
+		(@arg TAG: -t --("tag") +takes_value +multiple "TODO tags to search for.")
+		(@arg OVERRIDETAGS: -T --("override-tags") "Overrides default TODO tags to only search custom ones.")
 		(@arg VERBOSE: -v --("verbose") "Provide verbose output.")
 		(@arg DELETE_MODE: -d --("delete") "Interactive delete mode.")
 		(@subcommand remove =>
@@ -50,8 +51,10 @@ fn main() {
 			config.todo_words.append(&mut added_todo_words);
 		},
 		None => {
-			let mut added_todo_words = vec!["todo".to_string(), "fixme".to_string()];
-			config.todo_words.append(&mut added_todo_words);
+			if !matches.is_present("OVERRIDETAGS") {
+				let mut added_todo_words = vec!["todo".to_string(), "fixme".to_string()];
+				config.todo_words.append(&mut added_todo_words);
+			}
 		},
 	}
 

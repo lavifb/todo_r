@@ -78,13 +78,26 @@ fn dir_todos() {
 }
 
 #[test]
-fn config() {
+fn config1() {
 	todor()
 		.arg("test1.rs")
 		.arg("-c")
-		.arg("config.toml")
+		.arg("config1.toml")
 		.assert()
 		.success()
 		.stdout("test1.rs\n  line 2      TODO   item\n  line 4      FOO    bar\n")
+		.stderr("");
+}
+
+#[test]
+fn config2() {
+	todor()
+		.arg("test1.rs")
+		.arg("-c")
+		.arg("config2.toml")
+		.arg("-T")
+		.assert()
+		.success()
+		.stdout("test1.rs\n  line 4      FOO    bar\n  line 5      ITEM   item2\n")
 		.stderr("");
 }

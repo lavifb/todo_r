@@ -10,8 +10,8 @@ pub trait CommentType {
 }
 
 /// Struct for storing a type of single-line comment.
-#[derive(Clone)]
-pub struct SingleLineComment {
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct SingleLineComment {
 	token: String,
 }
 
@@ -35,8 +35,8 @@ impl CommentType for SingleLineComment {
 }
 
 /// Struct for storing a type of block comment.
-#[derive(Clone)]
-pub struct BlockComment {
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct BlockComment {
 	prefix: String,
 	suffix: String,
 }
@@ -62,7 +62,7 @@ impl CommentType for BlockComment {
 }
 
 /// Struct for storing a collection of CommentTypes that correspond to a specifix content type.
-#[derive(Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommentTypes {
 	single: Vec<SingleLineComment>,
 	block: Vec<BlockComment>,
@@ -74,6 +74,14 @@ impl CommentTypes {
 		CommentTypes {
 			single: Vec::new(),
 			block: Vec::new(),
+		}
+	}
+
+	/// Creates new CommentTypes struct from CommentsConfig.
+	pub(crate) fn from_config(config: CommentsConfig) -> CommentTypes {
+		CommentTypes {
+			single: config.single,
+			block: config.block,
 		}
 	}
 
@@ -94,4 +102,11 @@ impl CommentTypes {
 	pub fn iter_comment_types<'a>(&'a self) -> Box<Iterator<Item = &CommentType> + 'a> {
 		Box::new(self.single.iter().map(|c| c as &CommentType).chain(self.block.iter().map(|c| c as &CommentType)))
 	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct CommentsConfig {
+	pub ext: String,
+	pub(self) single: Vec<SingleLineComment>,
+	pub(self) block: Vec<BlockComment>,
 }
