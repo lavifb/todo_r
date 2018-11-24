@@ -306,8 +306,7 @@ impl TodoR {
 }
 
 fn default_comment_types_map() -> HashMap<String, CommentTypes> {
-	// TODO: move default CommentTypes into predefined ones in custom_tags
-	// MAYB: Use a Box or something to not alloc the same Vec over and over again
+	// MAYB: Use a Box or something to not alloc the same CommentTypes over and over again
 	let mut comment_types_map = HashMap::new();
 
 	comment_types_map.insert("rs".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
@@ -353,6 +352,36 @@ fn default_comment_types_map() -> HashMap<String, CommentTypes> {
 }
 
 fn default_config_file() -> &'static str {
-r#"
-tags: [ "todo", "fixme", "fix" ]"#
+r##"
+tags = ["todo", "fixme", "foo"]
+
+[[comments]]
+ext = "rs"
+
+	[[comments.single]]
+	token = "//"
+
+	[[comments.block]]
+	prefix = "/*"
+	suffix = "*/"
+
+[[comments]]
+ext = "c"
+
+	[[comments.single]]
+	token = "//"
+
+	[[comments.block]]
+	prefix = "/*"
+	suffix = "*/"
+
+[[comments]]
+ext = "py"
+
+	[[comments.single]]
+	token = "#"
+
+	[[comments.block]]
+	prefix = "\"\"\""
+	suffix = "\"\"\"""##
 }
