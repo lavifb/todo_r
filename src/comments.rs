@@ -10,6 +10,7 @@ pub trait CommentType {
 }
 
 /// Struct for storing a type of single-line comment.
+#[derive(Clone)]
 pub struct SingleLineComment {
 	token: String,
 }
@@ -34,6 +35,7 @@ impl CommentType for SingleLineComment {
 }
 
 /// Struct for storing a type of block comment.
+#[derive(Clone)]
 pub struct BlockComment {
 	prefix: String,
 	suffix: String,
@@ -56,5 +58,40 @@ impl CommentType for BlockComment {
 
 	fn suffix<'a>(&'a self) -> &'a str {
 		&self.suffix
+	}
+}
+
+/// Struct for storing a collection of CommentTypes that correspond to a specifix content type.
+#[derive(Clone)]
+pub struct CommentTypes {
+	single: Vec<SingleLineComment>,
+	block: Vec<BlockComment>,
+}
+
+impl CommentTypes {
+	/// Creates new CommentTypes struct.
+	pub fn new() -> CommentTypes {
+		CommentTypes {
+			single: Vec::new(),
+			block: Vec::new(),
+		}
+	}
+
+	/// Adds a single-line comment type.
+	pub fn add_single(mut self, token: &str) -> Self {
+		self.single.push(SingleLineComment::new(token));
+		self
+	}
+
+	/// Adds a block comment type.
+	pub fn add_block(mut self, prefix: &str, suffix: &str) -> Self {
+		self.block.push(BlockComment::new(prefix, suffix));
+		self
+	}
+
+	// TODO: use IntoIter
+	/// Returns an iterator over all of the comment types in the struct.
+	pub fn iter_comment_types<'a>(&'a self) -> Box<Iterator<Item = &CommentType> + 'a> {
+		Box::new(self.single.iter().map(|c| c as &CommentType).chain(self.block.iter().map(|c| c as &CommentType)))
 	}
 }

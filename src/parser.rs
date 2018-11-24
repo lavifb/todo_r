@@ -6,7 +6,8 @@ use std::fmt;
 use std::io::BufRead;
 use std::borrow::Cow;
 
-use custom_tags::{get_regex_string, CommentType};
+use custom_tags::get_regex_for_comment;
+use comments::CommentTypes;
 
 /// A struct holding the TODO and all the needed meta-information for it.
 pub struct Todo {
@@ -46,18 +47,17 @@ impl fmt::Display for Todo {
 }
 
 /// Parses content and Creates a list of TODOs found in content
-pub fn parse_content<B>(content_buf: &mut B, comment_types: &[CommentType], todo_words: &[String]) -> Result<Vec<Todo>, std::io::Error>
+pub(crate) fn parse_content<B>(content_buf: &mut B, comment_types: &CommentTypes, todo_words: &[String]) -> Result<Vec<Todo>, std::io::Error>
 where
 	B: BufRead,
 {
-	let mut regexs: Vec<Regex> = Vec::new();
+	let regexs: Vec<Regex> = comment_types
+		.iter_comment_types()
+		.map(|c| get_regex_for_comment(todo_words, &*c).unwrap())
+		.collect();
 
-	for comment_type in comment_types.iter() {
-		let regex_string = get_regex_string(todo_words, comment_type);
-		regexs.push(Regex::new(&regex_string).unwrap());
-	}
+	// MAYB: do this as iterator and collect
 	let mut todos = Vec::new();
-
 	for (line_num, line_result) in content_buf.lines().enumerate() {
 		let line = line_result?;
 
@@ -77,12 +77,14 @@ mod tests {
 	use super::*;
 	use std::io::Cursor;
 
+	use comments::CommentTypes;
+
 	fn test_content(content: &str, exp_result: &str, file_ext: &str) {
 		let comment_types = match file_ext {
-			"rs" => vec![CommentType::single_line("//"), CommentType::block("/*", "*/")],
-			"c"  => vec![CommentType::single_line("//"), CommentType::block("/*", "*/")],
-			"py" => vec![CommentType::single_line("#"), CommentType::block("\"\"\"", "\"\"\"")],
-			_    => vec![CommentType::single_line("//"), CommentType::block("/*", "*/")],
+			"rs" => CommentTypes::new().add_single("//").add_block("/*", "*/"),
+			"c"  => CommentTypes::new().add_single("//").add_block("/*", "*/"),
+			"py" => CommentTypes::new().add_single("#").add_block("\"\"\"", "\"\"\""),
+			_    => CommentTypes::new().add_single("//").add_block("/*", "*/"),
 		};
 
 		let mut content_buf = Cursor::new(content);

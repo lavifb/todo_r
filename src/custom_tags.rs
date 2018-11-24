@@ -8,7 +8,7 @@ use comments::CommentType;
 // MAYB: use a better regex to find TODOs
 pub(crate) fn get_regex_for_comment<C, S>(custom_tags: &[S], comment_type: &C) -> Result<Regex, regex::Error>
 where
-	C: CommentType,
+	C: CommentType + ?Sized,
 	S: Borrow<str>,
 {
 	let tags_string = custom_tags.join("|");
