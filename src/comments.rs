@@ -99,8 +99,8 @@ impl CommentTypes {
 
 	// TODO: use IntoIter
 	/// Returns an iterator over all of the comment types in the struct.
-	pub fn iter_comment_types<'a>(&'a self) -> Box<Iterator<Item = &CommentType> + 'a> {
-		Box::new(self.single.iter().map(|c| c as &CommentType).chain(self.block.iter().map(|c| c as &CommentType)))
+	pub fn iter_comment_types(&self) -> impl Iterator<Item = &dyn CommentType> {
+		self.single.iter().map(|c| c as &CommentType).chain(self.block.iter().map(|c| c as &CommentType))
 	}
 }
 
