@@ -52,7 +52,7 @@ where
 	B: BufRead,
 {
 	let regexs: Vec<Regex> = comment_types
-		.iter_comment_types()
+		.iter()
 		.map(|c| get_regex_for_comment(todo_words, &*c).unwrap())
 		.collect();
 

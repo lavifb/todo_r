@@ -97,16 +97,84 @@ impl CommentTypes {
 		self
 	}
 
-	// TODO: use IntoIter
 	/// Returns an iterator over all of the comment types in the struct.
-	pub fn iter_comment_types(&self) -> impl Iterator<Item = &dyn CommentType> {
-		self.single.iter().map(|c| c as &CommentType).chain(self.block.iter().map(|c| c as &CommentType))
+	pub fn iter(&self) -> impl Iterator<Item = &dyn CommentType> {
+		self.single
+			.iter()
+			.map(|c| c as &CommentType)
+			.chain(self.block
+				.iter()
+				.map(|c| c as &CommentType)
+			)
 	}
 }
 
 impl Default for CommentTypes {
 	fn default() -> CommentTypes {
 		Self::new()
+	}
+}
+
+// Made Iterator mostly to see how it is done.
+impl<'a> IntoIterator for &'a CommentTypes {
+	type Item = &'a dyn CommentType;
+	type IntoIter = CommentIter<'a>;
+
+	fn into_iter(self) -> CommentIter<'a> {
+		CommentIter {
+			single_iter: self.single.iter(),
+			block_iter: self.block.iter(),
+			state: CommentIterState::Both,
+		}
+	}
+}
+
+pub struct CommentIter<'a> {
+	single_iter: std::slice::Iter<'a, SingleLineComment>,
+	block_iter: std::slice::Iter<'a, BlockComment>,
+	state: CommentIterState
+}
+
+// Specifies which iters are remaining. Adapted from Chain
+//
+// Note that Single will only be required if we impl DoubleEndedIterator
+#[allow(dead_code)]
+enum CommentIterState {
+	Single,
+	Block,
+	Both,
+}
+
+impl<'a> Iterator for CommentIter<'a> {
+	type Item = &'a dyn CommentType;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		match self.state {
+			CommentIterState::Single => {
+				match self.single_iter.next() {
+					Some(item) => Some(item),
+					None => None,
+				}
+			}
+			CommentIterState::Block => {
+				match self.block_iter.next() {
+					Some(item) => Some(item),
+					None => None,
+				}
+			}
+			CommentIterState::Both => {
+				match self.single_iter.next() {
+					Some(item) => Some(item),
+					None => {
+						self.state = CommentIterState::Block;
+						match self.block_iter.next() {
+							Some(item) => Some(item),
+							None => None,
+						}
+					},
+				}
+			}
+		}
 	}
 }
 
