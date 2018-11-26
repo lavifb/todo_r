@@ -119,6 +119,7 @@ impl TodoRConfig {
 			.get_array("comments").unwrap_or_else(|_| Vec::with_capacity(0));
 
 		for comment_type in comment_types {
+			// TODO: deal with error
 			let comment_config: CommentsConfig = comment_type.try_into()?;
 			let ext = comment_config.ext.clone();
 

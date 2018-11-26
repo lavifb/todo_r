@@ -114,3 +114,29 @@ fn config2() {
 		.stdout("test1.rs\n  line 4      FOO    bar\n  line 5      ITEM   item2\n")
 		.stderr("");
 }
+
+#[test]
+fn config2json() {
+	todor()
+		.arg("test1.rs")
+		.arg("-c")
+		.arg("config2.json")
+		.arg("-T")
+		.assert()
+		.success()
+		.stdout("test1.rs\n  line 4      FOO    bar\n  line 5      ITEM   item2\n")
+		.stderr("");
+}
+
+#[test]
+fn config2yaml() {
+	todor()
+		.arg("test1.rs")
+		.arg("-c")
+		.arg("config2.yaml")
+		.arg("-T")
+		.assert()
+		.success()
+		.stdout("test1.rs\n  line 4      FOO    bar\n  line 5      ITEM   item2\n")
+		.stderr("");
+}

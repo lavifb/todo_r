@@ -1,0 +1,10 @@
+tags:
+  - foo
+  - item
+comments:
+  - ext: rs
+    types:
+      - single: //
+      - single: '@'
+      - prefix: /*
+        suffix: '*/'
