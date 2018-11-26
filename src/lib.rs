@@ -3,6 +3,7 @@
 extern crate regex;
 extern crate ansi_term;
 extern crate config;
+extern crate globset;
 
 mod parser;
 mod display;
@@ -56,6 +57,7 @@ use std::collections::HashMap;
 
 use failure::Error;
 use errors::TodoRError;
+use globset::{Glob, GlobSet, GlobSetBuilder};
 
 use parser::parse_content;
 use display::{StyleConfig, write_file_todos, TodoFile};
@@ -70,6 +72,7 @@ pub struct TodoRConfig {
 	pub verbose: bool,
 	pub todo_words: Vec<String>,
 	styles: StyleConfig,
+	ignore_paths: GlobSet,
 	ext_to_comment_types: HashMap<String, CommentTypes>,
 	default_comment_types: CommentTypes,
 }
@@ -78,11 +81,7 @@ impl TodoRConfig {
 	/// Creates new TodoR configuration with the default parameters.
 	pub fn new() -> TodoRConfig {
 		TodoRConfig {
-			verbose: false,
-			todo_words: Vec::new(),
-			styles: StyleConfig::default(),
-			ext_to_comment_types: default_comment_types_map(),
-			default_comment_types: CommentTypes::new().add_single("#"),
+			..Default::default()
 		}
 	}
 
@@ -94,11 +93,8 @@ impl TodoRConfig {
 			.collect();
 		
 		TodoRConfig {
-			verbose: false,
 			todo_words: todo_word_strings,
-			styles: StyleConfig::default(),
-			ext_to_comment_types: default_comment_types_map(),
-			default_comment_types: CommentTypes::new().add_single("#"),
+			..Default::default()
 		}
 	}
 
@@ -140,6 +136,23 @@ impl TodoRConfig {
 		self.styles = StyleConfig::no_style();
 	}
 
+	/// Sets the list of paths that will be ignored.
+	/// These paths can include globs such as `*.rs`, `src/**/*.rs`, or `src/**`.
+	///  
+	// TODO: allow dirs in ignore_paths
+	/// Note that listing just the directory (ex: `src/`) does not work. 
+	/// You must add the `**` to make `src/**`.
+	pub fn set_ignore_paths(&mut self, ignore_paths: &[&str]) -> Result<(), Error> {
+		let mut glob_builder = GlobSetBuilder::new();
+
+		for path in ignore_paths {
+			glob_builder.add(Glob::new(path)?);
+		}
+
+		self.ignore_paths = glob_builder.build()?;
+		Ok(())
+	}
+
 	/// Sets the default fall-back extension for comments.
 	///
 	/// For instance if you want to parse unknown extensions using C style comments,
@@ -162,7 +175,14 @@ impl TodoRConfig {
 
 impl Default for TodoRConfig {
 	fn default() -> TodoRConfig {
-		Self::new()
+		TodoRConfig {
+			verbose: false,
+			todo_words: Vec::new(),
+			styles: StyleConfig::default(),
+			ignore_paths: GlobSet::empty(),
+			ext_to_comment_types: default_comment_types_map(),
+			default_comment_types: CommentTypes::new().add_single("#"),
+		}
 	}
 }
 
@@ -219,6 +239,10 @@ impl TodoR {
 	/// Opens file at given filepath and process it by finding all its TODOs.
 	pub fn open_todos(&mut self, filepath: &Path) -> Result<(), Error> {
 		let mut todo_file = TodoFile::new(filepath);
+
+		if self.config.ignore_paths.is_match(filepath) {
+			return Ok(());
+		}
 
 		// Make sure the file is not a directory
 		if filepath.metadata()?.is_dir() {
@@ -364,8 +388,7 @@ fn default_comment_types_map() -> HashMap<String, CommentTypes> {
 }
 
 fn default_config_file() -> &'static str {
-r##"
-tags = ["todo", "fixme", "foo"]
+r##"tags = ["todo", "fixme", "foo"]
 
 [[comments]]
 ext = "rs"
