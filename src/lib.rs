@@ -103,6 +103,7 @@ impl TodoRConfig {
 		let mut config_from_file = config::Config::new();
 		config_from_file.merge(config::File::from(config_path))?;
 
+		// Parse tags
 		let todo_words: Vec<String> = config_from_file
 			.get_array("tags").unwrap_or_else(|_| Vec::with_capacity(0))
 			.into_iter()
@@ -111,6 +112,7 @@ impl TodoRConfig {
 
 		let mut config = TodoRConfig::with_todo_words(&todo_words);
 
+		// Parse comment types
 		let comment_types = config_from_file
 			.get_array("comments").unwrap_or_else(|_| Vec::with_capacity(0));
 
@@ -121,6 +123,14 @@ impl TodoRConfig {
 
 			config.set_ext_comment_types(&ext, CommentTypes::from_config(comment_config));
 		}
+
+		// Parse ignored paths
+		let ignore_paths: Vec<String> = config_from_file
+			.get_array("ignore").unwrap_or_else(|_| Vec::with_capacity(0))
+			.into_iter()
+			.map(|t| t.into_str().unwrap())
+			.collect();
+		config.set_ignore_paths(&ignore_paths)?;
 
 		Ok(config)
 	}
@@ -142,11 +152,11 @@ impl TodoRConfig {
 	// TODO: allow dirs in ignore_paths
 	/// Note that listing just the directory (ex: `src/`) does not work. 
 	/// You must add the `**` to make `src/**`.
-	pub fn set_ignore_paths(&mut self, ignore_paths: &[&str]) -> Result<(), Error> {
+	pub fn set_ignore_paths<S: AsRef<str>>(&mut self, ignore_paths: &[S]) -> Result<(), Error> {
 		let mut glob_builder = GlobSetBuilder::new();
 
 		for path in ignore_paths {
-			glob_builder.add(Glob::new(path)?);
+			glob_builder.add(Glob::new(path.as_ref())?);
 		}
 
 		self.ignore_paths = glob_builder.build()?;
@@ -344,6 +354,7 @@ impl Default for TodoR {
 
 fn default_comment_types_map() -> HashMap<String, CommentTypes> {
 	// MAYB: Use a Box or something to not alloc the same CommentTypes over and over again
+	// TODO: use default file
 	let mut comment_types_map = HashMap::new();
 
 	comment_types_map.insert("rs".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));

@@ -88,6 +88,7 @@ fn main() {
 			                        .arg("rev-parse")
 			                        .arg("--show-toplevel")
 			                        .output()
+			                        // TODO: handle error
 			                        .unwrap();
 
 			let top_level: String = String::from_utf8_lossy(&rev_parse.stdout).trim().to_string();
