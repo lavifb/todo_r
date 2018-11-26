@@ -53,7 +53,7 @@ where
 {
 	let regexs: Vec<Regex> = comment_types
 		.iter()
-		.map(|c| get_regex_for_comment(todo_words, &*c).unwrap())
+		.map(|c| get_regex_for_comment(todo_words, c).unwrap())
 		.collect();
 
 	// MAYB: do this as iterator and collect

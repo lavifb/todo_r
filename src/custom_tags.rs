@@ -6,9 +6,8 @@ use regex::Regex;
 use comments::CommentType;
 
 // MAYB: use a better regex to find TODOs
-pub(crate) fn get_regex_for_comment<C, S>(custom_tags: &[S], comment_type: &C) -> Result<Regex, regex::Error>
+pub(crate) fn get_regex_for_comment<S>(custom_tags: &[S], comment_type: &CommentType) -> Result<Regex, regex::Error>
 where
-	C: CommentType + ?Sized,
 	S: Borrow<str>,
 {
 	let tags_string = custom_tags.join("|");
@@ -25,9 +24,9 @@ where
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use comments::{SingleLineComment, BlockComment};
+	use comments::CommentType;
 
-	fn test_regex<C: CommentType>(content: &str, exp_result: &str, comment_type: &C) {
+	fn test_regex(content: &str, exp_result: &str, comment_type: &CommentType) {
 		let re = get_regex_for_comment(&["TODO", "FIXME"], comment_type).unwrap();
 		let todo_content = re.captures(content);
 		match todo_content {
@@ -39,81 +38,81 @@ mod tests {
 
 	#[test]
 	fn regex_whitespace() {
-		test_regex("\t\t\t\t  //  TODO:  item \t", "item", &SingleLineComment::new("//"));
+		test_regex("\t\t\t\t  //  TODO:  item \t", "item", &CommentType::new_single("//"));
 	}
 
 	#[test]
 	fn regex_todo_in_comment() {
-		test_regex("//  TODO:  item // TODO: item \t", "item // TODO: item", &SingleLineComment::new("//"));
+		test_regex("//  TODO:  item // TODO: item \t", "item // TODO: item", &CommentType::new_single("//"));
 	}
 	
 	#[test]
 	fn regex_optional_colon() {
-		test_regex("//  TODO  item // TODO: item \t", "item // TODO: item", &SingleLineComment::new("//"));
+		test_regex("//  TODO  item // TODO: item \t", "item // TODO: item", &CommentType::new_single("//"));
 	}
 
 	#[test]
 	fn regex_case_insensitive() {
-		test_regex("// tODo: case ", "case", &SingleLineComment::new("//"));
+		test_regex("// tODo: case ", "case", &CommentType::new_single("//"));
 	}
 
 	#[test]
 	fn regex_fixme() {
-		test_regex("\t\t\t\t  //  fixMe:  item for fix \t", "item for fix", &SingleLineComment::new("//"));
+		test_regex("\t\t\t\t  //  fixMe:  item for fix \t", "item for fix", &CommentType::new_single("//"));
 	}
 
 	#[test]
 	fn regex_todop() {
-		test_regex("// todop: nope ", "NONE", &SingleLineComment::new("//"));
+		test_regex("// todop: nope ", "NONE", &CommentType::new_single("//"));
 	}
 
 	#[test]
 	fn regex_todf() {
-		test_regex("// todf: nope ", "NONE", &SingleLineComment::new("//"));
+		test_regex("// todf: nope ", "NONE", &CommentType::new_single("//"));
 	}
 
 	#[test]
 	fn regex_todofixme() {
-		test_regex("// todofixme : nope ", "NONE", &SingleLineComment::new("//"));
+		test_regex("// todofixme : nope ", "NONE", &CommentType::new_single("//"));
 	}
 
 	#[test]
 	fn regex_py_comment() {
-		test_regex("# todo: item \t ", "item", &SingleLineComment::new("#"));
+		test_regex("# todo: item \t ", "item", &CommentType::new_single("#"));
 	}
 
 	#[test]
 	fn regex_percent_comment() {
-		test_regex("% todo: item \t ", "item", &SingleLineComment::new("%"));
+		test_regex("% todo: item \t ", "item", &CommentType::new_single("%"));
 	}
 
 	#[test]
 	fn regex_ddash_comment() {
-		test_regex("-- todo: item \t ", "item", &SingleLineComment::new("--"));
+		test_regex("-- todo: item \t ", "item", &CommentType::new_single("--"));
 	}
 
 	#[test]
 	fn regex_slashstar_comment() {
-		test_regex("/* todo: item \t */ \t ", "item", &BlockComment::new("/*", "*/"));
+		test_regex("/* todo: item \t */ \t ", "item", &CommentType::new_block("/*", "*/"));
 	}
 
 	#[test]
 	fn regex_slashstar_comment_double_prefix() {
-		test_regex("/* todo: item /* todo: decoy*/\t ", "item /* todo: decoy", &BlockComment::new("/*", "*/"));
+		test_regex("/* todo: item /* todo: decoy*/\t ", "item /* todo: decoy", &CommentType::new_block("/*", "*/"));
 	}
 
 	#[test]
 	fn regex_slashstar_comment_double_suffix() {
-		test_regex("/* todo: item */ \t other stuff */ ", "item", &BlockComment::new("/*", "*/"));
+		test_regex("/* todo: item */ \t other stuff */ ", "item", &CommentType::new_block("/*", "*/"));
 	}
 
 	#[test]
 	fn regex_comment_not_on_separate_line() {
-		test_regex("do_things(); \\ todo: item", "NONE", &SingleLineComment::new("//"));
+		test_regex("do_things(); \\ todo: item", "NONE", &CommentType::new_single("//"));
 	}
 
 	#[test]
 	fn regex_block_todo_before_function() {
-		test_regex("/* todo: item */ do_things();", "item", &BlockComment::new("/*", "*/"));
+		test_regex("/* todo: item */ do_things();", "item", &CommentType::new_block("/*", "*/"));
 	}
 }
