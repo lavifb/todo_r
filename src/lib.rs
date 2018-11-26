@@ -206,15 +206,14 @@ impl TodoR {
 	/// Creates new TodoR that looks for provided keywords.
 	pub fn new() -> TodoR {
 		TodoR {
-			config: TodoRConfig::new(),
-			todo_files: Vec::new(),
+			..Default::default()
 		}
 	}
 
 	pub fn with_todo_words<S: ToString>(todo_words: &[S]) -> TodoR {
 		TodoR {
 			config: TodoRConfig::with_todo_words(todo_words),
-			todo_files: Vec::new(),
+			..Default::default()
 		}
 	}
 
@@ -222,7 +221,7 @@ impl TodoR {
 	pub fn with_config(config: TodoRConfig) -> TodoR {
 		TodoR {
 			config,
-			todo_files: Vec::new(),
+			..Default::default()
 		}
 	}
 
@@ -348,13 +347,16 @@ impl TodoR {
 
 impl Default for TodoR {
 	fn default() -> TodoR {
-		Self::new()
+		TodoR {
+			config: TodoRConfig::new(),
+			todo_files: Vec::new(),
+		}
 	}
 }
 
 fn default_comment_types_map() -> HashMap<String, CommentTypes> {
 	// MAYB: Use a Box or something to not alloc the same CommentTypes over and over again
-	// TODO: use default file
+	// TODO: use default file: parse with include_str!("default_config.toml")
 	let mut comment_types_map = HashMap::new();
 
 	comment_types_map.insert("rs".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
