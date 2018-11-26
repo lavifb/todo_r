@@ -26,6 +26,7 @@ fn main() {
 		(@arg CONFIG: -c --("config") +takes_value "Takes configuration from file.")
 		(@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
 		(@arg TAG: -t --("tag") +takes_value +multiple "TODO tags to search for.")
+		(@arg IGNORE: -i --("ignore") +takes_value +multiple "Paths to be ignored.")
 		(@arg OVERRIDETAGS: -T --("override-tags") "Overrides default TODO tags to only search custom ones.")
 		(@arg VERBOSE: -v --("verbose") "Provide verbose output.")
 		(@arg DELETE_MODE: -d --("delete") "Interactive delete mode.")
@@ -64,6 +65,15 @@ fn main() {
 		config.set_no_style();
 	}
 	config.verbose = verbose;
+
+	match matches.values_of("IGNORE") {
+		Some(ignore_paths_iter) => {
+			let ignore_paths: Vec<&str> = ignore_paths_iter.collect();
+			// TODO: handle error
+			config.set_ignore_paths(&ignore_paths).unwrap();
+		},
+		None => {},
+	}
 
 	let mut todor = TodoR::with_config(config);
 	match matches.values_of("FILE") { 

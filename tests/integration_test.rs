@@ -140,3 +140,27 @@ fn config2yaml() {
 		.stdout("test1.rs\n  line 4      FOO    bar\n  line 5      ITEM   item2\n")
 		.stderr("");
 }
+
+#[test]
+fn multiple() {
+	todor()
+		.arg("test1.rs")
+		.arg("test2.py")
+		.assert()
+		.success()
+		.stdout("test1.rs\n  line 2      TODO   item\ntest2.py\n  line 2      TODO   docstring comment\n  line 4      TODO   item\n")
+		.stderr("");
+}
+
+#[test]
+fn ignore() {
+	todor()
+		.arg("test1.rs")
+		.arg("test2.py")
+		.arg("-i")
+		.arg("test2.py")
+		.assert()
+		.success()
+		.stdout("test1.rs\n  line 2      TODO   item\n")
+		.stderr("");
+}
