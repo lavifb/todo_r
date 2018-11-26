@@ -74,9 +74,9 @@ impl CommentTypes {
 	}
 
 	/// Creates new CommentTypes struct from CommentsConfig.
-	pub(crate) fn from_config(config: CommentsConfig) -> CommentTypes {
+	pub(crate) fn from_config(config: &CommentsConfig) -> CommentTypes {
 		CommentTypes {
-			comment_types: config.types,
+			comment_types: config.types.clone(),
 		}
 	}
 
@@ -120,6 +120,9 @@ impl<'a> IntoIterator for &'a CommentTypes {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub(crate) struct CommentsConfig {
+	#[serde(default)]
 	pub ext: String,
+	#[serde(default)]
+	pub exts: Vec<String>,
 	pub(self) types: Vec<CommentType>,
 }

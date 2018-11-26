@@ -2,17 +2,7 @@
 tags = ["todo", "fixme", "foo"]
 
 [[comments]]
-ext = "rs"
-
-	[[comments.types]]
-	single = "//"
-
-	[[comments.types]]
-	prefix = "/*"
-	suffix = "*/"
-
-[[comments]]
-ext = "c"
+exts = ["rs", "c"]
 
 	[[comments.types]]
 	single = "//"

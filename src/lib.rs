@@ -119,9 +119,9 @@ impl TodoRConfig {
 		for comment_type in comment_types {
 			// TODO: deal with error
 			let comment_config: CommentsConfig = comment_type.try_into()?;
-			let ext = comment_config.ext.clone();
 
-			config.set_ext_comment_types(&ext, CommentTypes::from_config(comment_config));
+			config.set_ext_comment_types(&comment_config.ext, CommentTypes::from_config(&comment_config));
+			config.set_exts_comment_types(&comment_config.exts, CommentTypes::from_config(&comment_config));
 		}
 
 		// Parse ignored paths
@@ -180,6 +180,13 @@ impl TodoRConfig {
 	/// Sets the comment tokens for the provided extension.
 	pub fn set_ext_comment_types(&mut self, ext: &str, comment_types: CommentTypes) {
 		self.ext_to_comment_types.insert(ext.to_string(), comment_types);
+	}
+
+	/// Sets the comment tokens for the list of provided extensions.
+	pub fn set_exts_comment_types<S: ToString>(&mut self, exts: &[S], comment_types: CommentTypes) {
+		for ext in exts {
+			self.ext_to_comment_types.insert(ext.to_string(), comment_types.clone());
+		}
 	}
 }
 
