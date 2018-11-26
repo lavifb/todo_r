@@ -66,13 +66,10 @@ fn main() {
 	}
 	config.verbose = verbose;
 
-	match matches.values_of("IGNORE") {
-		Some(ignore_paths_iter) => {
-			let ignore_paths: Vec<&str> = ignore_paths_iter.collect();
-			// TODO: handle error
-			config.set_ignore_paths(&ignore_paths).unwrap();
-		},
-		None => {},
+	if let Some(ignore_paths_iter) = matches.values_of("IGNORE") {
+		let ignore_paths: Vec<&str> = ignore_paths_iter.collect();
+		// TODO: handle error
+		config.set_ignore_paths(&ignore_paths).unwrap();
 	}
 
 	let mut todor = TodoR::with_config(config);

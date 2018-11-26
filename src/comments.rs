@@ -45,22 +45,22 @@ impl CommentType {
 	pub fn prefix(&self) -> &str {
 		match self {
 			CommentType::SingleLine{prefix} => prefix,
-			CommentType::Block{prefix, suffix:_} => &prefix,
+			CommentType::Block{prefix, ..} => &prefix,
 		}
 	}
 
 	/// Returns suffix token for comment.
 	pub fn suffix(&self) -> &str {
 		match self {
-			CommentType::SingleLine{prefix:_} => "$",
-			CommentType::Block{prefix:_, suffix} => &suffix,
+			CommentType::SingleLine{..} => "$",
+			CommentType::Block{suffix, ..} => &suffix,
 		}
 	}
 }
 
 /// Struct for storing a collection of CommentType enums that correspond to a specifix content type.
 /// It behaves as a wrapper for Vec<CommentType>.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct CommentTypes {
 	comment_types: Vec<CommentType>,
 }
@@ -69,7 +69,7 @@ impl CommentTypes {
 	/// Creates new CommentTypes struct.
 	pub fn new() -> CommentTypes {
 		CommentTypes {
-			comment_types: Vec::new(),
+			..Default::default()
 		}
 	}
 
@@ -100,12 +100,6 @@ impl CommentTypes {
 	}
 }
 
-impl Default for CommentTypes {
-	fn default() -> CommentTypes {
-		Self::new()
-	}
-}
-
 impl IntoIterator for CommentTypes {
 	type Item = CommentType;
 	type IntoIter = std::vec::IntoIter<CommentType>;
@@ -124,7 +118,7 @@ impl<'a> IntoIterator for &'a CommentTypes {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub(crate) struct CommentsConfig {
 	pub ext: String,
 	pub(self) types: Vec<CommentType>,
