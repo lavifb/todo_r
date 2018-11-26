@@ -164,3 +164,16 @@ fn ignore() {
 		.stdout("test1.rs\n  line 2      TODO   item\n")
 		.stderr("");
 }
+
+#[test]
+fn config_ignore() {
+	todor()
+		.arg("test1.rs")
+		.arg("test2.py")
+		.arg("-c")
+		.arg("config3.toml")
+		.assert()
+		.success()
+		.stdout("test1.rs\n  line 2      TODO   item\n")
+		.stderr("");
+}
