@@ -119,9 +119,12 @@ impl TodoRConfig {
 		for comment_type in comment_types {
 			// TODO: deal with error
 			let comment_config: CommentsConfig = comment_type.try_into()?;
+			let exts = comment_config.exts.to_owned();
+			let ext  = comment_config.ext.to_owned();
+			let comment_types = CommentTypes::from_config(comment_config);
 
-			config.set_ext_comment_types(&comment_config.ext, CommentTypes::from_config(&comment_config));
-			config.set_exts_comment_types(&comment_config.exts, CommentTypes::from_config(&comment_config));
+			config.set_exts_comment_types(&exts, comment_types.clone());
+			config.set_ext_comment_types(&ext, comment_types);
 		}
 
 		// Parse ignored paths

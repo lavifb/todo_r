@@ -74,9 +74,9 @@ impl CommentTypes {
 	}
 
 	/// Creates new CommentTypes struct from CommentsConfig.
-	pub(crate) fn from_config(config: &CommentsConfig) -> CommentTypes {
+	pub(crate) fn from_config(config: CommentsConfig) -> CommentTypes {
 		CommentTypes {
-			comment_types: config.types.clone(),
+			comment_types: config.types,
 		}
 	}
 
