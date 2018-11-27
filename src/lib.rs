@@ -139,6 +139,7 @@ impl TodoRConfig {
 		Ok(())
 	}
 
+	// TODO: Use a TodoRConfigBuilder struct
 	/// Parses and loads inner_config. Use after merging into inner_config.
 	fn reload_config(&mut self) -> Result<(), Error> {
 		let inner_config = self.inner_config.clone();

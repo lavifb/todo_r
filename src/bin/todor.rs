@@ -22,7 +22,7 @@ fn main() {
 		(author: "Lavi Blumberg <lavifb@gmail.com>")
 		(about: "Lists TODO comments in code")
 		(@arg FILE: ... "File to search for TODO items.")
-		// TODO: make default config file
+		// TODO: option to make config file
 		(@arg CONFIG: -c --("config") +takes_value "Takes configuration from file.")
 		(@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
 		(@arg TAG: -t --("tag") +takes_value +multiple "TODO tags to search for.")
