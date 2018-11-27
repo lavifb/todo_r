@@ -62,7 +62,7 @@ use globset::{Glob, GlobSet, GlobSetBuilder};
 
 use parser::parse_content;
 use display::{StyleConfig, write_file_todos, TodoFile};
-use comments::{CommentTypes, CommentsConfig};
+use comments::{CommentTypes, TodorConfigFileSerial};
 
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 
@@ -141,20 +141,14 @@ impl TodoRConfig {
 
 	/// Parses and loads inner_config. Use after merging into inner_config.
 	fn reload_config(&mut self) -> Result<(), Error> {
-		// Parse tags
-		self.todo_words = self.inner_config
-			.get_array("tags").unwrap_or_else(|_| Vec::with_capacity(0))
-			.into_iter()
-			.map(|t| t.into_str().unwrap())
-			.collect();
+		let inner_config = self.inner_config.clone();
+		let config_struct: TodorConfigFileSerial = inner_config.try_into()?;
 
-		// Parse comment types
-		let comment_types = self.inner_config
-			.get_array("comments").unwrap_or_else(|_| Vec::with_capacity(0));
+		self.todo_words = config_struct.tags;
+		self.set_ignore_paths(&config_struct.ignore)?;
 
-		for comment_type in comment_types {
+		for comment_config in config_struct.comments {
 			// TODO: deal with error
-			let comment_config: CommentsConfig = comment_type.try_into()?;
 			let exts = comment_config.exts.to_owned();
 			let ext  = comment_config.ext.to_owned();
 			let comment_types = CommentTypes::from_config(comment_config);
@@ -162,14 +156,6 @@ impl TodoRConfig {
 			self.set_exts_comment_types(&exts, comment_types.clone());
 			self.set_ext_comment_types(&ext, comment_types);
 		}
-
-		// Parse ignored paths
-		let ignore_paths: Vec<String> = self.inner_config
-			.get_array("ignore").unwrap_or_else(|_| Vec::with_capacity(0))
-			.into_iter()
-			.map(|t| t.into_str().unwrap())
-			.collect();
-		self.set_ignore_paths(&ignore_paths)?;
 
 		Ok(())
 	}

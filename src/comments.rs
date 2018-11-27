@@ -127,3 +127,14 @@ pub(crate) struct CommentsConfig {
 	pub exts: Vec<String>,
 	pub(self) types: Vec<CommentType>,
 }
+
+// TODO: fix this whole config file thing
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub(crate) struct TodorConfigFileSerial {
+	#[serde(default)]
+	pub tags: Vec<String>,
+	#[serde(default)]
+	pub ignore: Vec<String>,
+	#[serde(default)]
+	pub comments: Vec<CommentsConfig>,
+}
