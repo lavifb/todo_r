@@ -64,6 +64,7 @@ use parser::parse_content;
 use display::{StyleConfig, write_file_todos, TodoFile};
 use comments::{CommentTypes, CommentsConfig};
 
+static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 
 /// Configuration for `TodoR`.
 ///
@@ -175,7 +176,7 @@ impl TodoRConfig {
 
 	/// Writes the default configuration file to out_buffer.
 	pub fn write_default_config(out_buffer: &mut Write) -> Result<(), Error> {
-		out_buffer.write_all(default_config_file().as_bytes())?;
+		out_buffer.write_all(DEFAULT_CONFIG.as_bytes())?;
 		Ok(())
 	}
 
@@ -232,7 +233,7 @@ impl TodoRConfig {
 impl Default for TodoRConfig {
 	fn default() -> TodoRConfig {
 		let mut inner_config = config::Config::new();
-		inner_config.merge(config::File::from_str(include_str!("default_config.json"), config::FileFormat::Json)).unwrap();
+		inner_config.merge(config::File::from_str(DEFAULT_CONFIG, config::FileFormat::Json)).unwrap();
 
 		let mut config = TodoRConfig {
 			verbose: false,
@@ -405,38 +406,4 @@ impl Default for TodoR {
 			todo_files: Vec::new(),
 		}
 	}
-}
-
-fn default_config_file() -> &'static str {
-r##"tags = ["todo", "fixme", "foo"]
-
-[[comments]]
-ext = "rs"
-
-	[[comments.single]]
-	token = "//"
-
-	[[comments.block]]
-	prefix = "/*"
-	suffix = "*/"
-
-[[comments]]
-ext = "c"
-
-	[[comments.single]]
-	token = "//"
-
-	[[comments.block]]
-	prefix = "/*"
-	suffix = "*/"
-
-[[comments]]
-ext = "py"
-
-	[[comments.single]]
-	token = "#"
-
-	[[comments.block]]
-	prefix = "\"\"\""
-	suffix = "\"\"\"""##
 }
