@@ -1,5 +1,6 @@
 #[macro_use] extern crate failure;
 #[macro_use] extern crate serde_derive;
+extern crate serde;
 extern crate regex;
 extern crate ansi_term;
 extern crate config;
@@ -71,6 +72,7 @@ use comments::{CommentTypes, CommentsConfig};
 pub struct TodoRConfig {
 	pub verbose: bool,
 	pub todo_words: Vec<String>,
+	inner_config: config::Config,
 	styles: StyleConfig,
 	ignore_paths: GlobSet,
 	ext_to_comment_types: HashMap<String, CommentTypes>,
@@ -99,21 +101,54 @@ impl TodoRConfig {
 	}
 
 	/// Creates new TodoR configuration from the given configuration file.
-	pub fn with_config_file(config_path: &Path) -> Result<TodoRConfig, Error> {
+	/// Note that this config overrides the defaults.
+	pub fn from_config_file(config_path: &Path) -> Result<TodoRConfig, Error> {
 		let mut config_from_file = config::Config::new();
 		config_from_file.merge(config::File::from(config_path))?;
 
+		let mut config = TodoRConfig {
+			inner_config: config_from_file,
+			..Default::default()
+		};
+		config.reload_config()?;
+
+		Ok(config)
+	}
+
+	/// Creates new TodoR configuration from the given configuration file with defaults as a fall-back.
+	pub fn default_with_config_file(config_path: &Path) -> Result<TodoRConfig, Error> {
+		let mut inner_config = config::Config::new();
+		inner_config.merge(config::File::from_str(include_str!("default_config.json"), config::FileFormat::Json)).unwrap();
+		inner_config.merge(config::File::from(config_path))?;
+
+		let mut config = TodoRConfig {
+			inner_config,
+			..Default::default()
+		};
+		config.reload_config()?;
+
+		Ok(config)
+	}
+
+	/// Merges configuration file into the configuration.
+	pub fn merge_config_file(&mut self, config_path: &Path) -> Result<(), Error> {
+		self.inner_config.merge(config::File::from(config_path))?;
+		self.reload_config()?;
+
+		Ok(())
+	}
+
+	/// Parses and loads inner_config. Use after merging into inner_config.
+	fn reload_config(&mut self) -> Result<(), Error> {
 		// Parse tags
-		let todo_words: Vec<String> = config_from_file
+		self.todo_words = self.inner_config
 			.get_array("tags").unwrap_or_else(|_| Vec::with_capacity(0))
 			.into_iter()
 			.map(|t| t.into_str().unwrap())
 			.collect();
 
-		let mut config = TodoRConfig::with_todo_words(&todo_words);
-
 		// Parse comment types
-		let comment_types = config_from_file
+		let comment_types = self.inner_config
 			.get_array("comments").unwrap_or_else(|_| Vec::with_capacity(0));
 
 		for comment_type in comment_types {
@@ -123,19 +158,19 @@ impl TodoRConfig {
 			let ext  = comment_config.ext.to_owned();
 			let comment_types = CommentTypes::from_config(comment_config);
 
-			config.set_exts_comment_types(&exts, comment_types.clone());
-			config.set_ext_comment_types(&ext, comment_types);
+			self.set_exts_comment_types(&exts, comment_types.clone());
+			self.set_ext_comment_types(&ext, comment_types);
 		}
 
 		// Parse ignored paths
-		let ignore_paths: Vec<String> = config_from_file
+		let ignore_paths: Vec<String> = self.inner_config
 			.get_array("ignore").unwrap_or_else(|_| Vec::with_capacity(0))
 			.into_iter()
 			.map(|t| t.into_str().unwrap())
 			.collect();
-		config.set_ignore_paths(&ignore_paths)?;
+		self.set_ignore_paths(&ignore_paths)?;
 
-		Ok(config)
+		Ok(())
 	}
 
 	/// Writes the default configuration file to out_buffer.
@@ -180,6 +215,7 @@ impl TodoRConfig {
 		Ok(())
 	}
 
+	// TODO: use Cow<str>
 	/// Sets the comment tokens for the provided extension.
 	pub fn set_ext_comment_types(&mut self, ext: &str, comment_types: CommentTypes) {
 		self.ext_to_comment_types.insert(ext.to_string(), comment_types);
@@ -195,14 +231,21 @@ impl TodoRConfig {
 
 impl Default for TodoRConfig {
 	fn default() -> TodoRConfig {
-		TodoRConfig {
+		let mut inner_config = config::Config::new();
+		inner_config.merge(config::File::from_str(include_str!("default_config.json"), config::FileFormat::Json)).unwrap();
+
+		let mut config = TodoRConfig {
 			verbose: false,
 			todo_words: Vec::new(),
+			inner_config,
 			styles: StyleConfig::default(),
 			ignore_paths: GlobSet::empty(),
-			ext_to_comment_types: default_comment_types_map(),
+			ext_to_comment_types: HashMap::new(),
 			default_comment_types: CommentTypes::new().add_single("#"),
-		}
+		};
+
+		config.reload_config().unwrap();
+		config
 	}
 }
 
@@ -362,52 +405,6 @@ impl Default for TodoR {
 			todo_files: Vec::new(),
 		}
 	}
-}
-
-fn default_comment_types_map() -> HashMap<String, CommentTypes> {
-	// MAYB: Use a Box or something to not alloc the same CommentTypes over and over again
-	// TODO: use default file: parse with include_str!("default_config.toml")
-	let mut comment_types_map = HashMap::new();
-
-	comment_types_map.insert("rs".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("c".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("h".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("cpp".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("cs".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("go".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("java".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("js".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("es".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("es6".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("ts".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("tsx".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("styl".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("swift".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("less".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("scss".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("sass".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("m".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("mm".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("php".to_string(), CommentTypes::new().add_single("//").add_block("/*", "*/"));
-	comment_types_map.insert("py".to_string(), CommentTypes::new().add_single("#").add_block("\"\"\"", "\"\"\""));
-	comment_types_map.insert("rb".to_string(), CommentTypes::new().add_single("#"));
-	comment_types_map.insert("pl".to_string(), CommentTypes::new().add_single("#"));
-	comment_types_map.insert("pm".to_string(), CommentTypes::new().add_single("#"));
-	comment_types_map.insert("coffee".to_string(), CommentTypes::new().add_single("#"));
-	comment_types_map.insert("tex".to_string(), CommentTypes::new().add_single("%"));
-	comment_types_map.insert("hs".to_string(), CommentTypes::new().add_single("--"));
-	comment_types_map.insert("sql".to_string(), CommentTypes::new().add_single("--"));
-	comment_types_map.insert("html".to_string(), CommentTypes::new().add_block("<!--", "-->"));
-	comment_types_map.insert("htm".to_string(), CommentTypes::new().add_block("<!--", "-->"));
-	comment_types_map.insert("md".to_string(), CommentTypes::new().add_block("<!--", "-->"));
-	comment_types_map.insert("gitignore".to_string(), CommentTypes::new().add_single("#"));
-	comment_types_map.insert("yaml".to_string(), CommentTypes::new().add_single("#"));
-	comment_types_map.insert("yml".to_string(), CommentTypes::new().add_single("#"));
-	comment_types_map.insert("sh".to_string(), CommentTypes::new().add_single("#"));
-	comment_types_map.insert("bash".to_string(), CommentTypes::new().add_single("#"));
-	comment_types_map.insert("zsh".to_string(), CommentTypes::new().add_single("#"));
-
-	comment_types_map
 }
 
 fn default_config_file() -> &'static str {

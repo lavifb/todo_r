@@ -108,7 +108,7 @@ mod tests {
 
 	#[test]
 	fn regex_comment_not_on_separate_line() {
-		test_regex("do_things(); \\ todo: item", "NONE", &CommentType::new_single("//"));
+		test_regex("do_things(); // todo: item", "NONE", &CommentType::new_single("//"));
 	}
 
 	#[test]

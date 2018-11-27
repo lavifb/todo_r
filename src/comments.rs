@@ -25,35 +25,36 @@ pub enum CommentType {
 	},
 }
 
+// TODO: move escaping to creation and get serde to deserialize escaped
 impl CommentType {
 	/// Creates new single-line comment type
 	pub fn new_single(prefix: &str) -> CommentType {
 		CommentType::SingleLine {
-			prefix: escape(prefix),
+			prefix: prefix.to_string(),
 		}
 	}
 
 	/// Creates new block comment type
 	pub fn new_block(prefix: &str, suffix: &str) -> CommentType {
 		CommentType::Block {
-			prefix: escape(prefix),
-			suffix: escape(suffix),
+			prefix: prefix.to_string(),
+			suffix: suffix.to_string(),
 		}
 	}
 
 	/// Returns prefix token for comment.
-	pub fn prefix(&self) -> &str {
+	pub fn prefix(&self) -> String {
 		match self {
-			CommentType::SingleLine{prefix} => prefix,
-			CommentType::Block{prefix, ..} => &prefix,
+			CommentType::SingleLine{prefix} => escape(prefix),
+			CommentType::Block{prefix, ..} => escape(prefix),
 		}
 	}
 
 	/// Returns suffix token for comment.
-	pub fn suffix(&self) -> &str {
+	pub fn suffix(&self) -> String {
 		match self {
-			CommentType::SingleLine{..} => "$",
-			CommentType::Block{suffix, ..} => &suffix,
+			CommentType::SingleLine{..} => "$".to_string(),
+			CommentType::Block{suffix, ..} => escape(suffix),
 		}
 	}
 }

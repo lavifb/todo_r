@@ -16,15 +16,33 @@ A lot is adapted from [leasot](https://github.com/pgilad/leasot) but runs much f
 ### Language support
 
 <!-- TODO: finish adding support to REAMDE -->
-| Filetype | Extension           | Commnet Types |
-|----------|---------------------|---------------|
-|C/C++     |`.c`,`.h`,`.cpp`     |`//`,`/* */`   |
-|C#        |`.cs`                |`//`,`/* */`   |
-|Go        |`.go`                |`//`,`/* */`   |
-|Python    |`.py`                |`#`,`""" """`  |
-|Ruby      |`.rb`                |`#`            |
-|Rust      |`.rs`                |`//`,`/* */`   |
-|Shell     |`.sh`,`.bash`,`.zsh` |`#`            |
+| Filetype    | Extensions          | Comment Types |
+|-------------|---------------------|---------------|
+|C/C++        |`.c`,`.h`,`.cpp`     |`//`,`/* */`   |
+|C#           |`.cs`                |`//`,`/* */`   |
+|CoffeeScript |`.coffee`            |`#`            |
+|Go           |`.go`                |`//`,`/* */`   |
+|Haskell      |`.hs`                |`--`           |
+|HTML         |`.html`,`.htm`       |`<!-- -->`     |
+|Java         |`.java`              |`//`,`/* */`   |
+|JavaScript   |`.js`,`.es`,`.es6`   |`//`,`/* */`   |
+|Obj-C/C++    |`.m`,`.mm`           |`//`,`/* */`   |
+|Less         |`.less`              |`//`,`/* */`   |
+|Markdown     |`.md`                |`<!-- -->`     |
+|Perl         |`.pl`,`.pm`          |`#`            |
+|PHP          |`.php`               |`//`,`/* */`   |
+|Python       |`.py`                |`#`,`""" """`  |
+|Ruby         |`.rb`                |`#`            |
+|Rust         |`.rs`                |`//`,`/* */`   |
+|Sass         |`.sass`,`scss`       |`//`,`/* */`   |
+|Scala        |`.scala`             |`//`,`/* */`   |
+|Shell        |`.sh`,`.bash`,`.zsh` |`#`            |
+|SQL          |`.sql`               |`--`,`/* */`   |
+|Stylus       |`.styl`              |`//`,`/* */`   |
+|Swift        |`.swift`             |`//`,`/* */`   |
+|TeX          |`.tex`               |`%`            |
+|TypeScript   |`.ts`,`.tsx`         |`//`,`/* */`   |
+|YAML         |`.yaml`,`.yml`       |`#`            |
 
 ---
 written by Lavi Blumberg

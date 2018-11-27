@@ -1,0 +1,107 @@
+{
+  "tags": [
+    "todo",
+    "fix",
+    "fixme"
+  ],
+
+  "ignore" : [
+  ],
+
+  "comments": [
+    {
+      "exts": [
+        "c",
+        "h",
+        "cpp",
+        "cs",
+        "go",
+        "rs",
+        "scala",
+        "java",
+        "js",
+        "es",
+        "es6",
+        "ts",
+        "tsx",
+        "styl",
+        "swift",
+        "less",
+        "scss",
+        "sass",
+        "m",
+        "mm",
+        "php"
+      ],
+      "types": [
+        {
+          "single": "//"
+        },
+        {
+          "prefix": "/*",
+          "suffix": "*/"
+        }
+      ]
+    },
+    {
+      "ext": "py",
+      "types": [
+        {
+          "single": "#"
+        },
+        {
+          "prefix": "\"\"\"",
+          "suffix": "\"\"\""
+        }
+      ]
+    },
+    {
+      "exts": [
+        "rb",
+        "pl",
+        "pm",
+        "coffee",
+        "yaml",
+        "yml",
+        "sh",
+        "bash",
+        "zsh",
+        "gitignore"
+      ],
+      "types": [
+        {
+          "single": "#"
+        }
+      ]
+    },
+    {
+      "ext": "tex",
+      "types": [
+        {
+          "single": "%"
+        }
+      ]
+    },
+    {
+      "ext": "hs",
+      "types": [
+        {
+          "single": "--"
+        }
+      ]
+    },
+    {
+      "exts": [
+        "html",
+        "htm",
+        "md"
+      ],
+      "types": [
+        {
+          "prefix": "<!--",
+          "suffix": "-->"
+        }
+      ]
+    }
+  ]
+}

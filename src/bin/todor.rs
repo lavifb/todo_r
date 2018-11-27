@@ -41,30 +41,30 @@ fn main() {
 
 
 	let mut config = match matches.value_of("CONFIG") {
-		Some(config_path) => TodoRConfig::with_config_file(Path::new(config_path)).unwrap(),
+		Some(config_path) => TodoRConfig::default_with_config_file(Path::new(config_path)).unwrap(),
 		None => TodoRConfig::new(),
 	};
 
 	match matches.values_of("TAG") {
 		Some(words_iter) => {
-			let mut added_todo_words = words_iter.map(|s| s.to_string()).collect();
-			config.todo_words.append(&mut added_todo_words);
+			let added_todo_words = words_iter.map(|s| s.to_string()).collect();
+			config.todo_words = added_todo_words;
 		},
 		None => {
-			if !matches.is_present("OVERRIDETAGS") {
-				let mut added_todo_words = vec!["todo".to_string(), "fixme".to_string()];
-				config.todo_words.append(&mut added_todo_words);
-			}
+			// if !matches.is_present("OVERRIDETAGS") {
+			// 	let mut added_todo_words = vec!["todo".to_string(), "fixme".to_string()];
+			// 	config.todo_words.append(&mut added_todo_words);
+			// }
 		},
 	}
 
 	let verbose: bool = matches.is_present("VERBOSE");
 	if verbose { println!("TODO keywords: {}", config.todo_words.join(", ").to_uppercase()); }
+	config.verbose = verbose;
 
 	if matches.is_present("NOSTYLE") {
 		config.set_no_style();
 	}
-	config.verbose = verbose;
 
 	if let Some(ignore_paths_iter) = matches.values_of("IGNORE") {
 		let ignore_paths: Vec<&str> = ignore_paths_iter.collect();
