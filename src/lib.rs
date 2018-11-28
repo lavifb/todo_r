@@ -70,7 +70,7 @@ static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 pub struct TodoRBuilder {
 	pub verbose: Option<bool>,
 	pub todo_words: Option<Vec<String>>,
-	ignore_paths: GlobSetBuilder,
+	ignore_paths: Option<GlobSetBuilder>,
 	styles: StyleConfig,
 	// Config from files. Parameters above override inner_config.
 	inner_config: config::Config,
@@ -87,7 +87,7 @@ impl Default for TodoRBuilder {
 		TodoRBuilder {
 			verbose: None,
 			todo_words: None,
-			ignore_paths: GlobSetBuilder::new(),
+			ignore_paths: None,
 			inner_config,
 			styles: StyleConfig::default(),
 		}
@@ -110,7 +110,8 @@ impl TodoRBuilder {
 
 	// TODO: add doc comments
 	pub fn add_ignore_path(&mut self, path: &str) -> Result<&mut Self, Error> {
-		self.ignore_paths.add(Glob::new(path.as_ref())?);
+		let new_glob = Glob::new(path)?;
+		self.ignore_paths.get_or_insert_with(|| GlobSetBuilder::new()).add(new_glob);
 		Ok(self)
 	}
 
