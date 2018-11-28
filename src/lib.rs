@@ -68,9 +68,9 @@ static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 
 // TODO: add doc comments
 pub struct TodoRBuilder {
-	pub verbose: Option<bool>,
-	pub todo_words: Option<Vec<String>>,
-	ignore_paths: Option<GlobSetBuilder>,
+	pub override_verbose: Option<bool>,
+	pub override_todo_words: Option<Vec<String>>,
+	override_ignore_paths: Option<GlobSetBuilder>,
 	styles: StyleConfig,
 	// Config from files. Parameters above override inner_config.
 	inner_config: config::Config,
@@ -85,9 +85,9 @@ impl Default for TodoRBuilder {
 		).unwrap();
 
 		TodoRBuilder {
-			verbose: None,
-			todo_words: None,
-			ignore_paths: None,
+			override_verbose: None,
+			override_todo_words: None,
+			override_ignore_paths: None,
 			inner_config,
 			styles: StyleConfig::default(),
 		}
@@ -103,6 +103,18 @@ impl TodoRBuilder {
 		}
 	}
 
+	pub fn with_todo_words<S: ToString>(todo_words: &[S]) -> TodoRBuilder {
+		let todo_word_strings: Vec<String> = todo_words
+			.iter()
+			.map(|s| s.to_string())
+			.collect();
+		
+		TodoRBuilder {
+			override_todo_words: Some(todo_word_strings),
+			..Default::default()
+		}
+	}
+
 	// TODO: add doc comments
 	pub fn build(self) -> TodoR {
 		unimplemented!();
@@ -111,7 +123,8 @@ impl TodoRBuilder {
 	// TODO: add doc comments
 	pub fn add_ignore_path(&mut self, path: &str) -> Result<&mut Self, Error> {
 		let new_glob = Glob::new(path)?;
-		self.ignore_paths.get_or_insert_with(|| GlobSetBuilder::new()).add(new_glob);
+		self.override_ignore_paths.get_or_insert_with(|| GlobSetBuilder::new())
+			.add(new_glob);
 		Ok(self)
 	}
 
