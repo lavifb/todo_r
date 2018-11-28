@@ -15,7 +15,6 @@ A lot is adapted from [leasot](https://github.com/pgilad/leasot) but runs much f
 
 ### Language support
 
-<!-- TODO: finish adding support to REAMDE -->
 | Filetype    | Extensions          | Comment Types |
 |-------------|---------------------|---------------|
 |C/C++        |`.c`,`.h`,`.cpp`     |`//`,`/* */`   |
