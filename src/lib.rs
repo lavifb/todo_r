@@ -66,6 +66,61 @@ use comments::{CommentTypes, TodorConfigFileSerial};
 
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 
+// TODO: add doc comments
+pub struct TodoRBuilder {
+	pub verbose: Option<bool>,
+	pub todo_words: Option<Vec<String>>,
+	ignore_paths: GlobSetBuilder,
+	styles: StyleConfig,
+	// Config from files. Parameters above override inner_config.
+	inner_config: config::Config,
+}
+
+impl Default for TodoRBuilder {
+	// TODO: add doc comments
+	fn default() -> TodoRBuilder {
+		let mut inner_config = config::Config::new();
+		inner_config.merge(
+			config::File::from_str(DEFAULT_CONFIG, config::FileFormat::Json)
+		).unwrap();
+
+		TodoRBuilder {
+			verbose: None,
+			todo_words: None,
+			ignore_paths: GlobSetBuilder::new(),
+			inner_config,
+			styles: StyleConfig::default(),
+		}
+	}
+}
+
+impl TodoRBuilder {
+	// TODO: add doc comments
+	pub fn new() -> TodoRBuilder {
+		TodoRBuilder {
+			inner_config: config::Config::new(),
+			..Default::default()
+		}
+	}
+
+	// TODO: add doc comments
+	pub fn build(self) -> TodoR {
+		unimplemented!();
+	}
+
+	// TODO: add doc comments
+	pub fn add_ignore_path(&mut self, path: &str) -> Result<&mut Self, Error> {
+		self.ignore_paths.add(Glob::new(path.as_ref())?);
+		Ok(self)
+	}
+
+	// TODO: add doc comments
+	pub fn add_config_file(&mut self, config_path: &Path) -> Result<&mut Self, Error> {
+		self.inner_config.merge(config::File::from(config_path))?;
+		Ok(self)
+	}
+}
+
 /// Configuration for `TodoR`.
 ///
 /// `verbose` holds whether to print extra content.
