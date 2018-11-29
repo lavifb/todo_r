@@ -71,6 +71,18 @@ fn custom_tags2() {
 }
 
 #[test]
+fn custom_tags3() {
+	todor()
+		.arg("test1.rs")
+		.arg("-t")
+		.arg("foo")
+		.assert()
+		.success()
+		.stdout("test1.rs\n  line 2      TODO   item\n  line 4      FOO    bar\n")
+		.stderr("");
+}
+
+#[test]
 fn py_extension() {
 	todor()
 		.arg("test2.py")

@@ -47,8 +47,12 @@ fn main() {
 		builder.add_config_file(Path::new(config_path)).unwrap();
 	};
 
-	if let Some(words_iter) = matches.values_of("OVERRIDE_TAGS") {
-		builder.add_override_todo_words(words_iter);
+	if let Some(tags_iter) = matches.values_of("TAGS") {
+		builder.add_todo_words(tags_iter);
+	}
+
+	if let Some(tags_iter) = matches.values_of("OVERRIDE_TAGS") {
+		builder.add_override_todo_words(tags_iter);
 	}
 
 	let verbose: bool = matches.is_present("VERBOSE");

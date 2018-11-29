@@ -71,10 +71,11 @@ static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 pub struct TodoRBuilder {
 	override_verbose: Option<bool>,
 	// TODO: rename "todo_words" to "tags"
+	added_todo_words: Vec<String>,
 	override_todo_words: Option<Vec<String>>,
 	override_ignore_paths: Option<GlobSetBuilder>,
 	styles: StyleConfig,
-	// Config from files. Parameters above override inner_config.
+	// Config from files. Parameters with override_ override inner_config.
 	inner_config: config::Config,
 }
 
@@ -88,6 +89,7 @@ impl Default for TodoRBuilder {
 
 		TodoRBuilder {
 			override_verbose: None,
+			added_todo_words: Vec::new(),
 			override_todo_words: None,
 			override_ignore_paths: None,
 			inner_config,
@@ -115,7 +117,8 @@ impl TodoRBuilder {
 		let config_struct: TodorConfigFileSerial = self.inner_config.try_into()?;
 
 		let verbose = self.override_verbose.unwrap_or_else(|| config_struct.verbose);
-		let todo_words = self.override_todo_words.unwrap_or_else(|| config_struct.tags.to_owned());
+		let mut todo_words = self.override_todo_words.unwrap_or_else(|| config_struct.tags.to_owned());
+		todo_words.append(&mut self.added_todo_words.clone());
 
 		let ignore_paths = match self.override_ignore_paths {
 			Some(glob_builder) => glob_builder.build()?,
@@ -156,6 +159,25 @@ impl TodoRBuilder {
 	pub fn add_config_file(&mut self, config_path: &Path) -> Result<&mut Self, Error> {
 		self.inner_config.merge(config::File::from(config_path))?;
 		Ok(self)
+	}
+
+	/// Adds tag for TodoR to look for without overriding tags from config files.
+	pub fn add_todo_word<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
+		self.added_todo_words.push(tag.into().into_owned());
+		self
+	}
+
+	/// Adds tags for TodoR to look for without overriding tags from config files.
+	pub fn add_todo_words<I, S>(&mut self, tags: I) -> &mut Self 
+	where
+		I: IntoIterator<Item = S>,
+		S: ToString,
+	{
+		self.added_todo_words.extend(
+			tags.into_iter()
+			.map(|s| s.to_string())
+		);
+		self
 	}
 
 	/// Adds tag for TodoR to look for. This overrides tags from config files.
