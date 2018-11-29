@@ -373,7 +373,7 @@ impl TodoR {
 		let file_ext = filepath.extension().unwrap_or_else(|| OsStr::new(".sh"));
 		let comment_types = self.config.ext_to_comment_types.get(file_ext.to_str().unwrap())
 								.unwrap_or(&self.config.default_comment_types);
-		
+
 		let file = File::open(filepath)?;
 		let mut file_reader = BufReader::new(file);
 		todo_file.set_todos(parse_content(&mut file_reader, &comment_types, &self.config.todo_words)?);
