@@ -10,7 +10,7 @@ use std::process::Command;
 use dialoguer::Select;
 use ansi_term::Color::Red;
 
-use todo_r::{TodoR, TodoRConfig};
+use todo_r::{TodoR, TodoRBuilder};
 use todo_r::errors::eprint_error;
 
 
@@ -25,9 +25,9 @@ fn main() {
 		// TODO: option to make config file
 		(@arg CONFIG: -c --("config") +takes_value "Takes configuration from file.")
 		(@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
-		(@arg TAG: -t --("tag") +takes_value +multiple "TODO tags to search for.")
+		(@arg TAGS: -t --("tag") +takes_value +multiple "TODO tags to search for.")
 		(@arg IGNORE: -i --("ignore") +takes_value +multiple "Paths to be ignored.")
-		(@arg OVERRIDETAGS: -T --("override-tags") "Overrides default TODO tags to only search custom ones.")
+		(@arg OVERRIDE_TAGS: -T --("override-tags") +takes_value +multiple "Overrides default TODO tags to only search custom ones.")
 		(@arg VERBOSE: -v --("verbose") "Provide verbose output.")
 		(@arg DELETE_MODE: -d --("delete") "Interactive delete mode.")
 		(@subcommand remove =>
@@ -40,39 +40,32 @@ fn main() {
 	).get_matches();
 
 
-	let mut config = match matches.value_of("CONFIG") {
-		Some(config_path) => TodoRConfig::default_with_config_file(Path::new(config_path)).unwrap(),
-		None => TodoRConfig::new(),
+	let mut builder = TodoRBuilder::new();
+
+	if let Some(config_path) = matches.value_of("CONFIG") {
+		// TODO: handle error
+		builder.add_config_file(Path::new(config_path)).unwrap();
 	};
 
-	match matches.values_of("TAG") {
-		Some(words_iter) => {
-			let added_todo_words = words_iter.map(|s| s.to_string()).collect();
-			config.todo_words = added_todo_words;
-		},
-		None => {
-			// if !matches.is_present("OVERRIDETAGS") {
-			// 	let mut added_todo_words = vec!["todo".to_string(), "fixme".to_string()];
-			// 	config.todo_words.append(&mut added_todo_words);
-			// }
-		},
+	if let Some(words_iter) = matches.values_of("OVERRIDE_TAGS") {
+		builder.add_override_todo_words(words_iter);
 	}
 
 	let verbose: bool = matches.is_present("VERBOSE");
-	if verbose { println!("TODO keywords: {}", config.todo_words.join(", ").to_uppercase()); }
-	config.verbose = verbose;
+	if verbose { 
+		builder.set_verbose(verbose);
+	}
 
 	if matches.is_present("NOSTYLE") {
-		config.set_no_style();
+		builder.set_no_style();
 	}
 
 	if let Some(ignore_paths_iter) = matches.values_of("IGNORE") {
-		let ignore_paths: Vec<&str> = ignore_paths_iter.collect();
 		// TODO: handle error
-		config.set_ignore_paths(&ignore_paths).unwrap();
+		builder.add_override_ignore_paths(ignore_paths_iter).unwrap();
 	}
 
-	let mut todor = TodoR::with_config(config);
+	let mut todor = builder.build().unwrap();
 	match matches.values_of("FILE") { 
 		Some(files) => {
 			for file in files {

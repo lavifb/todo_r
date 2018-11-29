@@ -128,6 +128,10 @@ impl TodoRBuilder {
 			}
 		};
 
+		if verbose {
+			println!("TODO tags: {}", todo_words.join(", ").to_uppercase());
+		}
+
 		let mut config = TodoRConfig {
 			verbose,
 			todo_words,
@@ -148,36 +152,32 @@ impl TodoRBuilder {
 		Ok(TodoR::with_config(config))
 	}
 
-	/// Adds path for TodoR to ignore. This overrides ignore paths from config files.
-	pub fn add_ignore_path(&mut self, path: &str) -> Result<&mut Self, Error> {
-		let new_glob = Glob::new(path)?;
-		self.override_ignore_paths.get_or_insert_with(|| GlobSetBuilder::new())
-			.add(new_glob);
-		Ok(self)
-	}
-
 	/// Adds config file for TodoR.
 	pub fn add_config_file(&mut self, config_path: &Path) -> Result<&mut Self, Error> {
 		self.inner_config.merge(config::File::from(config_path))?;
 		Ok(self)
 	}
 
-	/// Adds tag for TodoR to look for. This overrides ignore tags from config files.
-	pub fn add_todo_word<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
+	/// Adds tag for TodoR to look for. This overrides tags from config files.
+	pub fn add_override_todo_word<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
 		self.override_todo_words.get_or_insert_with(|| Vec::new())
 			.push(tag.into().into_owned());
 		self
 	}
 
-	/// Adds tags for TodoR to look for. This overrides ignore tags from config files.
-	pub fn add_todo_words<'a, S: ToString>(&mut self, tags: &[S]) -> &mut Self {
+	/// Adds tags for TodoR to look for. This overrides tags from config files.
+	pub fn add_override_todo_words<I, S>(&mut self, tags: I) -> &mut Self 
+	where
+		I: IntoIterator<Item = S>,
+		S: ToString,
+	{
 		{
 			let tws = self.override_todo_words.get_or_insert_with(|| Vec::new());
-			tws.reserve(tags.len());
 
-			for tag in tags {
-				tws.push(tag.to_string());
-			}
+			tws.extend(
+				tags.into_iter()
+				.map(|s| s.to_string())
+			)
 		}
 		self
 	}
@@ -186,6 +186,32 @@ impl TodoRBuilder {
 	pub fn set_verbose(&mut self, verbose: bool) -> &mut Self {
 		self.override_verbose = Some(verbose);
 		self
+	}
+
+	/// Sets the terminal output of TodoR to be with no styles.
+	pub fn set_no_style(&mut self) -> &mut Self {
+		self.styles = StyleConfig::no_style();
+		self
+	}
+
+	/// Adds path for TodoR to ignore. This overrides ignore paths from config files.
+	pub fn add_override_ignore_path(&mut self, path: &str) -> Result<&mut Self, Error> {
+		let new_glob = Glob::new(path)?;
+		self.override_ignore_paths.get_or_insert_with(|| GlobSetBuilder::new())
+			.add(new_glob);
+		Ok(self)
+	}
+
+	/// Adds paths for TodoR to ignore. This overrides ignore paths from config files.
+	pub fn add_override_ignore_paths<I, S>(&mut self, paths: I) -> Result<&mut Self , Error>
+	where
+		I: IntoIterator<Item = S>,
+		S: AsRef<str>,
+	{
+		for path in paths {
+			self.add_override_ignore_path(path.as_ref())?;
+		}
+		Ok(self)
 	}
 }
 
