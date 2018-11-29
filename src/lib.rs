@@ -55,6 +55,7 @@ use std::path::Path;
 use std::ffi::OsStr;
 use std::io::{self, Write, BufReader, Cursor};
 use std::collections::HashMap;
+use std::borrow::Cow;
 
 use failure::Error;
 use errors::TodoRError;
@@ -66,10 +67,11 @@ use comments::{CommentTypes, TodorConfigFileSerial};
 
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 
-// TODO: add doc comments
+/// Type for building TodoR with a custom configuration.
 pub struct TodoRBuilder {
-	pub override_verbose: Option<bool>,
-	pub override_todo_words: Option<Vec<String>>,
+	override_verbose: Option<bool>,
+	// TODO: rename "todo_words" to "tags"
+	override_todo_words: Option<Vec<String>>,
 	override_ignore_paths: Option<GlobSetBuilder>,
 	styles: StyleConfig,
 	// Config from files. Parameters above override inner_config.
@@ -77,7 +79,7 @@ pub struct TodoRBuilder {
 }
 
 impl Default for TodoRBuilder {
-	// TODO: add doc comments
+	/// Creates TodoRBuilder using the default configuration.
 	fn default() -> TodoRBuilder {
 		let mut inner_config = config::Config::new();
 		inner_config.merge(
@@ -95,28 +97,20 @@ impl Default for TodoRBuilder {
 }
 
 impl TodoRBuilder {
-	// TODO: add doc comments
+	/// Creates TodoRBuilder using the default configuration.
 	pub fn new() -> TodoRBuilder {
+		TodoRBuilder::default()
+	}
+
+	/// Creates TodoRBuilder with no configuration.
+	pub fn with_no_config() -> TodoRBuilder {
 		TodoRBuilder {
 			inner_config: config::Config::new(),
 			..Default::default()
 		}
 	}
 
-	// TODO: add doc comments
-	pub fn with_todo_words<S: ToString>(todo_words: &[S]) -> TodoRBuilder {
-		let todo_word_strings: Vec<String> = todo_words
-			.iter()
-			.map(|s| s.to_string())
-			.collect();
-		
-		TodoRBuilder {
-			override_todo_words: Some(todo_word_strings),
-			..Default::default()
-		}
-	}
-
-	// TODO: add doc comments
+	/// Consumes self and builds TodoR.
 	pub fn build(self) -> Result<TodoR, Error> {
 		let config_struct: TodorConfigFileSerial = self.inner_config.try_into()?;
 
@@ -154,7 +148,7 @@ impl TodoRBuilder {
 		Ok(TodoR::with_config(config))
 	}
 
-	// TODO: add doc comments
+	/// Adds path for TodoR to ignore. This overrides ignore paths from config files.
 	pub fn add_ignore_path(&mut self, path: &str) -> Result<&mut Self, Error> {
 		let new_glob = Glob::new(path)?;
 		self.override_ignore_paths.get_or_insert_with(|| GlobSetBuilder::new())
@@ -162,10 +156,36 @@ impl TodoRBuilder {
 		Ok(self)
 	}
 
-	// TODO: add doc comments
+	/// Adds config file for TodoR.
 	pub fn add_config_file(&mut self, config_path: &Path) -> Result<&mut Self, Error> {
 		self.inner_config.merge(config::File::from(config_path))?;
 		Ok(self)
+	}
+
+	/// Adds tag for TodoR to look for. This overrides ignore tags from config files.
+	pub fn add_todo_word<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
+		self.override_todo_words.get_or_insert_with(|| Vec::new())
+			.push(tag.into().into_owned());
+		self
+	}
+
+	/// Adds tags for TodoR to look for. This overrides ignore tags from config files.
+	pub fn add_todo_words<'a, S: ToString>(&mut self, tags: &[S]) -> &mut Self {
+		{
+			let tws = self.override_todo_words.get_or_insert_with(|| Vec::new());
+			tws.reserve(tags.len());
+
+			for tag in tags {
+				tws.push(tag.to_string());
+			}
+		}
+		self
+	}
+
+	/// Overrides verbose from config files.
+	pub fn set_verbose(&mut self, verbose: bool) -> &mut Self {
+		self.override_verbose = Some(verbose);
+		self
 	}
 }
 
