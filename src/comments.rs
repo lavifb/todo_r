@@ -17,7 +17,6 @@ pub enum CommentType {
 	Block(BlockComment),
 }
 
-// TODO: move escaping to creation and get serde to deserialize escaped
 impl CommentType {
 	/// Creates new single-line comment type
 	pub fn new_single(prefix: &str) -> CommentType {
@@ -119,13 +118,6 @@ impl CommentTypes {
 		}
 	}
 
-	/// Creates new CommentTypes struct from CommentsConfig.
-	pub(crate) fn from_config(config: CommentsConfig) -> CommentTypes {
-		CommentTypes {
-			comment_types: config.types,
-		}
-	}
-
 	/// Adds a single-line comment type with the provided prefix.
 	/// For Rust single-line comments you might use `CommentTypes::new().add_single("//")`
 	pub fn add_single(mut self, prefix: &str) -> Self {
@@ -171,6 +163,12 @@ pub(crate) struct CommentsConfig {
 	#[serde(default)]
 	pub exts: Vec<String>,
 	pub(self) types: Vec<CommentType>,
+}
+
+impl CommentsConfig {
+	pub fn break_apart(self) -> (String, Vec<String>, CommentTypes) {
+		(self.ext, self.exts, CommentTypes {comment_types: self.types})
+	}
 }
 
 #[derive(Debug, Default, Clone, Deserialize)]

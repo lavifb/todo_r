@@ -74,6 +74,7 @@ pub struct TodoRBuilder {
 	added_todo_words: Vec<String>,
 	override_todo_words: Option<Vec<String>>,
 	override_ignore_paths: Option<GlobSetBuilder>,
+	override_default_ext: Option<String>,
 	styles: StyleConfig,
 	// Config from files. Parameters with override_ override inner_config.
 	inner_config: config::Config,
@@ -92,8 +93,9 @@ impl Default for TodoRBuilder {
 			added_todo_words: Vec::new(),
 			override_todo_words: None,
 			override_ignore_paths: None,
-			inner_config,
+			override_default_ext: None,
 			styles: StyleConfig::default(),
+			inner_config,
 		}
 	}
 }
@@ -114,7 +116,7 @@ impl TodoRBuilder {
 
 	/// Consumes self and builds TodoR.
 	pub fn build(self) -> Result<TodoR, Error> {
-		let config_struct: TodorConfigFileSerial = self.inner_config.try_into()?;
+		let mut config_struct: TodorConfigFileSerial = self.inner_config.try_into()?;
 
 		let verbose = self.override_verbose.unwrap_or_else(|| config_struct.verbose);
 		let mut todo_words = self.override_todo_words.unwrap_or_else(|| config_struct.tags.to_owned());
@@ -135,22 +137,35 @@ impl TodoRBuilder {
 			println!("TODO tags: {}", todo_words.join(", ").to_uppercase());
 		}
 
-		let mut config = TodoRConfig {
+		let mut ext_to_comment_types: HashMap<String, CommentTypes> = HashMap::new();
+
+		for comment_config in config_struct.comments.drain(..) {
+			let (ext, mut exts, comment_types) = comment_config.break_apart();
+
+			for extt in exts.drain(..) {
+				ext_to_comment_types.insert(extt, comment_types.clone());
+			}
+			ext_to_comment_types.insert(ext, comment_types);
+		}
+
+		// TODO: add default_ext to config file
+		let default_comment_types = match self.override_default_ext {
+			Some(default_ext) => {ext_to_comment_types.get(&default_ext)
+				.ok_or(TodoRError::InvalidExtension {ext: default_ext})?
+				.clone()
+			},
+			None => CommentTypes::new().add_single("#"),
+		};
+
+		let config = TodoRConfig {
 			verbose,
 			todo_words,
 			ignore_paths,
 			styles: self.styles,
-			..Default::default()
+			ext_to_comment_types,
+			default_comment_types,
 		};
 
-		for comment_config in config_struct.comments {
-			let exts = comment_config.exts.to_owned();
-			let ext  = comment_config.ext.to_owned();
-			let comment_types = CommentTypes::from_config(comment_config);
-
-			config.set_exts_comment_types(&exts, comment_types.clone());
-			config.set_ext_comment_types(&ext, comment_types);
-		}
 
 		Ok(TodoR::with_config(config))
 	}
@@ -168,37 +183,37 @@ impl TodoRBuilder {
 	}
 
 	/// Adds tags for TodoR to look for without overriding tags from config files.
-	pub fn add_todo_words<I, S>(&mut self, tags: I) -> &mut Self 
+	pub fn add_todo_words<'a, I, S>(&mut self, tags: I) -> &mut Self 
 	where
 		I: IntoIterator<Item = S>,
-		S: ToString,
+		S: Into<Cow<'a, str>>,
 	{
 		self.added_todo_words.extend(
 			tags.into_iter()
-			.map(|s| s.to_string())
+			.map(|s| s.into().into_owned())
 		);
 		self
 	}
 
 	/// Adds tag for TodoR to look for. This overrides tags from config files.
 	pub fn add_override_todo_word<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
-		self.override_todo_words.get_or_insert_with(|| Vec::new())
+		self.override_todo_words.get_or_insert_with(Vec::new)
 			.push(tag.into().into_owned());
 		self
 	}
 
 	/// Adds tags for TodoR to look for. This overrides tags from config files.
-	pub fn add_override_todo_words<I, S>(&mut self, tags: I) -> &mut Self 
+	pub fn add_override_todo_words<'a, I, S>(&mut self, tags: I) -> &mut Self 
 	where
 		I: IntoIterator<Item = S>,
-		S: ToString,
+		S: Into<Cow<'a, str>>,
 	{
 		{
-			let tws = self.override_todo_words.get_or_insert_with(|| Vec::new());
+			let tws = self.override_todo_words.get_or_insert_with(Vec::new);
 
 			tws.extend(
 				tags.into_iter()
-				.map(|s| s.to_string())
+				.map(|s| s.into().into_owned())
 			)
 		}
 		self
@@ -219,7 +234,7 @@ impl TodoRBuilder {
 	/// Adds path for TodoR to ignore. This overrides ignore paths from config files.
 	pub fn add_override_ignore_path(&mut self, path: &str) -> Result<&mut Self, Error> {
 		let new_glob = Glob::new(path)?;
-		self.override_ignore_paths.get_or_insert_with(|| GlobSetBuilder::new())
+		self.override_ignore_paths.get_or_insert_with(GlobSetBuilder::new)
 			.add(new_glob);
 		Ok(self)
 	}
@@ -235,99 +250,13 @@ impl TodoRBuilder {
 		}
 		Ok(self)
 	}
-}
 
-/// Configuration for `TodoR`.
-///
-/// `verbose` holds whether to print extra content.
-/// `todo_words` gives a list of the TODO terms to search for.
-pub struct TodoRConfig {
-	pub verbose: bool,
-	pub todo_words: Vec<String>,
-	inner_config: config::Config,
-	styles: StyleConfig,
-	ignore_paths: GlobSet,
-	ext_to_comment_types: HashMap<String, CommentTypes>,
-	default_comment_types: CommentTypes,
-}
-
-impl TodoRConfig {
-	/// Creates new TodoR configuration with the default parameters.
-	pub fn new() -> TodoRConfig {
-		TodoRConfig {
-			..Default::default()
-		}
-	}
-
-	/// Creates new TodoR configuration with the given TODO comment types.
-	pub fn with_todo_words<S: ToString>(todo_words: &[S]) -> TodoRConfig {
-		let todo_word_strings: Vec<String> = todo_words
-			.iter()
-			.map(|s| s.to_string())
-			.collect();
-		
-		TodoRConfig {
-			todo_words: todo_word_strings,
-			..Default::default()
-		}
-	}
-
-	/// Creates new TodoR configuration from the given configuration file.
-	/// Note that this config overrides the defaults.
-	pub fn from_config_file(config_path: &Path) -> Result<TodoRConfig, Error> {
-		let mut config_from_file = config::Config::new();
-		config_from_file.merge(config::File::from(config_path))?;
-
-		let mut config = TodoRConfig {
-			inner_config: config_from_file,
-			..Default::default()
-		};
-		config.reload_config()?;
-
-		Ok(config)
-	}
-
-	/// Creates new TodoR configuration from the given configuration file with defaults as a fall-back.
-	pub fn default_with_config_file(config_path: &Path) -> Result<TodoRConfig, Error> {
-		let mut inner_config = config::Config::new();
-		inner_config.merge(config::File::from_str(include_str!("default_config.json"), config::FileFormat::Json)).unwrap();
-		inner_config.merge(config::File::from(config_path))?;
-
-		let mut config = TodoRConfig {
-			inner_config,
-			..Default::default()
-		};
-		config.reload_config()?;
-
-		Ok(config)
-	}
-
-	/// Merges configuration file into the configuration.
-	pub fn merge_config_file(&mut self, config_path: &Path) -> Result<(), Error> {
-		self.inner_config.merge(config::File::from(config_path))?;
-		self.reload_config()?;
-
-		Ok(())
-	}
-
-	// TODO: Use a TodoRConfigBuilder struct
-	/// Parses and loads inner_config. Use after merging into inner_config.
-	fn reload_config(&mut self) -> Result<(), Error> {
-		let inner_config = self.inner_config.clone();
-		let config_struct: TodorConfigFileSerial = inner_config.try_into()?;
-
-		self.todo_words = config_struct.tags;
-		self.set_ignore_paths(&config_struct.ignore)?;
-
-		for comment_config in config_struct.comments {
-			// TODO: deal with error
-			let exts = comment_config.exts.to_owned();
-			let ext  = comment_config.ext.to_owned();
-			let comment_types = CommentTypes::from_config(comment_config);
-
-			self.set_exts_comment_types(&exts, comment_types.clone());
-			self.set_ext_comment_types(&ext, comment_types);
-		}
+	/// Sets the default fall-back extension for comments.
+	///
+	/// For instance if you want to parse unknown extensions using C style comments,
+	/// use `builder.set_default_ext("c")`.
+	pub fn set_default_ext<'a, S: Into<Cow<'a, str>>>(&mut self, ext: S) -> Result<(), Error> {
+		self.override_default_ext = Some(ext.into().into_owned());
 
 		Ok(())
 	}
@@ -337,103 +266,54 @@ impl TodoRConfig {
 		out_buffer.write_all(DEFAULT_CONFIG.as_bytes())?;
 		Ok(())
 	}
-
-	/// Sets output to be without colors or styles.
-	pub fn set_no_style(&mut self) {
-		self.styles = StyleConfig::no_style();
-	}
-
-	/// Sets the list of paths that will be ignored.
-	/// These paths can include globs such as `*.rs`, `src/**/*.rs`, or `src/**`.
-	///  
-	// TODO: allow dirs in ignore_paths
-	/// Note that listing just the directory (ex: `src/`) does not work. 
-	/// You must add the `**` to make `src/**`.
-	pub fn set_ignore_paths<S: AsRef<str>>(&mut self, ignore_paths: &[S]) -> Result<(), Error> {
-		let mut glob_builder = GlobSetBuilder::new();
-
-		for path in ignore_paths {
-			glob_builder.add(Glob::new(path.as_ref())?);
-		}
-
-		self.ignore_paths = glob_builder.build()?;
-		Ok(())
-	}
-
-	/// Sets the default fall-back extension for comments.
-	///
-	/// For instance if you want to parse unknown extensions using C style comments,
-	/// use `todor.set_default_ext("c")`.
-	pub fn set_default_ext(&mut self, ext: &str) -> Result<(), Error> {
-		self.default_comment_types = self.ext_to_comment_types.get(ext).ok_or(
-			TodoRError::InvalidExtension {
-				ext: ext.to_string()
-			}
-		).unwrap().clone();
-
-		Ok(())
-	}
-
-	// TODO: use Cow<str>
-	/// Sets the comment tokens for the provided extension.
-	pub fn set_ext_comment_types(&mut self, ext: &str, comment_types: CommentTypes) {
-		self.ext_to_comment_types.insert(ext.to_string(), comment_types);
-	}
-
-	/// Sets the comment tokens for the list of provided extensions.
-	pub fn set_exts_comment_types<S: ToString>(&mut self, exts: &[S], comment_types: CommentTypes) {
-		for ext in exts {
-			self.ext_to_comment_types.insert(ext.to_string(), comment_types.clone());
-		}
-	}
 }
 
-impl Default for TodoRConfig {
-	fn default() -> TodoRConfig {
-		let mut inner_config = config::Config::new();
-		inner_config.merge(config::File::from_str(DEFAULT_CONFIG, config::FileFormat::Json)).unwrap();
-
-		let mut config = TodoRConfig {
-			verbose: false,
-			todo_words: Vec::new(),
-			inner_config,
-			styles: StyleConfig::default(),
-			ignore_paths: GlobSet::empty(),
-			ext_to_comment_types: HashMap::new(),
-			default_comment_types: CommentTypes::new().add_single("#"),
-		};
-
-		config.reload_config().unwrap();
-		config
-	}
+/// Configuration for `TodoR`.
+///
+/// `verbose` holds whether to print extra content.
+/// `todo_words` gives a list of the TODO terms to search for.
+struct TodoRConfig {
+	verbose: bool,
+	todo_words: Vec<String>,
+	styles: StyleConfig,
+	ignore_paths: GlobSet,
+	ext_to_comment_types: HashMap<String, CommentTypes>,
+	default_comment_types: CommentTypes,
 }
 
 /// Parser for finding TODOs in comments and storing them on a per-file basis.
 pub struct TodoR {
-	pub config: TodoRConfig,
+	config: TodoRConfig,
 	todo_files: Vec<TodoFile>,
+}
+
+impl Default for TodoR {
+	fn default() -> TodoR {
+		TodoRBuilder::default().build().unwrap()
+	}
 }
 
 impl TodoR {
 	/// Creates new TodoR that looks for provided keywords.
 	pub fn new() -> TodoR {
-		TodoR {
-			..Default::default()
-		}
+		TodoR::default()
 	}
 
-	pub fn with_todo_words<S: ToString>(todo_words: &[S]) -> TodoR {
-		TodoR {
-			config: TodoRConfig::with_todo_words(todo_words),
-			..Default::default()
-		}
+	pub fn with_todo_words<'a, I, S>(todo_words: I) -> TodoR
+	where
+		I: IntoIterator<Item = S>,
+		S: Into<Cow<'a, str>>,
+	{
+		let mut builder = TodoRBuilder::default();
+		builder.add_override_todo_words(todo_words);
+		builder.build().unwrap()
 	}
 
 	/// Creates new TodoR using given configuration.
-	pub fn with_config(config: TodoRConfig) -> TodoR {
+	fn with_config(config: TodoRConfig) -> TodoR {
 		TodoR {
 			config,
-			..Default::default()
+			todo_files: Vec::new(),
 		}
 	}
 
@@ -554,14 +434,5 @@ impl TodoR {
 		Err(TodoRError::FileNotTracked {
 			filepath: filepath.to_string_lossy().to_string()
 		}.into())
-	}
-}
-
-impl Default for TodoR {
-	fn default() -> TodoR {
-		TodoR {
-			config: TodoRConfig::new(),
-			todo_files: Vec::new(),
-		}
 	}
 }
