@@ -47,13 +47,13 @@ impl fmt::Display for Todo {
 }
 
 /// Parses content and Creates a list of TODOs found in content
-pub(crate) fn parse_content<B>(content_buf: &mut B, comment_types: &CommentTypes, todo_words: &[String]) -> Result<Vec<Todo>, std::io::Error>
+pub(crate) fn parse_content<B>(content_buf: &mut B, comment_types: &CommentTypes, tags: &[String]) -> Result<Vec<Todo>, std::io::Error>
 where
 	B: BufRead,
 {
 	let regexs: Vec<Regex> = comment_types
 		.iter()
-		.map(|c| get_regex_for_comment(todo_words, c).unwrap())
+		.map(|c| get_regex_for_comment(tags, c).unwrap())
 		.collect();
 
 	// MAYB: do this as iterator and collect

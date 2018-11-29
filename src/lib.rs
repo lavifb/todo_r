@@ -70,9 +70,8 @@ static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 /// Type for building TodoR with a custom configuration.
 pub struct TodoRBuilder {
 	override_verbose: Option<bool>,
-	// TODO: rename "todo_words" to "tags"
-	added_todo_words: Vec<String>,
-	override_todo_words: Option<Vec<String>>,
+	added_tags: Vec<String>,
+	override_tags: Option<Vec<String>>,
 	override_ignore_paths: Option<GlobSetBuilder>,
 	override_default_ext: Option<String>,
 	styles: StyleConfig,
@@ -90,8 +89,8 @@ impl Default for TodoRBuilder {
 
 		TodoRBuilder {
 			override_verbose: None,
-			added_todo_words: Vec::new(),
-			override_todo_words: None,
+			added_tags: Vec::new(),
+			override_tags: None,
 			override_ignore_paths: None,
 			override_default_ext: None,
 			styles: StyleConfig::default(),
@@ -119,8 +118,8 @@ impl TodoRBuilder {
 		let mut config_struct: TodorConfigFileSerial = self.inner_config.try_into()?;
 
 		let verbose = self.override_verbose.unwrap_or_else(|| config_struct.verbose);
-		let mut todo_words = self.override_todo_words.unwrap_or_else(|| config_struct.tags.to_owned());
-		todo_words.append(&mut self.added_todo_words.clone());
+		let mut tags = self.override_tags.unwrap_or_else(|| config_struct.tags.to_owned());
+		tags.append(&mut self.added_tags.clone());
 
 		let ignore_paths = match self.override_ignore_paths {
 			Some(glob_builder) => glob_builder.build()?,
@@ -134,7 +133,7 @@ impl TodoRBuilder {
 		};
 
 		if verbose {
-			println!("TODO tags: {}", todo_words.join(", ").to_uppercase());
+			println!("TODO tags: {}", tags.join(", ").to_uppercase());
 		}
 
 		let mut ext_to_comment_types: HashMap<String, CommentTypes> = HashMap::new();
@@ -159,7 +158,7 @@ impl TodoRBuilder {
 
 		let config = TodoRConfig {
 			verbose,
-			todo_words,
+			tags,
 			ignore_paths,
 			styles: self.styles,
 			ext_to_comment_types,
@@ -178,17 +177,17 @@ impl TodoRBuilder {
 
 	/// Adds tag for TodoR to look for without overriding tags from config files.
 	pub fn add_todo_word<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
-		self.added_todo_words.push(tag.into().into_owned());
+		self.added_tags.push(tag.into().into_owned());
 		self
 	}
 
 	/// Adds tags for TodoR to look for without overriding tags from config files.
-	pub fn add_todo_words<'a, I, S>(&mut self, tags: I) -> &mut Self 
+	pub fn add_tags<'a, I, S>(&mut self, tags: I) -> &mut Self 
 	where
 		I: IntoIterator<Item = S>,
 		S: Into<Cow<'a, str>>,
 	{
-		self.added_todo_words.extend(
+		self.added_tags.extend(
 			tags.into_iter()
 			.map(|s| s.into().into_owned())
 		);
@@ -197,19 +196,19 @@ impl TodoRBuilder {
 
 	/// Adds tag for TodoR to look for. This overrides tags from config files.
 	pub fn add_override_todo_word<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
-		self.override_todo_words.get_or_insert_with(Vec::new)
+		self.override_tags.get_or_insert_with(Vec::new)
 			.push(tag.into().into_owned());
 		self
 	}
 
 	/// Adds tags for TodoR to look for. This overrides tags from config files.
-	pub fn add_override_todo_words<'a, I, S>(&mut self, tags: I) -> &mut Self 
+	pub fn add_override_tags<'a, I, S>(&mut self, tags: I) -> &mut Self 
 	where
 		I: IntoIterator<Item = S>,
 		S: Into<Cow<'a, str>>,
 	{
 		{
-			let tws = self.override_todo_words.get_or_insert_with(Vec::new);
+			let tws = self.override_tags.get_or_insert_with(Vec::new);
 
 			tws.extend(
 				tags.into_iter()
@@ -271,10 +270,10 @@ impl TodoRBuilder {
 /// Configuration for `TodoR`.
 ///
 /// `verbose` holds whether to print extra content.
-/// `todo_words` gives a list of the TODO terms to search for.
+/// `tags` gives a list of the TODO terms to search for.
 struct TodoRConfig {
 	verbose: bool,
-	todo_words: Vec<String>,
+	tags: Vec<String>,
 	styles: StyleConfig,
 	ignore_paths: GlobSet,
 	ext_to_comment_types: HashMap<String, CommentTypes>,
@@ -299,13 +298,13 @@ impl TodoR {
 		TodoR::default()
 	}
 
-	pub fn with_todo_words<'a, I, S>(todo_words: I) -> TodoR
+	pub fn with_tags<'a, I, S>(tags: I) -> TodoR
 	where
 		I: IntoIterator<Item = S>,
 		S: Into<Cow<'a, str>>,
 	{
 		let mut builder = TodoRBuilder::default();
-		builder.add_override_todo_words(todo_words);
+		builder.add_override_tags(tags);
 		builder.build().unwrap()
 	}
 
@@ -358,7 +357,7 @@ impl TodoR {
 
 		let file = File::open(filepath)?;
 		let mut file_reader = BufReader::new(file);
-		todo_file.set_todos(parse_content(&mut file_reader, &comment_types, &self.config.todo_words)?);
+		todo_file.set_todos(parse_content(&mut file_reader, &comment_types, &self.config.tags)?);
 
 		self.todo_files.push(todo_file);
 		Ok(())
@@ -368,7 +367,7 @@ impl TodoR {
 	pub fn find_todos(&mut self, content: &str) -> Result<(), Error> {
 		let mut todo_file = TodoFile::new(Path::new(""));
 		let mut content_buf = Cursor::new(content);
-		todo_file.set_todos(parse_content(&mut content_buf, &self.config.default_comment_types, &self.config.todo_words)?);
+		todo_file.set_todos(parse_content(&mut content_buf, &self.config.default_comment_types, &self.config.tags)?);
 
 		self.todo_files.push(todo_file);
 		Ok(())
