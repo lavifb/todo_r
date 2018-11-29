@@ -103,6 +103,7 @@ impl TodoRBuilder {
 		}
 	}
 
+	// TODO: add doc comments
 	pub fn with_todo_words<S: ToString>(todo_words: &[S]) -> TodoRBuilder {
 		let todo_word_strings: Vec<String> = todo_words
 			.iter()
@@ -116,8 +117,41 @@ impl TodoRBuilder {
 	}
 
 	// TODO: add doc comments
-	pub fn build(self) -> TodoR {
-		unimplemented!();
+	pub fn build(self) -> Result<TodoR, Error> {
+		let config_struct: TodorConfigFileSerial = self.inner_config.try_into()?;
+
+		let verbose = self.override_verbose.unwrap_or_else(|| config_struct.verbose);
+		let todo_words = self.override_todo_words.unwrap_or_else(|| config_struct.tags.to_owned());
+
+		let ignore_paths = match self.override_ignore_paths {
+			Some(glob_builder) => glob_builder.build()?,
+			None => {
+				let mut gb = GlobSetBuilder::new();
+				for path in config_struct.ignore {
+					gb.add(Glob::new(&path)?);
+				}
+				gb.build()?
+			}
+		};
+
+		let mut config = TodoRConfig {
+			verbose,
+			todo_words,
+			ignore_paths,
+			styles: self.styles,
+			..Default::default()
+		};
+
+		for comment_config in config_struct.comments {
+			let exts = comment_config.exts.to_owned();
+			let ext  = comment_config.ext.to_owned();
+			let comment_types = CommentTypes::from_config(comment_config);
+
+			config.set_exts_comment_types(&exts, comment_types.clone());
+			config.set_ext_comment_types(&ext, comment_types);
+		}
+
+		Ok(TodoR::with_config(config))
 	}
 
 	// TODO: add doc comments

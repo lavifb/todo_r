@@ -176,6 +176,8 @@ pub(crate) struct CommentsConfig {
 #[derive(Debug, Default, Clone, Deserialize)]
 pub(crate) struct TodorConfigFileSerial {
 	#[serde(default)]
+	pub verbose: bool,
+	#[serde(default)]
 	pub tags: Vec<String>,
 	#[serde(default)]
 	pub ignore: Vec<String>,
