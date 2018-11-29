@@ -1,5 +1,6 @@
 // Module for the structs that hold the comment types
 
+use serde::{Deserialize, Deserializer};
 use regex::escape;
 
 
@@ -9,59 +10,103 @@ use regex::escape;
 /// 	SingleLine: for single line comments like `// comment`
 /// 	Block: for block comments like `/* comment */`
 ///
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(untagged)]
 pub enum CommentType {
-	/// Stores a single-line comment type.
-	SingleLine {
-		#[serde(rename = "single")]
-		prefix: String,
-	},
-
-	/// Stores a single-line comment type.
-	Block {
-		prefix: String,
-		suffix: String,
-	},
+	SingleLine(SingleLineComment),
+	Block(BlockComment),
 }
 
 // TODO: move escaping to creation and get serde to deserialize escaped
 impl CommentType {
 	/// Creates new single-line comment type
 	pub fn new_single(prefix: &str) -> CommentType {
-		CommentType::SingleLine {
-			prefix: prefix.to_string(),
-		}
+		SingleLineComment::new(prefix).into()
 	}
 
 	/// Creates new block comment type
 	pub fn new_block(prefix: &str, suffix: &str) -> CommentType {
-		CommentType::Block {
-			prefix: prefix.to_string(),
-			suffix: suffix.to_string(),
-		}
+		BlockComment::new(prefix, suffix).into()
 	}
 
 	/// Returns prefix token for comment.
-	pub fn prefix(&self) -> String {
+	pub fn prefix(&self) -> &str {
 		match self {
-			CommentType::SingleLine{prefix} => escape(prefix),
-			CommentType::Block{prefix, ..} => escape(prefix),
+			CommentType::SingleLine(c) => &c.prefix,
+			CommentType::Block(c) => &c.prefix,
 		}
 	}
 
 	/// Returns suffix token for comment.
-	pub fn suffix(&self) -> String {
+	pub fn suffix(&self) -> &str {
 		match self {
-			CommentType::SingleLine{..} => "$".to_string(),
-			CommentType::Block{suffix, ..} => escape(suffix),
+			CommentType::SingleLine(_c) => "$",
+			CommentType::Block(c) => &c.suffix,
 		}
 	}
 }
 
+/// Stores a single-line comment type.
+/// This holds the prefix for single-lines comments.
+/// For Rust comments it should hold `//`.
+#[derive(Debug, Clone, Deserialize)]
+pub struct SingleLineComment {
+	#[serde(rename = "single")]
+	#[serde(deserialize_with = "escape_deserialize")]
+	prefix: String,
+}
+
+impl SingleLineComment {
+	pub fn new(prefix: &str) -> SingleLineComment {
+		SingleLineComment {
+			prefix: escape(prefix),
+		}
+	}
+}
+
+impl Into<CommentType> for SingleLineComment {
+	fn into(self) -> CommentType {
+		CommentType::SingleLine(self)
+	}
+}
+
+/// Stores a block comment type.
+/// This holds the prefix and suffix for block comments.
+/// For Rust comments it should hold `/*` and `*/`.
+#[derive(Debug, Clone, Deserialize)]
+pub struct BlockComment {
+	#[serde(deserialize_with = "escape_deserialize")]
+	prefix: String,
+	#[serde(deserialize_with = "escape_deserialize")]
+	suffix: String,
+}
+
+impl BlockComment {
+	pub fn new(prefix: &str, suffix: &str) -> BlockComment {
+		BlockComment {
+			prefix: escape(prefix),
+			suffix: escape(suffix),
+		}
+	}
+}
+
+impl Into<CommentType> for BlockComment {
+	fn into(self) -> CommentType {
+		CommentType::Block(self)
+	}
+}
+
+fn escape_deserialize<'de, D>(deserializer: D) -> Result<String, D::Error>
+where 
+	D: Deserializer<'de>,
+{
+	let s: String = Deserialize::deserialize(deserializer)?;
+	Ok(escape(&s))
+}
+
 /// Struct for storing a collection of CommentType enums that correspond to a specifix content type.
 /// It behaves as a wrapper for Vec<CommentType>.
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Deserialize)]
 pub struct CommentTypes {
 	comment_types: Vec<CommentType>,
 }
@@ -119,7 +164,7 @@ impl<'a> IntoIterator for &'a CommentTypes {
 	}
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Deserialize)]
 pub(crate) struct CommentsConfig {
 	#[serde(default)]
 	pub ext: String,
@@ -128,7 +173,7 @@ pub(crate) struct CommentsConfig {
 	pub(self) types: Vec<CommentType>,
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Deserialize)]
 pub(crate) struct TodorConfigFileSerial {
 	#[serde(default)]
 	pub tags: Vec<String>,
