@@ -8,6 +8,8 @@
   "ignore" : [
   ],
 
+  "default_ext": "sh",
+
   "comments": [
     {
       "exts": [

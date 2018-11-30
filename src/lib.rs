@@ -147,7 +147,6 @@ impl TodoRBuilder {
 			ext_to_comment_types.insert(ext, comment_types);
 		}
 
-		// TODO: add default_ext to config file
 		let default_comment_types = match self.override_default_ext {
 			Some(default_ext) => {ext_to_comment_types.get(&default_ext)
 				.ok_or(TodoRError::InvalidExtension {ext: default_ext})?
