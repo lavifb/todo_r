@@ -38,6 +38,11 @@ pub mod errors {
 		TodoNotFound {
 			line: usize
 		},
+		/// Error for when provided default file extension is not supported
+		#[fail(display = "'{}' is an default invalid extension.", ext)]
+		InvalidDefaultExtension {
+			ext: String,
+		},
 	}
 
 	use ansi_term::Colour::Red;
@@ -119,6 +124,7 @@ impl TodoRBuilder {
 
 		let verbose = self.override_verbose.unwrap_or_else(|| config_struct.verbose);
 		let mut tags = self.override_tags.unwrap_or_else(|| config_struct.tags.to_owned());
+		let default_ext = self.override_default_ext.unwrap_or_else(|| config_struct.default_ext.to_owned());
 		tags.append(&mut self.added_tags.clone());
 
 		let ignore_paths = match self.override_ignore_paths {
@@ -138,7 +144,11 @@ impl TodoRBuilder {
 
 		let mut ext_to_comment_types: HashMap<String, CommentTypes> = HashMap::new();
 
-		for comment_config in config_struct.comments.drain(..) {
+		// Put default comment types in hashmap.
+		for comment_config in config_struct.default_comments.drain(..)
+			// Put config comment types in hashmap.
+			.chain(config_struct.comments.drain(..)) 
+		{
 			let (ext, mut exts, comment_types) = comment_config.break_apart();
 
 			for extt in exts.drain(..) {
@@ -147,13 +157,9 @@ impl TodoRBuilder {
 			ext_to_comment_types.insert(ext, comment_types);
 		}
 
-		let default_comment_types = match self.override_default_ext {
-			Some(default_ext) => {ext_to_comment_types.get(&default_ext)
-				.ok_or(TodoRError::InvalidExtension {ext: default_ext})?
-				.clone()
-			},
-			None => CommentTypes::new().add_single("#"),
-		};
+		let default_comment_types = ext_to_comment_types.get(&default_ext)
+			.ok_or(TodoRError::InvalidDefaultExtension {ext: default_ext})?
+			.clone();
 
 		let config = TodoRConfig {
 			verbose,

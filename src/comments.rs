@@ -182,5 +182,7 @@ pub(crate) struct TodorConfigFileSerial {
 	#[serde(default)]
 	pub default_ext: String,
 	#[serde(default)]
+	pub default_comments: Vec<CommentsConfig>,
+	#[serde(default)]
 	pub comments: Vec<CommentsConfig>,
 }

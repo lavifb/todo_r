@@ -10,7 +10,7 @@
 
   "default_ext": "sh",
 
-  "comments": [
+  "default_comments": [
     {
       "exts": [
         "c",
