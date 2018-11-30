@@ -99,7 +99,7 @@ fn dir_todos() {
 		.assert()
 		.success()
 		.stdout("")
-		.stderr("[31m[todo_r error][0m: '..' is a directory.\n");
+		.stderr("[31m[todor error][0m: '..' is a directory\n");
 }
 
 #[test]
