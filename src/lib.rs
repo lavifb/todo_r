@@ -267,6 +267,7 @@ impl TodoRBuilder {
 
 	/// Writes the default configuration file to out_buffer.
 	pub fn write_default_config(out_buffer: &mut Write) -> Result<(), Error> {
+		// TODO: make new example_config file
 		out_buffer.write_all(DEFAULT_CONFIG.as_bytes())?;
 		Ok(())
 	}

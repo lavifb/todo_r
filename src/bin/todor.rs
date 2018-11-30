@@ -43,8 +43,10 @@ fn main() {
 	let mut builder = TodoRBuilder::new();
 
 	if let Some(config_path) = matches.value_of("CONFIG") {
-		// TODO: handle error
-		builder.add_config_file(Path::new(config_path)).unwrap();
+		builder.add_config_file(Path::new(config_path)).unwrap_or_else(|err| {
+			eprint_error(&err);
+			std::process::exit(1);
+		});
 	};
 
 	if let Some(tags_iter) = matches.values_of("TAGS") {
@@ -69,6 +71,7 @@ fn main() {
 		builder.add_override_ignore_paths(ignore_paths_iter).unwrap();
 	}
 
+	// TODO: handle error
 	let mut todor = builder.build().unwrap();
 	match matches.values_of("FILE") { 
 		Some(files) => {
@@ -128,7 +131,7 @@ fn main() {
 		let line: usize = matches.value_of("LINE").unwrap().parse().unwrap();
 		let file = matches.value_of("FILE").unwrap();
 
-		println!("\n Removing TODO comment {} in {}\n", line, file);
+		println!("\n Removing TODO comment on line {} in `{}`...\n", line, file);
 
 		todor.remove_todo_line(Path::new(file), line).unwrap_or_else(|err| eprint_error(&err));
 
