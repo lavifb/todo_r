@@ -19,29 +19,39 @@ pub mod errors {
 	#[derive(Debug, Fail)]
 	pub enum TodoRError {
 		/// Error for when provided file path is a directory
-		#[fail(display = "'{}' is a directory.", filepath)]
+		#[fail(display = "'{}' is a directory", filepath)]
 		FileIsDir {
 			filepath: String,
 		},
 		/// Error for when provided file extension is not supported
-		#[fail(display = "'{}' is an invalid extension.", ext)]
+		#[fail(display = "'{}' is an invalid extension", ext)]
 		InvalidExtension {
 			ext: String,
 		},
 		/// Error for when provided filepath for modification is not tracked
-		#[fail(display = "'{}' is not a tracked file.", filepath)]
+		#[fail(display = "'{}' is not a tracked file", filepath)]
 		FileNotTracked {
 			filepath: String,
 		},
 		/// Error for when provided TODO line is not found
-		#[fail(display = "TODO comment not found in line {}.", line)]
+		#[fail(display = "TODO comment not found in line {}", line)]
 		TodoNotFound {
 			line: usize
 		},
 		/// Error for when provided default file extension is not supported
-		#[fail(display = "'{}' is an default invalid extension.", ext)]
+		#[fail(display = "'{}' is an invalid default extension", ext)]
 		InvalidDefaultExtension {
 			ext: String,
+		},
+		/// Error for invalid config file.
+		#[fail(display = "invalid config file: {}", message)]
+		InvalidConfigFile {
+			message: String,
+		},
+		/// Error for invalid ignore path.
+		#[fail(display = "invalid ignore path: {}", message)]
+		InvalidIgnorePath {
+			message: String,
 		},
 	}
 
@@ -50,7 +60,7 @@ pub mod errors {
 	/// Prints err to stderr
 	pub fn eprint_error(err: &Error) {
 		match err {
-			_ => eprintln!("{}: {}", Red.paint("[todo_r error]"), err.to_string()),
+			_ => eprintln!("{}: {}", Red.paint("[todor error]"), err.to_string()),
 		};
 	}
 }
@@ -120,7 +130,8 @@ impl TodoRBuilder {
 
 	/// Consumes self and builds TodoR.
 	pub fn build(self) -> Result<TodoR, Error> {
-		let mut config_struct: TodorConfigFileSerial = self.inner_config.try_into()?;
+		let mut config_struct: TodorConfigFileSerial = self.inner_config.try_into()
+			.map_err(|err| TodoRError::InvalidConfigFile{message: err.to_string()})?;
 
 		let verbose = self.override_verbose.unwrap_or_else(|| config_struct.verbose);
 		let mut tags = self.override_tags.unwrap_or_else(|| config_struct.tags.to_owned());
@@ -132,7 +143,10 @@ impl TodoRBuilder {
 			None => {
 				let mut gb = GlobSetBuilder::new();
 				for path in config_struct.ignore {
-					gb.add(Glob::new(&path)?);
+					gb.add(
+						Glob::new(&path)
+						.map_err(|err| TodoRError::InvalidConfigFile{message: format!("invalid ignore path: {}", err)})?
+					);
 				}
 				gb.build()?
 			}
@@ -237,7 +251,8 @@ impl TodoRBuilder {
 
 	/// Adds path for TodoR to ignore. This overrides ignore paths from config files.
 	pub fn add_override_ignore_path(&mut self, path: &str) -> Result<&mut Self, Error> {
-		let new_glob = Glob::new(path)?;
+		let new_glob = Glob::new(path)
+			.map_err(|err| TodoRError::InvalidIgnorePath{message: err.to_string()})?;
 		self.override_ignore_paths.get_or_insert_with(GlobSetBuilder::new)
 			.add(new_glob);
 		Ok(self)

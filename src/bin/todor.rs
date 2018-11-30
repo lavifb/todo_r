@@ -67,12 +67,17 @@ fn main() {
 	}
 
 	if let Some(ignore_paths_iter) = matches.values_of("IGNORE") {
-		// TODO: handle error
-		builder.add_override_ignore_paths(ignore_paths_iter).unwrap();
+		builder.add_override_ignore_paths(ignore_paths_iter).unwrap_or_else(|err| {
+			eprint_error(&err);
+			std::process::exit(1);
+		});
 	}
 
-	// TODO: handle error
-	let mut todor = builder.build().unwrap();
+	let mut todor = builder.build().unwrap_or_else(|err| {
+		eprint_error(&err);
+		std::process::exit(1);
+	});
+
 	match matches.values_of("FILE") { 
 		Some(files) => {
 			for file in files {
