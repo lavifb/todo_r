@@ -94,14 +94,19 @@ pub struct TodoRBuilder {
 	inner_config: config::Config,
 }
 
-impl Default for TodoRBuilder {
+impl TodoRBuilder {
 	/// Creates TodoRBuilder using the default configuration.
-	fn default() -> TodoRBuilder {
-		let mut inner_config = config::Config::new();
-		inner_config.merge(
+	pub fn new() -> TodoRBuilder {
+		let mut builder = TodoRBuilder::with_no_config();
+		builder.inner_config.merge(
 			config::File::from_str(DEFAULT_CONFIG, config::FileFormat::Json)
 		).unwrap();
 
+		builder
+	}
+
+	/// Creates TodoRBuilder with no configuration.
+	pub fn with_no_config() -> TodoRBuilder {
 		TodoRBuilder {
 			override_verbose: None,
 			added_tags: Vec::new(),
@@ -109,22 +114,7 @@ impl Default for TodoRBuilder {
 			override_ignore_paths: None,
 			override_default_ext: None,
 			styles: StyleConfig::default(),
-			inner_config,
-		}
-	}
-}
-
-impl TodoRBuilder {
-	/// Creates TodoRBuilder using the default configuration.
-	pub fn new() -> TodoRBuilder {
-		TodoRBuilder::default()
-	}
-
-	/// Creates TodoRBuilder with no configuration.
-	pub fn with_no_config() -> TodoRBuilder {
-		TodoRBuilder {
 			inner_config: config::Config::new(),
-			..Default::default()
 		}
 	}
 
@@ -309,7 +299,7 @@ pub struct TodoR {
 
 impl Default for TodoR {
 	fn default() -> TodoR {
-		TodoRBuilder::default().build().unwrap()
+		TodoRBuilder::new().build().unwrap()
 	}
 }
 
@@ -324,7 +314,7 @@ impl TodoR {
 		I: IntoIterator<Item = S>,
 		S: Into<Cow<'a, str>>,
 	{
-		let mut builder = TodoRBuilder::default();
+		let mut builder = TodoRBuilder::new();
 		builder.add_override_tags(tags);
 		builder.build().unwrap()
 	}

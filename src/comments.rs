@@ -96,7 +96,7 @@ impl Into<CommentType> for BlockComment {
 }
 
 fn escape_deserialize<'de, D>(deserializer: D) -> Result<String, D::Error>
-where 
+where
 	D: Deserializer<'de>,
 {
 	let s: String = Deserialize::deserialize(deserializer)?;
