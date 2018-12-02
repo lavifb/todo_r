@@ -8,6 +8,7 @@ use std::io::{self, Write};
 use std::borrow::Cow;
 
 /// Struct for holding ansi color printing options
+#[derive(Debug, Clone)]
 pub struct StyleConfig {
 	filepath_style: Style,
 	line_number_style: Style,

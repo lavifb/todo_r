@@ -88,6 +88,7 @@ use comments::{CommentTypes, TodorConfigFileSerial};
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 
 /// Type for building TodoR with a custom configuration.
+#[derive(Debug, Default, Clone)]
 pub struct TodoRBuilder {
 	override_verbose: Option<bool>,
 	added_tags: Vec<String>,
@@ -102,7 +103,7 @@ pub struct TodoRBuilder {
 impl TodoRBuilder {
 	/// Creates TodoRBuilder using the default configuration.
 	pub fn new() -> TodoRBuilder {
-		let mut builder = TodoRBuilder::with_no_config();
+		let mut builder = TodoRBuilder::default();
 		builder.inner_config.merge(
 			config::File::from_str(DEFAULT_CONFIG, config::FileFormat::Json)
 		).unwrap();
@@ -112,15 +113,7 @@ impl TodoRBuilder {
 
 	/// Creates TodoRBuilder with no configuration.
 	pub fn with_no_config() -> TodoRBuilder {
-		TodoRBuilder {
-			override_verbose: None,
-			added_tags: Vec::new(),
-			override_tags: None,
-			override_ignore_paths: None,
-			override_default_ext: None,
-			styles: StyleConfig::default(),
-			inner_config: config::Config::new(),
-		}
+		TodoRBuilder::default()
 	}
 
 	/// Consumes self and builds TodoR.

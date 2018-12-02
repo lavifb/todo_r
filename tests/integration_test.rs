@@ -11,7 +11,7 @@ lazy_static! {
 	static ref CARGO_RUN: CargoRun = escargot::CargoBuild::new()
 		.bin("todor")
 		.current_release()
-		// .current_target() // No difference in targets so this is omitted so ther is no recompilation
+		.current_target()
 		.run()
 		.unwrap();
  }
