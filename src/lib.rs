@@ -20,7 +20,12 @@ pub mod errors {
 	pub enum TodoRError {
 		/// Error for when provided file path is a directory
 		#[fail(display = "'{}' is a directory", filepath)]
-		FileIsDir {
+		InputIsDir {
+			filepath: String,
+		},
+		/// Error for when provided file cannot be accessed for some reason
+		#[fail(display = "cannot access '{}'", filepath)]
+		CannotAccessFile {
 			filepath: String,
 		},
 		/// Error for when provided file extension is not supported
@@ -240,6 +245,7 @@ impl TodoRBuilder {
 	}
 
 	/// Adds path for TodoR to ignore. This overrides ignore paths from config files.
+	// MAYB: use ignore crate instead of globset
 	pub fn add_override_ignore_path(&mut self, path: &str) -> Result<&mut Self, Error> {
 		let new_glob = Glob::new(path)
 			.map_err(|err| TodoRError::InvalidIgnorePath{message: err.to_string()})?;
@@ -356,10 +362,16 @@ impl TodoR {
 		}
 
 		// Make sure the file is not a directory
-		if filepath.metadata()?.is_dir() {
-			return Err(TodoRError::FileIsDir {
-				filepath: filepath.to_string_lossy().to_string()
-			}.into());
+		if !filepath.is_file() {
+			if filepath.is_dir() {
+				return Err(TodoRError::InputIsDir {
+					filepath: filepath.to_string_lossy().to_string()
+				}.into());
+			} else {
+				return Err(TodoRError::CannotAccessFile {
+					filepath: filepath.to_string_lossy().to_string()
+				}.into());
+			}
 		}
 
 		let file_ext = filepath.extension().unwrap_or_else(|| OsStr::new(".sh"));
