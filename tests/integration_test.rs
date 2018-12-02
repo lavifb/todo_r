@@ -18,7 +18,7 @@ lazy_static! {
 
 fn todor() -> Command {
 	let mut cmd = CARGO_RUN.command();
-	cmd.current_dir("tests/examples");
+	cmd.current_dir("tests/inputs");
 	cmd.arg("--no-style");
 	cmd
 }
@@ -36,7 +36,7 @@ fn basic() {
 #[test]
 fn colors() {
 	let mut cmd = Command::main_binary().unwrap();
-	cmd.current_dir("tests/examples")
+	cmd.current_dir("tests/inputs")
 		.arg("test1.rs")
 		.assert()
 		.success()
