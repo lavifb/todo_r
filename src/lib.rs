@@ -86,6 +86,7 @@ use display::{StyleConfig, write_file_todos, TodoFile};
 use comments::{CommentTypes, TodorConfigFileSerial};
 
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
+static EXAMPLE_CONFIG: &str = include_str!("example_config.hjson");
 
 /// Type for building TodoR with a custom configuration.
 #[derive(Debug, Default, Clone)]
@@ -270,9 +271,8 @@ impl TodoRBuilder {
 	}
 
 	/// Writes the default configuration file to out_buffer.
-	pub fn write_default_config(out_buffer: &mut Write) -> Result<(), Error> {
-		// TODO: make new example_config file
-		out_buffer.write_all(DEFAULT_CONFIG.as_bytes())?;
+	pub fn write_example_config(out_buffer: &mut Write) -> Result<(), Error> {
+		out_buffer.write_all(EXAMPLE_CONFIG.as_bytes())?;
 		Ok(())
 	}
 }

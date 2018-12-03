@@ -1,0 +1,51 @@
+{
+  // TODO tags to search for
+  "tags": [
+    "todo",
+    "fix",
+    "fixme"
+  ],
+
+  // Paths to ignore. You can use .gitignore style globs
+  "ignore" : [
+  ],
+
+  // Default extension fallback
+  "default_ext": "sh",
+
+  // custom comment types
+  "comments": [
+    {
+      // extension for this comment type
+      "ext": "py",
+      "types": [
+        // single line comment definition
+        {
+          "single": "#"
+        },
+        // block comment definition
+        {
+          "prefix": "\"\"\"",
+          "suffix": "\"\"\""
+        }
+      ]
+    },
+    {
+      // list of extensions for this comment type
+      "exts": [
+        "rs",
+        "c",
+        "h",
+      ],
+      "types": [
+        {
+          "single": "//"
+        },
+        {
+          "prefix": "/*",
+          "suffix": "*/"
+        }
+      ]
+    }
+  ]
+}
