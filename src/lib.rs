@@ -2,6 +2,7 @@
 #[macro_use] extern crate serde_derive;
 extern crate serde;
 extern crate regex;
+extern crate fnv;
 extern crate ansi_term;
 extern crate config;
 extern crate globset;
@@ -74,11 +75,11 @@ use std::fs::File;
 use std::path::Path;
 use std::ffi::OsStr;
 use std::io::{self, Write, BufReader, Cursor};
-use std::collections::HashMap;
 use std::borrow::Cow;
 
 use failure::Error;
 use errors::TodoRError;
+use fnv::FnvHashMap;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 
 use parser::parse_content;
@@ -145,7 +146,7 @@ impl TodoRBuilder {
 			println!("TODO tags: {}", tags.join(", ").to_uppercase());
 		}
 
-		let mut ext_to_comment_types: HashMap<String, CommentTypes> = HashMap::new();
+		let mut ext_to_comment_types: FnvHashMap<String, CommentTypes> = FnvHashMap::default();
 
 		// Put default comment types in hashmap.
 		for comment_config in config_struct.default_comments.drain(..)
@@ -286,7 +287,7 @@ struct TodoRConfig {
 	tags: Vec<String>,
 	styles: StyleConfig,
 	ignore_paths: GlobSet,
-	ext_to_comment_types: HashMap<String, CommentTypes>,
+	ext_to_comment_types: FnvHashMap<String, CommentTypes>,
 	default_comment_types: CommentTypes,
 }
 

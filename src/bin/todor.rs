@@ -85,6 +85,7 @@ fn main() {
 			}
 		},
 		None => {
+			// MAYB: use walker from ignore crate
 			// try to use git using `git ls-files $(git rev-parse --show-toplevel)`
 			let rev_parse = Command::new("git")
 			                        .arg("rev-parse")
