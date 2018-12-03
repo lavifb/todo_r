@@ -1,5 +1,5 @@
 {
-  // TODO tags to search for
+  // tags to search for. These are case-insensitive
   "tags": [
     "todo",
     "fix",
@@ -10,7 +10,7 @@
   "ignore" : [
   ],
 
-  // Default extension fallback
+  // Default extension fall-back
   "default_ext": "sh",
 
   // custom comment types
