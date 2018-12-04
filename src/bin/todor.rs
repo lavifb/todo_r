@@ -6,7 +6,9 @@ extern crate dialoguer;
 extern crate ansi_term;
 
 use std::path::Path;
+use std::fs::File;
 use std::process::Command;
+use clap::ArgMatches;
 use dialoguer::Select;
 use ansi_term::Color::Red;
 
@@ -22,7 +24,6 @@ fn main() {
 		(author: "Lavi Blumberg <lavifb@gmail.com>")
 		(about: "Lists TODO comments in code")
 		(@arg FILE: ... "File to search for TODO items.")
-		// TODO: option to make config file
 		(@arg CONFIG: -c --("config") +takes_value "Takes configuration from file.")
 		(@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
 		(@arg TAGS: -t --("tag") +takes_value +multiple "TODO tags to search for.")
@@ -37,9 +38,25 @@ fn main() {
 			(@arg FILE: +required ... "File to remove TODO items from.")
 			(@arg LINE: -l +takes_value +required "Index of TODO to remove.")
 		)
+		(@subcommand init =>
+			(version: "0.1")
+			(about: "Creates example config file")
+			(author: "Lavi Blumberg <lavifb@gmail.com>")
+		)
 	).get_matches();
 
+	let exit_code: i32;
 
+	if matches.subcommand_matches("init").is_some() {
+		exit_code = run_init();
+	} else {
+		exit_code = run(&matches);
+	}
+
+	std::process::exit(exit_code);
+}
+
+fn run(matches: &ArgMatches) -> i32 {
 	let mut builder = TodoRBuilder::new();
 
 	if let Some(config_path) = matches.value_of("CONFIG") {
@@ -85,6 +102,7 @@ fn main() {
 			}
 		},
 		None => {
+			// TODO: look for .todor file
 			// MAYB: use walker from ignore crate
 			// try to use git using `git ls-files $(git rev-parse --show-toplevel)`
 			let rev_parse = Command::new("git")
@@ -114,7 +132,7 @@ fn main() {
 		loop {
 			let file_selection = match select_file(&todor) {
 				Some(file_selection) => file_selection,
-				None => return,
+				None => return 0,
 			};
 			
 			let filepath = Path::new(&file_selection);
@@ -142,6 +160,26 @@ fn main() {
 		todor.remove_todo_line(Path::new(file), line).unwrap_or_else(|err| eprint_error(&err));
 
 		todor.print_todos();
+	}
+
+	0
+}
+
+fn run_init() -> i32 {
+	let mut config_file = match File::create(Path::new(".todor")) {
+		Ok(file) => file,
+		Err(e) => {
+			eprint_error(&e.into());
+			return 1
+		}
+	};
+
+	match TodoRBuilder::write_example_config(&mut config_file) {
+		Ok(_) => 0,
+		Err(e) => {
+			eprint_error(&e.into());
+			1
+		}
 	}
 }
 

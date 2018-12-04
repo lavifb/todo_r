@@ -1,0 +1,21 @@
+{
+  // tags to search for. These are case-insensitive
+  "tags": [
+    "todo",
+    "fix",
+    "fixme"
+  ],
+
+  // Paths to ignore. You can use .gitignore style globs
+  "ignore" : [
+    "benches/**",
+    "tests/**"
+  ],
+
+  // Default extension fall-back
+  "default_ext": "sh",
+
+  // custom comment types
+  "comments": [
+  ]
+}
