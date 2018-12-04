@@ -28,8 +28,8 @@ impl Todo {
 	/// Returns colored output string
 	pub fn style_string(&self, line_style: &Style, todo_style: &Style, content_style: &Style) -> String {
 		format!("  {}  {}  {}", 
-			// MAYB: figure out biggest line number to use for formatting
-			line_style.paint(format!("line {:<5}", self.line)), // works up to 100,000 lines which should be a long enough file...
+			// Columns align for up to 100,000 lines which should be fine
+			line_style.paint(format!("line {:<5}", self.line)),
 			todo_style.paint(format!("{:5}", &self.todo_type)),
 			content_style.paint(&self.content),
 			)
@@ -52,7 +52,6 @@ where
 		.map(|c| get_regex_for_comment(tags, c).unwrap())
 		.collect();
 
-	// MAYB: do this as iterator and collect
 	let mut todos = Vec::new();
 	for (line_num, line_result) in content_buf.lines().enumerate() {
 		let line = line_result?;
