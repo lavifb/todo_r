@@ -6,6 +6,8 @@ extern crate lazy_static;
 use assert_cmd::prelude::*;
 use escargot::CargoRun;
 use std::process::Command;
+use std::path::Path;
+use std::fs;
 
 lazy_static! {
 	static ref CARGO_RUN: CargoRun = escargot::CargoBuild::new()
@@ -35,7 +37,7 @@ fn basic() {
 
 #[test]
 fn colors() {
-	let mut cmd = Command::main_binary().unwrap();
+	let mut cmd = CARGO_RUN.command();
 	cmd.current_dir("tests/inputs")
 		.arg("test1.rs")
 		.assert()
@@ -185,4 +187,22 @@ fn config_ignore() {
 		.success()
 		.stdout("test1.rs\n  line 2      TODO   item\n")
 		.stderr("");
+}
+
+#[test]
+fn init() {
+	let mut cmd = CARGO_RUN.command();
+	cmd.current_dir("tests/inputs")
+		.arg("init")
+		.assert()
+		.success()
+		.stdout("")
+		.stderr("");
+
+	let todor_config = Path::new("tests/inputs/.todor");
+	// check that file is created
+	assert!(todor_config.is_file(), true);
+
+	// remove file
+	fs::remove_file(todor_config).unwrap();
 }
