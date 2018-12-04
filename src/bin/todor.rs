@@ -4,6 +4,7 @@ extern crate todo_r;
 #[macro_use(clap_app)] extern crate clap;
 extern crate dialoguer;
 extern crate ansi_term;
+extern crate failure;
 
 use std::path::Path;
 use std::fs::File;
@@ -11,6 +12,7 @@ use std::process::Command;
 use clap::ArgMatches;
 use dialoguer::Select;
 use ansi_term::Color::Red;
+use failure::Error;
 
 use todo_r::{TodoR, TodoRBuilder};
 use todo_r::errors::eprint_error;
@@ -50,20 +52,23 @@ fn main() {
 	if matches.subcommand_matches("init").is_some() {
 		exit_code = run_init();
 	} else {
-		exit_code = run(&matches);
+		exit_code = match run(&matches){
+			Ok(code) => code,
+			Err(err) => {
+				eprint_error(&err);
+				1
+			}
+		};
 	}
 
 	std::process::exit(exit_code);
 }
 
-fn run(matches: &ArgMatches) -> i32 {
+fn run(matches: &ArgMatches) -> Result<i32, Error> {
 	let mut builder = TodoRBuilder::new();
 
 	if let Some(config_path) = matches.value_of("CONFIG") {
-		builder.add_config_file(Path::new(config_path)).unwrap_or_else(|err| {
-			eprint_error(&err);
-			std::process::exit(1);
-		});
+		builder.add_config_file(Path::new(config_path))?;
 	};
 
 	if let Some(tags_iter) = matches.values_of("TAGS") {
@@ -84,16 +89,10 @@ fn run(matches: &ArgMatches) -> i32 {
 	}
 
 	if let Some(ignore_paths_iter) = matches.values_of("IGNORE") {
-		builder.add_override_ignore_paths(ignore_paths_iter).unwrap_or_else(|err| {
-			eprint_error(&err);
-			std::process::exit(1);
-		});
+		builder.add_override_ignore_paths(ignore_paths_iter)?;
 	}
 
-	let mut todor = builder.build().unwrap_or_else(|err| {
-		eprint_error(&err);
-		std::process::exit(1);
-	});
+	let mut todor = builder.build()?;
 
 	match matches.values_of("FILE") { 
 		Some(files) => {
@@ -123,7 +122,7 @@ fn run(matches: &ArgMatches) -> i32 {
 
 			let files_in_lines = String::from_utf8_lossy(&output.stdout);
 			for file in files_in_lines.lines() {
-				todor.open_todos(Path::new(file)).unwrap_or_else(|err| eprint_error(&err));
+				todor.open_todos(Path::new(file))?;
 			}
 		},
 	}
@@ -132,7 +131,7 @@ fn run(matches: &ArgMatches) -> i32 {
 		loop {
 			let file_selection = match select_file(&todor) {
 				Some(file_selection) => file_selection,
-				None => return 0,
+				None => return Ok(0),
 			};
 			
 			let filepath = Path::new(&file_selection);
@@ -162,7 +161,7 @@ fn run(matches: &ArgMatches) -> i32 {
 		todor.print_todos();
 	}
 
-	0
+	Ok(0)
 }
 
 fn run_init() -> i32 {
