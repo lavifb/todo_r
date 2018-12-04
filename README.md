@@ -1,10 +1,11 @@
 Todo_r
 ===
+[![Build Status](https://travis-ci.org/lavifb/todo_r.svg?branch=master)](https://travis-ci.org/lavifb/todo_r)
 
 Todo_r is a simple rust command line utility that keeps track of your todo items in code.
+It is pronounced "todoer" like someone that does todos.
 
 A lot is adapted from [leasot](https://github.com/pgilad/leasot) but runs much faster.
-
 
 ### Current support
 
