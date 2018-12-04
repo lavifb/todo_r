@@ -4,7 +4,6 @@ use regex::Regex;
 use ansi_term::Style;
 use std::fmt;
 use std::io::BufRead;
-use std::borrow::Cow;
 
 use custom_tags::get_regex_for_comment;
 use comments::CommentTypes;
@@ -18,14 +17,11 @@ pub struct Todo {
 
 impl Todo {
 	/// Create new TODO struct
-	fn new<'a, S>(line: usize, todo_type_str: &str, content_str: S) -> Todo 
-	where
-		S: Into<Cow<'a, str>>,
-	{
+	fn new(line: usize, todo_type_str: &str, content_str: &str) -> Todo {
 		Todo {
 			line,
 			todo_type: todo_type_str.to_uppercase(),
-			content: content_str.into().into_owned(),
+			content: content_str.to_string(),
 		}
 	}
 
