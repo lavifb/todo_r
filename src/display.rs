@@ -12,7 +12,7 @@ use std::borrow::Cow;
 pub struct StyleConfig {
 	filepath_style: Style,
 	line_number_style: Style,
-	todo_type_style: Style,
+	tag_style: Style,
 	content_style: Style,
 }
 
@@ -22,7 +22,7 @@ impl StyleConfig {
 		StyleConfig {
 			filepath_style: Style::new(),
 			line_number_style: Style::new(),
-			todo_type_style: Style::new(),
+			tag_style: Style::new(),
 			content_style: Style::new(),
 		}
 	}
@@ -35,7 +35,7 @@ impl Default for StyleConfig {
 		StyleConfig {
 			filepath_style: Style::new().underline(),
 			line_number_style: Style::from(Fixed(8)),
-			todo_type_style: Style::from(Green),
+			tag_style: Style::from(Green),
 			content_style: Style::from(Cyan),
 		}
 	}
@@ -88,7 +88,7 @@ pub fn write_file_todos(out_buffer: &mut Write, todo_file: &TodoFile, styles: &S
 		writeln!(out_buffer, "{}", 
 			todo.style_string(
 				&styles.line_number_style, 
-				&styles.todo_type_style, 
+				&styles.tag_style, 
 				&styles.content_style
 			)
 		);
