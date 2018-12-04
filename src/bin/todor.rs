@@ -33,13 +33,6 @@ fn main() {
 		(@arg OVERRIDE_TAGS: -T --("override-tags") +takes_value +multiple "Overrides default TODO tags to only search custom ones.")
 		(@arg VERBOSE: -v --("verbose") "Provide verbose output.")
 		(@arg DELETE_MODE: -d --("delete") "Interactive delete mode.")
-		(@subcommand remove =>
-			(version: "0.1")
-			(about: "Removes TODO comments from the code")
-			(author: "Lavi Blumberg <lavifb@gmail.com>")
-			(@arg FILE: +required ... "File to remove TODO items from.")
-			(@arg LINE: -l +takes_value +required "Index of TODO to remove.")
-		)
 		(@subcommand init =>
 			(version: "0.1")
 			(about: "Creates example config file")
@@ -146,18 +139,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 			println!("Comment removed");
 		}
 	} else {
-		todor.print_todos();
-	}
-
-	// handle remove subcommand
-	if let Some(matches) = matches.subcommand_matches("remove") {
-		let line: usize = matches.value_of("LINE").unwrap().parse().unwrap();
-		let file = matches.value_of("FILE").unwrap();
-
-		println!("\n Removing TODO comment on line {} in `{}`...\n", line, file);
-
-		todor.remove_todo_line(Path::new(file), line).unwrap_or_else(|err| eprint_error(&err));
-
 		todor.print_todos();
 	}
 
