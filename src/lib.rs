@@ -180,7 +180,11 @@ impl TodoRBuilder {
 
 	/// Adds config file for TodoR.
 	pub fn add_config_file(&mut self, config_path: &Path) -> Result<&mut Self, Error> {
-		self.inner_config.merge(config::File::from(config_path))?;
+		let mut merge_file = config::File::from(config_path);
+		if config_path.file_name() == Some(OsStr::new(".todor")) {
+			merge_file = merge_file.format(config::FileFormat::Hjson);
+		}
+		self.inner_config.merge(merge_file)?;
 		Ok(self)
 	}
 
@@ -272,7 +276,7 @@ impl TodoRBuilder {
 	}
 
 	/// Writes the default configuration file to out_buffer.
-	pub fn write_example_config(out_buffer: &mut Write) -> Result<(), Error> {
+	pub fn write_example_config(out_buffer: &mut impl Write) -> Result<(), Error> {
 		out_buffer.write_all(EXAMPLE_CONFIG.as_bytes())?;
 		Ok(())
 	}
