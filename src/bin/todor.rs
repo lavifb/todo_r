@@ -96,6 +96,10 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 		},
 		None => {
 			// Recurse down and try to find either .git or .todor as the root folder
+			if verbose {
+				println!("Looking for .git or .todor to use as workspace root...");
+			}
+
 			let mut curr_dir = current_dir()?;
 			curr_dir.push(".todor");
 			let mut relative_path = PathBuf::from("./");
@@ -117,6 +121,10 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 				let todor_path = path.with_file_name(".todor");
 				if todor_path.exists() {
 					found_walker_root = true;
+					if verbose {
+						println!("Found workspace root: '{}'", todor_path.display());
+						println!("Applying config file '{}'...", todor_path.display());
+					}
 					builder.add_config_file(&todor_path)?;
 					break;
 				}
@@ -124,6 +132,9 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 				let git_path = path.with_file_name(".git");
 				if git_path.exists() {
 					found_walker_root = true;
+					if verbose {
+						println!("Found workspace root: '{}'", git_path.display());
+					}
 					break;
 				}
 
