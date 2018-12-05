@@ -125,7 +125,11 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 						println!("Found workspace root: '{}'", todor_path.display());
 						println!("Applying config file '{}'...", todor_path.display());
 					}
-					builder.add_config_file(&todor_path)?;
+					
+					// check for empty file before adding
+					if todor_path.metadata().unwrap().len() > 2 {
+						builder.add_config_file(&todor_path)?;
+					}
 					break;
 				}
 
