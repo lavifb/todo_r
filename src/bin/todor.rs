@@ -2,13 +2,16 @@
 extern crate todo_r;
 
 #[macro_use(clap_app)] extern crate clap;
+extern crate ignore;
 extern crate dialoguer;
 extern crate ansi_term;
-extern crate failure;
+#[macro_use(format_err)] extern crate failure;
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fs::File;
-use std::process::Command;
+use ignore::WalkBuilder;
+use ignore::overrides::OverrideBuilder;
+use std::env::*;
 use clap::ArgMatches;
 use dialoguer::Select;
 use ansi_term::Color::Red;
@@ -83,37 +86,67 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 		builder.add_override_ignore_paths(ignore_paths_iter)?;
 	}
 
-	let mut todor = builder.build()?;
-
+	let mut todor;
 	match matches.values_of("FILE") { 
 		Some(files) => {
+			todor = builder.build()?;
 			for file in files {
 				todor.open_todos(Path::new(file)).unwrap_or_else(|err| eprint_error(&err));
 			}
 		},
 		None => {
-			// TODO: look for .todor file
-			// MAYB: use walker from ignore crate
-			// try to use git using `git ls-files $(git rev-parse --show-toplevel)`
-			let rev_parse = Command::new("git")
-			                        .arg("rev-parse")
-			                        .arg("--show-toplevel")
-			                        .output()
-			                        // TODO: handle error
-			                        .unwrap();
+			// Recurse down and try to find either .git or .todor as the root folder
+			let mut curr_dir = current_dir()?;
+			curr_dir.push(".todor");
+			let mut relative_path = PathBuf::from("./");
+			let mut found_walker_root = false;
+			let mut walk_builder = WalkBuilder::new(&relative_path);
+			let mut ignore_builder = OverrideBuilder::new("");
 
-			let top_level: String = String::from_utf8_lossy(&rev_parse.stdout).trim().to_string();
-			if verbose { println!("Searching git repo at {}", top_level); }
+			for path in curr_dir.ancestors() {
+				let ignore_path = relative_path
+					.strip_prefix("./")
+					.unwrap()
+					.with_file_name(path.file_name()
+						.ok_or(format_err!("No input files provided and no git repo or todor workspace found"))?
+					)
+					.to_string_lossy()
+					.into_owned();
+				ignore_builder.add(&format!("!{}", &ignore_path)).unwrap();
 
-			let output = Command::new("git")
-			                        .arg("ls-files")
-			                        .arg(top_level)
-			                        .output()
-			                        .unwrap();
+				let todor_path = path.with_file_name(".todor");
+				if todor_path.exists() {
+					found_walker_root = true;
+					builder.add_config_file(&todor_path)?;
+					break;
+				}
 
-			let files_in_lines = String::from_utf8_lossy(&output.stdout);
-			for file in files_in_lines.lines() {
-				todor.open_todos(Path::new(file))?;
+				let git_path = path.with_file_name(".git");
+				if git_path.exists() {
+					found_walker_root = true;
+					break;
+				}
+
+				relative_path.push("..");
+				walk_builder.add(&relative_path);
+			}
+
+			if !found_walker_root {
+				return Err(format_err!("No input files provided and no git repo or todor workspace found"))
+			}
+
+			walk_builder.overrides(ignore_builder.build()?);
+			let walk = walk_builder.build();
+
+			todor = builder.build()?;
+
+			for entry in walk {
+				let dir_entry = entry?;
+				let path = dir_entry.path().strip_prefix("./").unwrap();
+
+				if path.is_file() {
+					todor.open_todos(path).unwrap_or_else(|err| eprint_error(&err));
+				}
 			}
 		},
 	}

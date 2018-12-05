@@ -95,6 +95,7 @@ pub struct TodoRBuilder {
 	override_verbose: Option<bool>,
 	added_tags: Vec<String>,
 	override_tags: Option<Vec<String>>,
+	// TODO: move into .todorignore files
 	override_ignore_paths: Option<GlobSetBuilder>,
 	override_default_ext: Option<String>,
 	styles: StyleConfig,
