@@ -40,19 +40,17 @@ fn main() {
 		)
 	).get_matches();
 
-	let exit_code: i32;
-
-	if matches.subcommand_matches("init").is_some() {
-		exit_code = run_init();
+	let exit_code = if matches.subcommand_matches("init").is_some() {
+		run_init()
 	} else {
-		exit_code = match run(&matches){
+		match run(&matches) {
 			Ok(code) => code,
 			Err(err) => {
 				eprint_error(&err);
 				1
 			}
-		};
-	}
+		}
+	};
 
 	std::process::exit(exit_code);
 }
@@ -156,8 +154,8 @@ fn run_init() -> i32 {
 
 	match TodoRBuilder::write_example_config(&mut config_file) {
 		Ok(_) => 0,
-		Err(e) => {
-			eprint_error(&e.into());
+		Err(err) => {
+			eprint_error(&err);
 			1
 		}
 	}
