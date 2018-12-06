@@ -152,7 +152,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 
 			walk_builder.overrides(ignore_builder.build()?);
 			let walk = walk_builder.build();
-
 			todor = builder.build()?;
 
 			for entry in walk {

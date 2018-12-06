@@ -206,3 +206,36 @@ fn init() {
 	// remove file
 	fs::remove_file(todor_config).unwrap();
 }
+
+#[test]
+fn walk1() {
+	todor()
+		.current_dir("tests")
+		.assert()
+		.success()
+		.stdout("inputs/test1.rs\n  line 2      TODO   item\ninputs/test2.py\n  line 2      TODO   docstring comment\n  line 4      TODO   item\ninputt/test1.rs\n  line 1      TODO   item2\n")
+		.stderr("");
+}
+
+#[test]
+fn walk2() {
+	todor()
+		.current_dir("tests")
+		.arg("-T")
+		.arg("foo")
+		.assert()
+		.success()
+		.stdout("inputs/test1.rs\n  line 4      FOO    bar\ninputt/test1.rs\n  line 3      FOO    bar2\n")
+		.stderr("");
+}
+
+#[test]
+fn walk3() {
+	todor()
+		.arg("-T")
+		.arg("foo")
+		.assert()
+		.success()
+		.stdout("test1.rs\n  line 4      FOO    bar\n../inputt/test1.rs\n  line 3      FOO    bar2\n")
+		.stderr("");
+}
