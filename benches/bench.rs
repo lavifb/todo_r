@@ -1,9 +1,7 @@
-#[macro_use]
-extern crate criterion;
-extern crate todo_r;
+// Benchmarking for todor
 
+use criterion::{Criterion, criterion_group, criterion_main};
 use std::path::Path;
-use criterion::Criterion;
 use todo_r::TodoRBuilder;
 use todo_r::errors::eprint_error;
 

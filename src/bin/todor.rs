@@ -1,12 +1,6 @@
 // Binary for finding TODOs in specified files
-extern crate todo_r;
 
-#[macro_use(clap_app)] extern crate clap;
-extern crate ignore;
-extern crate dialoguer;
-extern crate ansi_term;
-#[macro_use(format_err)] extern crate failure;
-
+use clap::clap_app;
 use std::path::{Path, PathBuf};
 use std::fs::File;
 use ignore::WalkBuilder;
@@ -15,7 +9,7 @@ use std::env::*;
 use clap::ArgMatches;
 use dialoguer::Select;
 use ansi_term::Color::Red;
-use failure::Error;
+use failure::{Error, format_err};
 
 use todo_r::{TodoR, TodoRBuilder};
 use todo_r::errors::eprint_error;
@@ -112,7 +106,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 					.strip_prefix(".")
 					.unwrap()
 					.with_file_name(path.file_name()
-						.ok_or(format_err!("No input files provided and no git repo or todor workspace found"))?
+						.ok_or_else(|| format_err!("No input files provided and no git repo or todor workspace found"))?
 					)
 					.to_string_lossy()
 					.into_owned();
@@ -176,7 +170,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 			};
 			
 			let filepath = Path::new(&file_selection);
-			let selected_todo = select_todo(&todor, filepath);
+			let selected_todo = select_todo(&todor, filepath)?;
 
 			let todo_ind = match selected_todo {
 				Some(todo_ind) => todo_ind,
@@ -230,9 +224,9 @@ fn select_file(todor: &TodoR) -> Option<String> {
 	Some(tracked_files[file_ind].to_string())
 }
 
-fn select_todo(todor: &TodoR, filepath : &Path) -> Option<usize> {
+fn select_todo(todor: &TodoR, filepath : &Path) -> Result<Option<usize>, Error> {
 	let mut todos_buf: Vec<u8> = Vec::new();
-	todor.write_todos_from_file(filepath, &mut todos_buf);
+	todor.write_todos_from_file(filepath, &mut todos_buf)?;
 
 	let todos_string = String::from_utf8_lossy(&todos_buf);
 	let mut todos_lines = todos_string.lines();
@@ -249,8 +243,8 @@ fn select_todo(todor: &TodoR, filepath : &Path) -> Option<usize> {
 
 	let todo_ind = todo_selector.interact().unwrap();
 	if todo_ind + 1 == todos_items.len() {
-		return None;
+		return Ok(None);
 	}
 
-	Some(todo_ind)
+	Ok(Some(todo_ind))
 }

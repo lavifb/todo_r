@@ -3,7 +3,7 @@
 use std::borrow::Borrow;
 use regex::Regex;
 
-use comments::CommentType;
+use crate::comments::CommentType;
 
 // MAYB: use a better regex to find TODOs
 pub(crate) fn get_regex_for_comment<S>(custom_tags: &[S], comment_type: &CommentType) -> Result<Regex, regex::Error>
@@ -24,7 +24,7 @@ where
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use comments::CommentType;
+	use crate::comments::CommentType;
 
 	fn test_regex(content: &str, exp_result: &str, comment_type: &CommentType) {
 		let re = get_regex_for_comment(&["TODO", "FIXME"], comment_type).unwrap();

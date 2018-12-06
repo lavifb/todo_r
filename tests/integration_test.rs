@@ -1,8 +1,6 @@
-extern crate assert_cmd;
-extern crate escargot;
-#[macro_use]
-extern crate lazy_static;
+// Integratino tests for todor
 
+use lazy_static::lazy_static;
 use assert_cmd::prelude::*;
 use escargot::CargoRun;
 use std::process::Command;
