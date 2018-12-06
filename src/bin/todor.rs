@@ -95,11 +95,11 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 			}
 
 			let mut curr_dir = current_dir()?;
+			let mut ignore_builder = OverrideBuilder::new(&curr_dir);
 			curr_dir.push(".todor");
 			let mut relative_path = PathBuf::from(".");
-			let mut found_walker_root = false;
 			let mut walk_builder = WalkBuilder::new(&relative_path);
-			let mut ignore_builder = OverrideBuilder::new(&curr_dir);
+			let mut found_walker_root = false;
 
 			for path in curr_dir.ancestors() {
 				let ignore_path = relative_path
