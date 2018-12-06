@@ -16,11 +16,19 @@ lazy_static! {
 		.current_target()
 		.run()
 		.unwrap();
- }
+}
+
+fn dir_sep() -> &'static str {
+	if cfg!(windows) {
+		"\\"
+	} else {
+		"/"
+	}
+}
 
 fn todor() -> Command {
 	let mut cmd = CARGO_RUN.command();
-	cmd.current_dir("tests/inputs");
+	cmd.current_dir(format!("tests{0}inputs", dir_sep()));
 	cmd.arg("--no-style");
 	cmd
 }
@@ -205,14 +213,6 @@ fn init() {
 
 	// remove file
 	fs::remove_file(todor_config).unwrap();
-}
-
-fn dir_sep() -> &'static str {
-	if cfg!(windows) {
-		"\\"
-	} else {
-		"/"
-	}
 }
 
 #[test]
