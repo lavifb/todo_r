@@ -17,6 +17,6 @@ cache:
 
 script:
   - cargo build --verbose --all
-  - cd tests\inputs
+  - dir tests\inputs
   - cargo run -- -v
   - cargo test --verbose --all
