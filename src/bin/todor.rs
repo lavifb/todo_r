@@ -118,10 +118,10 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 					.into_owned();
 
 				if verbose {
-					println!("path: {}", path.display());
-					println!("rel_path: {}", relative_path.display());
-					println!("ignore: {}", ignore_path);
-					println!("\n");
+					eprintln!("path: {}", path.display());
+					eprintln!("rel_path: {}", relative_path.display());
+					eprintln!("ignore: {}", ignore_path);
+					eprintln!("\n");
 				}
 
 				ignore_builder.add(&format!("!{}", &ignore_path)).unwrap();
@@ -168,7 +168,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 			for entry in walk {
 				let dir_entry = entry?;
 				if verbose {
-					println!("walking: {}", dir_entry.path().display());
+					eprintln!("walking: {}", dir_entry.path().display());
 				}
 
 				let path = dir_entry.path().strip_prefix("./").unwrap();

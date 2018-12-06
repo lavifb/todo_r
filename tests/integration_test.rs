@@ -219,6 +219,7 @@ fn init() {
 fn walk1() {
 	todor()
 		.current_dir("tests")
+		.arg("-v")
 		.assert()
 		.success()
 		.stdout(format!("inputs{0}test1.rs\n  line 2      TODO   item\ninputs{0}test2.py\n  line 2      TODO   docstring comment\n  line 4      TODO   item\ninputt{0}test1.rs\n  line 1      TODO   item2\n",
@@ -230,6 +231,7 @@ fn walk1() {
 fn walk2() {
 	todor()
 		.current_dir("tests")
+		.arg("-v")
 		.arg("-T")
 		.arg("foo")
 		.assert()
@@ -242,6 +244,7 @@ fn walk2() {
 #[test]
 fn walk3() {
 	todor()
+		.arg("-v")
 		.arg("-T")
 		.arg("foo")
 		.assert()
