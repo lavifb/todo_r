@@ -5,6 +5,7 @@ authors = ["Lavi Blumberg <lavifb@gmail.com>"]
 homepage = "https://github.com/lavifb/todo_r"
 repository = "https://github.com/lavifb/todo_r"
 license = "MIT"
+edition = "2018"
 
 [dependencies]
 clap = "2.32"

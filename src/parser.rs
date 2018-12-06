@@ -5,8 +5,8 @@ use ansi_term::Style;
 use std::fmt;
 use std::io::BufRead;
 
-use custom_tags::get_regex_for_comment;
-use comments::CommentTypes;
+use crate::custom_tags::get_regex_for_comment;
+use crate::comments::CommentTypes;
 
 /// A struct holding the TODO and all the needed meta-information for it.
 pub struct Todo {
@@ -72,7 +72,7 @@ mod tests {
 	use super::*;
 	use std::io::Cursor;
 
-	use comments::CommentTypes;
+	use crate::comments::CommentTypes;
 
 	fn test_content(content: &str, exp_result: &str, file_ext: &str) {
 		let comment_types = match file_ext {

@@ -1,11 +1,11 @@
-#[macro_use] extern crate failure;
-#[macro_use] extern crate serde_derive;
-extern crate serde;
-extern crate regex;
-extern crate fnv;
-extern crate ansi_term;
-extern crate config;
-extern crate globset;
+// #[macro_use] extern crate failure;
+// #[macro_use] extern crate serde_derive;
+// extern crate serde;
+// extern crate regex;
+// extern crate fnv;
+// extern crate ansi_term;
+// extern crate config;
+// extern crate globset;
 
 mod parser;
 mod display;
@@ -14,7 +14,7 @@ mod remover;
 pub mod comments;
 
 pub mod errors {
-	use failure::Error;
+	use failure::{Error, Fail};
 
 	/// Custom Errors for TodoR
 	#[derive(Debug, Fail)]
@@ -78,13 +78,13 @@ use std::io::{self, Write, BufReader, Cursor};
 use std::borrow::Cow;
 
 use failure::Error;
-use errors::TodoRError;
 use fnv::FnvHashMap;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 
-use parser::parse_content;
-use display::{StyleConfig, write_file_todos, TodoFile};
-use comments::{CommentTypes, TodorConfigFileSerial};
+use crate::errors::TodoRError;
+use crate::parser::parse_content;
+use crate::display::{StyleConfig, write_file_todos, TodoFile};
+use crate::comments::{CommentTypes, TodorConfigFileSerial};
 
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 static EXAMPLE_CONFIG: &str = include_str!("example_config.hjson");
@@ -402,29 +402,33 @@ impl TodoR {
 		let lock = stdout.lock();
 		let mut out_buffer = io::BufWriter::new(lock);
 
-		self.write_todos(&mut out_buffer);
+		self.write_todos(&mut out_buffer).unwrap();
 	}
 
 	/// Writes TODOs to out_buffer.
-	pub fn write_todos(&self, out_buffer: &mut Write) {
+	pub fn write_todos(&self, out_buffer: &mut Write) -> Result<(), Error> {
 		for todo_file in &self.todo_files {
 			if todo_file.is_empty() && !self.config.verbose {
 				continue
 			}
 
-			write_file_todos(out_buffer, &todo_file, &self.config.styles);
+			write_file_todos(out_buffer, &todo_file, &self.config.styles)?;
 		}
+
+		Ok(())
 	}
 
 	/// Writes TODOs to out_buffer.
 	// MAYB: change self.todo_files to Hashmap for easier finding
-	pub fn write_todos_from_file(&self, filepath: &Path, out_buffer: &mut Write) {
+	pub fn write_todos_from_file(&self, filepath: &Path, out_buffer: &mut Write) -> Result<(), Error> {
 		for todo_file in &self.todo_files {
 			if todo_file.filepath == filepath {
-				write_file_todos(out_buffer, &todo_file, &self.config.styles);
+				write_file_todos(out_buffer, &todo_file, &self.config.styles)?;
 				break;
 			}
 		}
+
+		Ok(())
 	}
 
 	/// Deletes TODO line from given filepath corresponding to the given index.
