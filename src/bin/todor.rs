@@ -105,7 +105,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 			let mut relative_path = PathBuf::from(".");
 			let mut found_walker_root = false;
 			let mut walk_builder = WalkBuilder::new(&relative_path);
-			let mut ignore_builder = OverrideBuilder::new(".");
+			let mut ignore_builder = OverrideBuilder::new(&curr_dir);
 
 			for path in curr_dir.ancestors() {
 				let ignore_path = relative_path
