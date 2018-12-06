@@ -102,7 +102,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 
 			let mut curr_dir = current_dir()?;
 			curr_dir.push(".todor");
-			let mut relative_path = PathBuf::from(".");
+			let mut relative_path = PathBuf::from("./");
 			let mut found_walker_root = false;
 			let mut walk_builder = WalkBuilder::new(&relative_path);
 			let mut ignore_builder = OverrideBuilder::new("");
@@ -152,7 +152,9 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 
 			walk_builder.overrides(ignore_builder.build()?)
 				.sort_by_file_name(std::ffi::OsStr::cmp)
-				.add_custom_ignore_filename(".todorignore");
+				.add_custom_ignore_filename(".todorignore")
+				.parents(false)
+				.hidden(false);
 			let walk = walk_builder.build();
 			todor = builder.build()?;
 
