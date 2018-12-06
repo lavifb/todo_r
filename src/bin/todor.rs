@@ -109,7 +109,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 
 			for path in curr_dir.ancestors() {
 				let ignore_path = relative_path
-					.strip_prefix("./")
+					.strip_prefix(".")
 					.unwrap()
 					.with_file_name(path.file_name()
 						.ok_or(format_err!("No input files provided and no git repo or todor workspace found"))?
