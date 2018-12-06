@@ -109,8 +109,8 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 
 			for path in curr_dir.ancestors() {
 				let ignore_path = relative_path
-					// .strip_prefix(".")
-					// .unwrap()
+					.strip_prefix(".")
+					.unwrap()
 					.with_file_name(path.file_name()
 						.ok_or(format_err!("No input files provided and no git repo or todor workspace found"))?
 					)
@@ -124,7 +124,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 					eprintln!("\n");
 				}
 
-				ignore_builder.add(&format!("!{}", &ignore_path)).unwrap();
+				ignore_builder.add(&format!("!{}\\", &ignore_path)).unwrap();
 
 				let todor_path = path.with_file_name(".todor");
 				if todor_path.exists() {
