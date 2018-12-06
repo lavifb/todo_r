@@ -207,14 +207,22 @@ fn init() {
 	fs::remove_file(todor_config).unwrap();
 }
 
+fn dir_sep() -> &'static str {
+	if cfg!(windows) {
+		"\\"
+	} else {
+		"/"
+	}
+}
+
 #[test]
 fn walk1() {
-	// TODO2: make test have windows friendly paths
 	todor()
 		.current_dir("tests")
 		.assert()
 		.success()
-		.stdout("inputs/test1.rs\n  line 2      TODO   item\ninputs/test2.py\n  line 2      TODO   docstring comment\n  line 4      TODO   item\ninputt/test1.rs\n  line 1      TODO   item2\n")
+		.stdout(format!("inputs{0}test1.rs\n  line 2      TODO   item\ninputs{0}test2.py\n  line 2      TODO   docstring comment\n  line 4      TODO   item\ninputt{0}test1.rs\n  line 1      TODO   item2\n",
+			dir_sep()))
 		.stderr("");
 }
 
@@ -226,7 +234,8 @@ fn walk2() {
 		.arg("foo")
 		.assert()
 		.success()
-		.stdout("inputs/test1.rs\n  line 4      FOO    bar\ninputt/test1.rs\n  line 3      FOO    bar2\n")
+		.stdout(format!("inputs{0}test1.rs\n  line 4      FOO    bar\ninputt{0}test1.rs\n  line 3      FOO    bar2\n",
+			dir_sep()))
 		.stderr("");
 }
 
@@ -237,6 +246,7 @@ fn walk3() {
 		.arg("foo")
 		.assert()
 		.success()
-		.stdout("test1.rs\n  line 4      FOO    bar\n../inputt/test1.rs\n  line 3      FOO    bar2\n")
+		.stdout(format!("test1.rs\n  line 4      FOO    bar\n..{0}inputt{0}test1.rs\n  line 3      FOO    bar2\n",
+			dir_sep()))
 		.stderr("");
 }
