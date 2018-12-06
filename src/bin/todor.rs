@@ -124,7 +124,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 					eprintln!("\n");
 				}
 
-				ignore_builder.add(&format!("!{}\\**", &ignore_path)).unwrap();
+				ignore_builder.add(&format!("!{}/", &ignore_path)).unwrap();
 
 				let todor_path = path.with_file_name(".todor");
 				if todor_path.exists() {
