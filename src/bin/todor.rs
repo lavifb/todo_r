@@ -150,7 +150,8 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 				return Err(format_err!("No input files provided and no git repo or todor workspace found"))
 			}
 
-			walk_builder.overrides(ignore_builder.build()?);
+			walk_builder.overrides(ignore_builder.build()?)
+				.sort_by_file_name(std::ffi::OsStr::cmp);
 			let walk = walk_builder.build();
 			todor = builder.build()?;
 
