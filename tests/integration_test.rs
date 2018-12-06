@@ -209,6 +209,7 @@ fn init() {
 
 #[test]
 fn walk1() {
+	// TODO: make test have windows friendly paths
 	todor()
 		.current_dir("tests")
 		.assert()
