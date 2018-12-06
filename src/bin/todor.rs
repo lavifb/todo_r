@@ -151,7 +151,8 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 			}
 
 			walk_builder.overrides(ignore_builder.build()?)
-				.sort_by_file_name(std::ffi::OsStr::cmp);
+				.sort_by_file_name(std::ffi::OsStr::cmp)
+				.add_custom_ignore_filename(".todorignore");
 			let walk = walk_builder.build();
 			todor = builder.build()?;
 

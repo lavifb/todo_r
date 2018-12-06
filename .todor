@@ -6,12 +6,6 @@
     "fixme"
   ],
 
-  // Paths to ignore. You can use .gitignore style globs
-  "ignore" : [
-    "benches/**",
-    "tests/**"
-  ],
-
   // Default extension fall-back
   "default_ext": "sh",
 
