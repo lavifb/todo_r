@@ -1,11 +1,12 @@
 // Module for displaying output
 
-use parser::Todo;
+use crate::parser::Todo;
 
 use std::path::{Path, PathBuf};
 use ansi_term::Style;
 use std::io::{self, Write};
 use std::borrow::Cow;
+use failure::Error;
 
 /// Struct for holding ansi color printing options
 #[derive(Debug, Clone)]
@@ -77,13 +78,13 @@ pub fn print_file_todos(todo_file: &TodoFile, styles: &StyleConfig, verbose: boo
 	let stdout = io::stdout();
 	let lock = stdout.lock();
 	let mut out_buffer = io::BufWriter::new(lock);
-	write_file_todos(&mut out_buffer, todo_file, styles);
+	write_file_todos(&mut out_buffer, todo_file, styles).unwrap();
 }
 
 /// Writes file path and a list of Todos to out_buffer
 // MAYB: have different colors for different TODOs
-pub fn write_file_todos(out_buffer: &mut Write, todo_file: &TodoFile, styles: &StyleConfig) {
-	writeln!(out_buffer, "{}", styles.filepath_style.paint(todo_file.filepath.to_string_lossy()));
+pub fn write_file_todos(out_buffer: &mut Write, todo_file: &TodoFile, styles: &StyleConfig) -> Result<(), Error> {
+	writeln!(out_buffer, "{}", styles.filepath_style.paint(todo_file.filepath.to_string_lossy()))?;
 	for todo in &todo_file.todos {
 		writeln!(out_buffer, "{}", 
 			todo.style_string(
@@ -91,6 +92,8 @@ pub fn write_file_todos(out_buffer: &mut Write, todo_file: &TodoFile, styles: &S
 				&styles.tag_style, 
 				&styles.content_style
 			)
-		);
+		)?;
 	}
+
+	Ok(())
 }

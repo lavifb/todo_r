@@ -4,8 +4,8 @@ use failure::Error;
 use std::fs::{File, rename};
 use std::io::{BufReader, BufRead, BufWriter, Write};
 
-use errors::TodoRError;
-use display::TodoFile;
+use crate::errors::TodoRError;
+use crate::display::TodoFile;
 
 pub fn remove_todo_by_index(todo_file: &mut TodoFile, ind: usize) -> Result<(), Error> {
 	assert!(ind < todo_file.todos.len());
