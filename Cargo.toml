@@ -1,5 +1,6 @@
 [package]
 name = "todo_r"
+description = "Simple rust command line utility that keeps track of your todo comments in code"
 version = "0.4.0"
 authors = ["Lavi Blumberg <lavifb@gmail.com>"]
 homepage = "https://github.com/lavifb/todo_r"
