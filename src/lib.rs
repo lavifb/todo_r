@@ -7,7 +7,7 @@ mod remover;
 pub mod comments;
 
 pub mod errors {
-	use failure::{Error, Fail};
+	use failure::Fail;
 
 	/// Custom Errors for TodoR
 	#[derive(Debug, Fail)]
@@ -52,15 +52,6 @@ pub mod errors {
 		InvalidIgnorePath {
 			message: String,
 		},
-	}
-
-	use ansi_term::Colour::Red;
-
-	/// Prints error message to stderr using a red identifier.
-	pub fn eprint_error(err: &Error) {
-		match err {
-			_ => eprintln!("{}: {}", Red.paint("[todor error]"), err.to_string()),
-		};
 	}
 }
 

@@ -12,8 +12,13 @@ use ansi_term::Color::Red;
 use failure::{Error, format_err};
 
 use todo_r::{TodoR, TodoRBuilder};
-use todo_r::errors::eprint_error;
 
+/// Prints error message to stderr using a red identifier.
+pub fn eprint_error(err: &Error) {
+	match err {
+		_ => eprintln!("{}: {}", Red.paint("[todor error]"), err.to_string()),
+	};
+}
 
 /// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
