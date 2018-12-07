@@ -6,6 +6,7 @@ use regex::Regex;
 use crate::comments::CommentType;
 
 // MAYB: use a better regex to find TODOs
+// TODO: collect tags like `// TODO(lavifb): item` or `// TODO: item @lavifb`
 pub(crate) fn get_regex_for_comment<S>(custom_tags: &[S], comment_type: &CommentType) -> Result<Regex, regex::Error>
 where
 	S: Borrow<str>,

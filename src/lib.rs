@@ -1,11 +1,4 @@
-// #[macro_use] extern crate failure;
-// #[macro_use] extern crate serde_derive;
-// extern crate serde;
-// extern crate regex;
-// extern crate fnv;
-// extern crate ansi_term;
-// extern crate config;
-// extern crate globset;
+/// todor library for reading content and processing it into output.
 
 mod parser;
 mod display;
@@ -19,32 +12,32 @@ pub mod errors {
 	/// Custom Errors for TodoR
 	#[derive(Debug, Fail)]
 	pub enum TodoRError {
-		/// Error for when provided file path is a directory
+		/// Error for when provided file path is a directory.
 		#[fail(display = "'{}' is a directory", filepath)]
 		InputIsDir {
 			filepath: String,
 		},
-		/// Error for when provided file cannot be accessed for some reason
+		/// Error for when provided file cannot be accessed for some reason.
 		#[fail(display = "cannot access '{}'", filepath)]
 		CannotAccessFile {
 			filepath: String,
 		},
-		/// Error for when provided file extension is not supported
+		/// Error for when provided file extension is not supported.
 		#[fail(display = "'{}' is an invalid extension", ext)]
 		InvalidExtension {
 			ext: String,
 		},
-		/// Error for when provided filepath for modification is not tracked
+		/// Error for when provided filepath for modification is not tracked.
 		#[fail(display = "'{}' is not a tracked file", filepath)]
 		FileNotTracked {
 			filepath: String,
 		},
-		/// Error for when provided TODO line is not found
+		/// Error for when provided TODO line is not found.
 		#[fail(display = "TODO comment not found in line {}", line)]
 		TodoNotFound {
 			line: usize
 		},
-		/// Error for when provided default file extension is not supported
+		/// Error for when provided default file extension is not supported.
 		#[fail(display = "'{}' is an invalid default extension", ext)]
 		InvalidDefaultExtension {
 			ext: String,
@@ -63,7 +56,7 @@ pub mod errors {
 
 	use ansi_term::Colour::Red;
 
-	/// Prints err to stderr
+	/// Prints error message to stderr using a red identifier.
 	pub fn eprint_error(err: &Error) {
 		match err {
 			_ => eprintln!("{}: {}", Red.paint("[todor error]"), err.to_string()),
@@ -89,7 +82,18 @@ use crate::comments::{CommentTypes, TodorConfigFileSerial};
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 static EXAMPLE_CONFIG: &str = include_str!("example_config.hjson");
 
-/// Type for building TodoR with a custom configuration.
+/// A builder to create a TodoR with a custom configuration.
+/// Customization occurs in two forms: using manual functions and adding config files.
+///
+/// ### Functions
+/// Use functions such as `add_tag()` to add to the config.
+/// Functions that have `override` in them will fully override settings from config files.
+///
+/// ### Config files
+/// Config files are added using `add_config_file()`. 
+///
+/// For an example config file, use `todo_r::write_example_config()`.
+
 #[derive(Debug, Default, Clone)]
 pub struct TodoRBuilder {
 	override_verbose: Option<bool>,
@@ -189,7 +193,7 @@ impl TodoRBuilder {
 	}
 
 	/// Adds tag for TodoR to look for without overriding tags from config files.
-	pub fn add_todo_word<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
+	pub fn add_tag<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
 		self.added_tags.push(tag.into().into_owned());
 		self
 	}
@@ -208,7 +212,7 @@ impl TodoRBuilder {
 	}
 
 	/// Adds tag for TodoR to look for. This overrides tags from config files.
-	pub fn add_override_todo_word<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
+	pub fn add_override_tag<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
 		self.override_tags.get_or_insert_with(Vec::new)
 			.push(tag.into().into_owned());
 		self
@@ -274,12 +278,12 @@ impl TodoRBuilder {
 
 		Ok(())
 	}
+}
 
-	/// Writes the default configuration file to out_buffer.
-	pub fn write_example_config(out_buffer: &mut impl Write) -> Result<(), Error> {
-		out_buffer.write_all(EXAMPLE_CONFIG.as_bytes())?;
-		Ok(())
-	}
+/// Writes the default configuration file to out_buffer.
+pub fn write_example_config(out_buffer: &mut impl Write) -> Result<(), Error> {
+	out_buffer.write_all(EXAMPLE_CONFIG.as_bytes())?;
+	Ok(())
 }
 
 /// Configuration for `TodoR`.

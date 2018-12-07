@@ -54,6 +54,7 @@ fn main() {
 
 fn run(matches: &ArgMatches) -> Result<i32, Error> {
 	let mut builder = TodoRBuilder::new();
+	// TODO: serach for default config file in ~/.config/todor
 
 	if let Some(config_path) = matches.value_of("CONFIG") {
 		builder.add_config_file(Path::new(config_path))?;
@@ -196,7 +197,7 @@ fn run_init() -> i32 {
 		}
 	};
 
-	match TodoRBuilder::write_example_config(&mut config_file) {
+	match todo_r::write_example_config(&mut config_file) {
 		Ok(_) => 0,
 		Err(err) => {
 			eprint_error(&err);
