@@ -1,4 +1,4 @@
 // TODO: item2
 fn main() {
-// FOO: bar2
+    // FOO: bar2
 }
