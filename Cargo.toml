@@ -1,6 +1,6 @@
 [package]
 name = "todo_r"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Lavi Blumberg <lavifb@gmail.com>"]
 homepage = "https://github.com/lavifb/todo_r"
 repository = "https://github.com/lavifb/todo_r"

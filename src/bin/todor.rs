@@ -37,7 +37,6 @@ fn main() {
 		(@arg VERBOSE: -v --("verbose") "Provide verbose output.")
 		(@arg DELETE_MODE: -d --("delete") "Interactive delete mode.")
 		(@subcommand init =>
-			(version: "0.1")
 			(about: "Creates example config file")
 			(author: "Lavi Blumberg <lavifb@gmail.com>")
 		)
