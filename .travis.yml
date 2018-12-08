@@ -79,6 +79,9 @@ script:
   - cargo build --verbose --all
   - cargo test --verbose --all
 
+before_deploy:
+  - sh ci/before_deploy.sh
+
 deploy:
   provider: releases
   # NOTE updating the `api_key.secure`

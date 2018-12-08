@@ -35,3 +35,6 @@ assert_cmd = "0.10"
 [[bench]]
 name = "bench"
 harness = false
+
+[profile.release]
+lto = true
