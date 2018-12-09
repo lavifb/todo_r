@@ -56,8 +56,8 @@ cache:
   cargo: true
 
 script:
-  - cargo build --verbose --all
-  - cargo test --verbose --all
+  - cargo build --verbose --all --target $TARGET
+  - cargo test --verbose --all --target $TARGET
 
 before_deploy:
   - sh ci/before_deploy.sh
