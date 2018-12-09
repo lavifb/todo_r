@@ -37,10 +37,10 @@ matrix:
 
     # Code formatting check
     - os: linux
-      rust: nightly
+      rust: stable
       # skip the global install step
       install:
-        - cargo install --debug --force rustfmt-nightly
+        - rustup component add rustfmt-preview
       script: cargo fmt -- --check
 
   allow_failures:
