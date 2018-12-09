@@ -22,6 +22,8 @@ pub fn eprint_error(err: &Error) {
 
 /// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
+    // TODO: use env_logger for debugging and logs
+
     // TODO: add subcommand for just content so it can be piped
     let matches = clap_app!(todo_r =>
         (version: env!("CARGO_PKG_VERSION"))
