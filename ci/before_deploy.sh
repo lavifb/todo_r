@@ -22,7 +22,6 @@ main() {
 
     cargo build --target "$TARGET" --release --verbose --locked
 
-    # TODO Update this to package the right artifacts
     cp "target/$TARGET/release/$PROJECT_NAME" $stage/
 
     cd $stage

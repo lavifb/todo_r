@@ -99,11 +99,7 @@ mod tests {
         };
 
         let mut content_buf = Cursor::new(content);
-        let todos = parse_content(
-            &mut content_buf,
-            &comment_types,
-            &["TODO".to_string()]
-            ).unwrap();
+        let todos = parse_content(&mut content_buf, &comment_types, &["TODO".to_string()]).unwrap();
 
         if todos.is_empty() {
             assert_eq!(exp_result, "NONE");
