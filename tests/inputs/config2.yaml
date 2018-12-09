@@ -5,6 +5,6 @@ comments:
   - ext: rs
     types:
       - single: //
-      - single: '@'
+      - single: '^'
       - prefix: /*
         suffix: '*/'

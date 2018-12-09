@@ -1,16 +1,55 @@
 language: rust
-rust:
-  - stable
-  - beta
-  - nightly
-
-os:
-  - windows
 
 matrix:
+  include:
+    # Stable channel.
+    - os: linux
+      rust: stable
+      env: TARGET=x86_64-unknown-linux-gnu
+    - os: osx
+      rust: stable
+      env: TARGET=x86_64-apple-darwin
+    - os: windows
+      rust: stable
+      env: TARGET=x86_64-pc-windows-gnu
+
+    # Beta test
+    - os: linux
+      rust: beta
+      env: TARGET=x86_64-unknown-linux-gnu
+    - os: osx
+      rust: beta
+      env: TARGET=x86_64-apple-darwin
+    - os: windows
+      rust: beta
+      env: TARGET=x86_64-pc-windows-gnu
+
+    # Nightly test
+    - os: linux
+      rust: nightly
+      env: TARGET=x86_64-unknown-linux-gnu
+    - os: osx
+      rust: nightly
+      env: TARGET=x86_64-apple-darwin
+    - os: windows
+      rust: nightly
+      env: TARGET=x86_64-pc-windows-gnu
+
+    # Code formatting check
+    - os: linux
+      rust: stable
+      # skip the global install step
+      install:
+        - rustup component add rustfmt-preview
+      script: cargo fmt -- --check
+
   allow_failures:
     - rust: nightly
   fast_finish: true
+
+env:
+  global:
+    - PROJECT_NAME=todor
 
 cache: 
   cargo: true
@@ -18,3 +57,28 @@ cache:
 script:
   - cargo build --verbose --all
   - cargo test --verbose --all
+
+before_deploy:
+  - sh ci/before_deploy.sh
+
+deploy:
+  provider: releases
+  # NOTE updating the `api_key.secure`
+  # - go to: https://github.com/settings/tokens/new
+  # - generate new token using `public_repo` scope
+  # - encrypt it using: `travis encrypt API_KEY_HERE`
+  # - paste the output below
+  api_key:
+    secure: "vvLKNhCaKTifhdKhJR27IDs8x48EVn80f4EX5wWmFdPh9ANt0RJjFWkQtJAVQEekAvIyFiCZ44Fd4l28Fh9MqGia1zvRKZI8RC9xsFVHFvqNih/teb23CY4EPy7p14oIkfV61faWo/M0GG7yhMdfofUBtLL/coE8VAMjqE3IWGV1B5bEMO4OcxpOSZfBkRg025bYV1UCFYjhJlyZPEEMoKvEZS1zncpsUs1XipmXL39ii1OrPQxfX1IcGmD+yO4jterZsVPB278O9j8d3ouNSIktflP5gwk2EgJ+H/EdRZ2m+2QPQdM/SyAJ+t9TarVbX19xL06d7j3yfX8aI/iq6hPCydcdSozFTfMu1QYy2JnmPK4+XvH8D1vNIELrVqSoekjsfzifCUakWcYmT64ysayuPMRZGOEDcMOLIjmOKgV0kPM30dUpGRQ4GZdc2oLstLIgiTMGPem4xsZMJJpEwnt6s3yBdgK/JUiQlW0+QQHDiJURa8EY77HEor31MEqBQ/vTy36wwsD1pJKZrKomHZiIi7yDzRLVf5X4xE78MVBSkZLH8TDWe6SJtKm1SOA5e5K3Mw4AxFZ7WTB6eg5o/nXZtsz5NyM3FAupkt/9YnO19P7jZJUScGIguc5cYsfeROZZOGZo/ywNOVXZu9PHL/eLJOg0cMHUvNI6fZE06Vw="
+  # for uploading multiple files
+  file_glob: true
+  # NOTE explanation on each env variable
+  # - PROJECT_NAME: name of the project, set on the `env.global` above
+  # - TRAVIS_TAG: tag name that the build is being deployed for, usually the version number
+  # - TARGET: target triple of the build
+  file:
+    - $PROJECT_NAME-$TRAVIS_TAG-$TARGET.*
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: $TRAVIS_RUST_VERSION = stable && $TARGET != ""

@@ -8,7 +8,7 @@ ext = "rs"
 	single = "//"
 
 	[[comments.types]]
-	single = "@"
+	single = "^"
 
 	[[comments.types]]
 	prefix = "/*"
