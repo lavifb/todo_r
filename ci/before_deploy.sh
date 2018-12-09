@@ -20,13 +20,13 @@ main() {
 
     test -f Cargo.lock || cargo generate-lockfile
 
-    cargo build --target "$TARGET" --release --verbose
+    cargo build --target "$TARGET" --release --verbose --locked
 
     # TODO Update this to package the right artifacts
     cp "target/$TARGET/release/$PROJECT_NAME" $stage/
 
     cd $stage
-    tar czf $src/$CRATE_NAME-$TRAVIS_TAG-$TARGET.tar.gz *
+    tar czf $src/$PROJECT_NAME-$TRAVIS_TAG-$TARGET.tar.gz *
     cd $src
 
     rm -rf $stage
