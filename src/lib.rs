@@ -330,9 +330,7 @@ impl TodoR {
 
     /// Returns the number of TODOs currently tracked by TodoR
     pub fn num_todos(&self) -> usize {
-        self.todo_files
-            .iter()
-            .fold(0, |s, tf| s + tf.todos.len())
+        self.todo_files.iter().fold(0, |s, tf| s + tf.todos.len())
     }
 
     /// Returns all tracked files that contain TODOs

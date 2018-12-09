@@ -319,10 +319,7 @@ fn walk3() {
 
 #[test]
 fn check1() {
-    todor()
-        .arg("--check")
-        .assert()
-        .failure();
+    todor().arg("--check").assert().failure();
 }
 
 #[test]
