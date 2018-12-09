@@ -68,6 +68,8 @@ impl TodoFile {
     }
 }
 
+// TODO: other printing options: json, xml, etc.
+
 #[allow(dead_code)]
 /// Prints file path and a list of Todos to stdout
 pub fn print_file_todos(todo_file: &TodoFile, styles: &StyleConfig, verbose: bool) {

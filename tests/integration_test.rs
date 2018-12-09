@@ -316,3 +316,18 @@ fn walk3() {
         ))
         .stderr("");
 }
+
+#[test]
+fn check1() {
+    todor().arg("--check").assert().failure();
+}
+
+#[test]
+fn check2() {
+    todor()
+        .arg("--check")
+        .arg("-T")
+        .arg("none")
+        .assert()
+        .success();
+}

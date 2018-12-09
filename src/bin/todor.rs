@@ -35,6 +35,7 @@ fn main() {
         (@arg OVERRIDE_TAGS: -T --("override-tags") +takes_value +multiple
             "Overrides default TODO tags to only search custom ones.")
         (@arg VERBOSE: -v --("verbose") "Provide verbose output.")
+        (@arg CHECK: --("check") "Exits nicely only if no TODO tags are found.")
         (@arg DELETE_MODE: -d --("delete") "Interactive delete mode.")
         (@subcommand init =>
             (about: "Creates example config file")
@@ -200,6 +201,10 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
         }
     } else {
         todor.print_todos();
+    }
+
+    if matches.is_present("CHECK") && todor.num_todos() > 0 {
+        return Ok(1);
     }
 
     Ok(0)
