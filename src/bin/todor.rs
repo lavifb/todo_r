@@ -10,6 +10,7 @@ use ignore::WalkBuilder;
 use std::env::*;
 use std::fs::File;
 use std::path::{Path, PathBuf};
+use env_logger;
 
 use todo_r::{TodoR, TodoRBuilder};
 
@@ -22,6 +23,8 @@ pub fn eprint_error(err: &Error) {
 
 /// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
+    env_logger::init();
+    
     // TODO: add subcommand for just content so it can be piped
     let matches = clap_app!(todo_r =>
         (version: env!("CARGO_PKG_VERSION"))

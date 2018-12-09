@@ -3,45 +3,49 @@ language: rust
 matrix:
   include:
     # Stable channel.
-    - os: linux
-      rust: stable
-      env: TARGET=x86_64-unknown-linux-gnu
-    - os: osx
-      rust: stable
-      env: TARGET=x86_64-apple-darwin
+    # - os: linux
+    #   rust: stable
+    #   env: TARGET=x86_64-unknown-linux-gnu
+    # - os: osx
+    #   rust: stable
+    #   env: TARGET=x86_64-apple-darwin
     - os: windows
       rust: stable
       env: TARGET=x86_64-pc-windows-gnu
+      script:
+        - cargo build --verbose --all --target $TARGET
+        - cd tests/inputs
+        - RUST_LOG=debug cargo run
 
     # Beta test
-    - os: linux
-      rust: beta
-      env: TARGET=x86_64-unknown-linux-gnu
-    - os: osx
-      rust: beta
-      env: TARGET=x86_64-apple-darwin
-    - os: windows
-      rust: beta
-      env: TARGET=x86_64-pc-windows-gnu
+    # - os: linux
+    #   rust: beta
+    #   env: TARGET=x86_64-unknown-linux-gnu
+    # - os: osx
+    #   rust: beta
+    #   env: TARGET=x86_64-apple-darwin
+    # - os: windows
+    #   rust: beta
+    #   env: TARGET=x86_64-pc-windows-gnu
 
     # Nightly test
-    - os: linux
-      rust: nightly
-      env: TARGET=x86_64-unknown-linux-gnu
-    - os: osx
-      rust: nightly
-      env: TARGET=x86_64-apple-darwin
-    - os: windows
-      rust: nightly
-      env: TARGET=x86_64-pc-windows-gnu
+    # - os: linux
+    #   rust: nightly
+    #   env: TARGET=x86_64-unknown-linux-gnu
+    # - os: osx
+    #   rust: nightly
+    #   env: TARGET=x86_64-apple-darwin
+    # - os: windows
+    #   rust: nightly
+    #   env: TARGET=x86_64-pc-windows-gnu
 
     # Code formatting check
-    - os: linux
-      rust: stable
-      # skip the global install step
-      install:
-        - rustup component add rustfmt-preview
-      script: cargo fmt -- --check
+    # - os: linux
+    #   rust: stable
+    #   # skip the global install step
+    #   install:
+    #     - rustup component add rustfmt-preview
+    #   script: cargo fmt -- --check
 
   allow_failures:
     - rust: nightly
