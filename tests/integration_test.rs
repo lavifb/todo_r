@@ -124,12 +124,7 @@ fn py_extension() {
 
 #[test]
 fn dir_todos() {
-    todor()
-        .arg("..")
-        .assert()
-        .success()
-        .stdout("")
-        .stderr("[31m[todor error][0m: '..' is a directory\n");
+    todor().arg("..").assert().success().stdout("").stderr("");
 }
 
 #[test]

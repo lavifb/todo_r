@@ -48,6 +48,7 @@ use std::path::Path;
 use failure::Error;
 use fnv::FnvHashMap;
 use globset::{Glob, GlobSet, GlobSetBuilder};
+use log::info;
 
 use crate::comments::{CommentTypes, TodorConfigFileSerial};
 use crate::display::{write_file_todos, StyleConfig, TodoFile};
@@ -136,10 +137,6 @@ impl TodoRBuilder {
             }
         };
 
-        if verbose {
-            println!("TODO tags: {}", tags.join(", ").to_uppercase());
-        }
-
         let mut ext_to_comment_types: FnvHashMap<String, CommentTypes> = FnvHashMap::default();
 
         // Put default comment types in hashmap.
@@ -161,6 +158,11 @@ impl TodoRBuilder {
             .get(&default_ext)
             .ok_or(TodoRError::InvalidDefaultExtension { ext: default_ext })?
             .clone();
+
+        info!(
+            "todor parser built with tags: {}",
+            tags.join(", ").to_uppercase()
+        );
 
         let config = TodoRConfig {
             verbose,

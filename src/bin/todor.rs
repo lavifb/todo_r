@@ -11,22 +11,13 @@ use ignore::WalkBuilder;
 use log::*;
 use std::env::*;
 use std::fs::File;
+use std::io::Write;
 use std::path::{self, Path, PathBuf};
 
 use todo_r::{TodoR, TodoRBuilder};
 
-// TODO: make into macro
-/// Prints error message to stderr using a red identifier.
-pub fn eprint_error(err: &Error) {
-    match err {
-        _ => eprintln!("{}: {}", Red.paint("[todor error]"), err.to_string()),
-    };
-}
-
 /// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
-    // TODO: use env_logger for debugging and logs and verbose
-
     // TODO: add subcommand for just content so it can be piped
     // TODO: flag to suppress non-panic errors
     let matches = clap_app!(todo_r =>
@@ -50,13 +41,48 @@ fn main() {
     )
     .get_matches();
 
+    // Set up log output
+    let mut log_env = env_logger::Env::default();
+    let verbose: bool = matches.is_present("VERBOSE");
+    if verbose {
+        log_env = log_env.default_filter_or("info");
+    } else {
+        log_env = log_env.default_filter_or("error");
+    }
+
+    env_logger::Builder::from_env(log_env)
+        .format(|buf, record| {
+            let mut style = buf.style();
+
+            match record.level() {
+                log::Level::Error => style.set_color(env_logger::fmt::Color::Red),
+                log::Level::Warn => style.set_color(env_logger::fmt::Color::Yellow),
+                _ => style.set_color(env_logger::fmt::Color::White),
+            };
+
+            let log_prefix = match record.module_path() {
+                Some(mod_path) => format!("[{} {}]", mod_path, record.level()),
+                None => format!("[{}]", record.level())
+            };
+
+            writeln!(
+                buf,
+                "{}: - {}",
+                log_prefix,
+                record.args()
+            )
+        })
+        .target(env_logger::Target::Stderr)
+        .init();
+
+    // Run program
     let exit_code = if matches.subcommand_matches("init").is_some() {
         run_init()
     } else {
         match run(&matches) {
             Ok(code) => code,
             Err(err) => {
-                eprint_error(&err);
+                error!("{}", err);
                 1
             }
         }
@@ -101,14 +127,12 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
             for file in files {
                 todor
                     .open_todos(Path::new(file))
-                    .unwrap_or_else(|err| eprint_error(&err));
+                    .unwrap_or_else(|err| warn!("{}", err));
             }
         }
         None => {
             // Recurse down and try to find either .git or .todor as the root folder
-            if verbose {
-                println!("Looking for .git or .todor to use as workspace root...");
-            }
+            info!("Looking for .git or .todor to use as workspace root...");
 
             let mut curr_dir = current_dir()?;
             let mut ignore_builder = OverrideBuilder::new(&curr_dir);
@@ -149,10 +173,8 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                 let todor_path = path.with_file_name(".todor");
                 if todor_path.exists() {
                     found_walker_root = true;
-                    if verbose {
-                        println!("Found workspace root: '{}'", todor_path.display());
-                        println!("Applying config file '{}'...", todor_path.display());
-                    }
+                    info!("Found workspace root: '{}'", todor_path.display());
+                    info!("Applying config file '{}'...", todor_path.display());
 
                     // check for empty file before adding
                     if todor_path.metadata().unwrap().len() > 2 {
@@ -164,9 +186,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                 let git_path = path.with_file_name(".git");
                 if git_path.exists() {
                     found_walker_root = true;
-                    if verbose {
-                        println!("Found workspace root: '{}'", git_path.display());
-                    }
+                    info!("Found workspace root: '{}'", git_path.display());
                     break;
                 }
 
@@ -197,7 +217,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                 if path.is_file() {
                     todor
                         .open_todos(path)
-                        .unwrap_or_else(|err| eprint_error(&err));
+                        .unwrap_or_else(|err| warn!("{}", err));
                 }
             }
         }
@@ -220,7 +240,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 
             todor
                 .remove_todo(filepath, todo_ind)
-                .unwrap_or_else(|err| eprint_error(&err));
+                .unwrap_or_else(|err| warn!("{}", err));
             println!("Comment removed");
         }
     } else {
@@ -237,8 +257,8 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 fn run_init() -> i32 {
     let mut config_file = match File::create(Path::new(".todor")) {
         Ok(file) => file,
-        Err(e) => {
-            eprint_error(&e.into());
+        Err(err) => {
+            error!("{}", err);
             return 1;
         }
     };
@@ -246,7 +266,7 @@ fn run_init() -> i32 {
     match todo_r::write_example_config(&mut config_file) {
         Ok(_) => 0,
         Err(err) => {
-            eprint_error(&err);
+            error!("{}", err);
             1
         }
     }
