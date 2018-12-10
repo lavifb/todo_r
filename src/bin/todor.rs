@@ -4,14 +4,14 @@ use ansi_term::Color::Red;
 use clap::clap_app;
 use clap::ArgMatches;
 use dialoguer::Select;
+use env_logger;
 use failure::{format_err, Error};
 use ignore::overrides::OverrideBuilder;
 use ignore::WalkBuilder;
+use log::*;
 use std::env::*;
 use std::fs::File;
-use std::path::{Path, PathBuf};
-use log::*;
-use env_logger;
+use std::path::{self, Path, PathBuf};
 
 use todo_r::{TodoR, TodoRBuilder};
 
@@ -116,18 +116,28 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
             let mut found_walker_root = false;
 
             for path in curr_dir.ancestors() {
-                let ignore_path = relative_path
-                    .strip_prefix(".")
-                    .unwrap()
-                    .with_file_name(path.file_name().ok_or_else(|| {
+                let ignore_path = relative_path.strip_prefix(".").unwrap().with_file_name(
+                    path.file_name().ok_or_else(|| {
                         format_err!(
                             "No input files provided and no git repo or todor workspace found"
                         )
-                    })?)
-                    .to_string_lossy()
-                    .into_owned();
-                debug!("ignoring: {:?}", ignore_path);
-                ignore_builder.add(&format!("!{}", &ignore_path)).unwrap();
+                    })?,
+                );
+
+                let ignore_path_str = ignore_path.to_str().unwrap();
+                let ignore_string;
+                // Fix windows paths
+                if path::MAIN_SEPARATOR != '/' {
+                    ignore_string = format!(
+                        "!{}",
+                        ignore_path_str.replace(&path::MAIN_SEPARATOR.to_string(), "/")
+                    );
+                } else {
+                    ignore_string = format!("!{}", ignore_path_str);
+                }
+
+                debug!("adding {} in walker override", &ignore_string);
+                ignore_builder.add(&ignore_string).unwrap();
 
                 let todor_path = path.with_file_name(".todor");
                 if todor_path.exists() {
@@ -175,7 +185,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                 let dir_entry = entry?;
                 let path = dir_entry.path().strip_prefix(".").unwrap();
 
-                debug!("walking: {}", path.display());
+                debug!("found {} in walk", path.display());
 
                 if path.is_file() {
                     todor
