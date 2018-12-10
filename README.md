@@ -45,13 +45,5 @@ A lot is adapted from [leasot](https://github.com/pgilad/leasot) but runs much f
 |YAML         |`.yaml`,`.yml`       |`#`            |
 
 
-### Note about Windows
-
-Todor has not been formally tested on Windows but most of its features should work.
-
-#### Known/possible issues
-* directory walking picks up files more than once if you have to go up directories.
-* interactive mode is untested
-
 ---
 written by Lavi Blumberg
