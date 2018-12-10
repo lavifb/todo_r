@@ -11,10 +11,7 @@ matrix:
       env: TARGET=x86_64-apple-darwin
     - os: windows
       rust: stable
-      env: TARGET=x86_64-pc-windows-gnu
-      script:
-        - cargo build --verbose --all --target-dir $TARGET
-        - cargo test --verbose --all --target-dir $TARGET
+      env: TARGET=x86_64-pc-windows-msvc
 
     # Beta test
     - os: linux
@@ -25,10 +22,7 @@ matrix:
       env: TARGET=x86_64-apple-darwin
     - os: windows
       rust: beta
-      env: TARGET=x86_64-pc-windows-gnu
-      script:
-        - cargo build --verbose --all --target-dir $TARGET
-        - cargo test --verbose --all --target-dir $TARGET
+      env: TARGET=x86_64-pc-windows-msvc
 
     # Nightly test
     - os: linux
@@ -39,13 +33,11 @@ matrix:
       env: TARGET=x86_64-apple-darwin
     - os: windows
       rust: nightly
-      env: TARGET=x86_64-pc-windows-gnu
-      script:
-        - cargo build --verbose --all --target-dir $TARGET
-        - cargo test --verbose --all --target-dir $TARGET
+      env: TARGET=x86_64-pc-windows-msvc
 
     # Code formatting check
-    - os: linux
+    - name: rustfmt
+      os: linux
       rust: stable
       # skip the global install step
       install:
