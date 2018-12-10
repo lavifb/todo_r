@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Windows release
 - `--check` tag to exit nicely only when no TODOs are found
 
 ## v0.4.1 (2018-12-8)
