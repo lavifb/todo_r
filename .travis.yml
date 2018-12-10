@@ -13,9 +13,9 @@ matrix:
       rust: stable
       env: TARGET=x86_64-pc-windows-gnu
       script:
-        - cargo build --verbose --all --target $TARGET
+        - cargo build --verbose --all
         - cd tests/inputs
-        - RUST_LOG=debug ../../target/$TARGET/debug/$PROJECT_NAME
+        - RUST_LOG=debug ../../target/debug/$PROJECT_NAME
 
     # Beta test
     # - os: linux
