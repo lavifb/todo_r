@@ -4,11 +4,13 @@ use ansi_term::Style;
 use regex::Regex;
 use std::fmt;
 use std::io::BufRead;
+use log::trace;
 
 use crate::comments::CommentTypes;
 use crate::custom_tags::get_regex_for_comment;
 
 /// A struct holding the TODO and all the needed meta-information for it.
+#[derive(Debug, Clone)]
 pub struct Todo {
     pub line: usize,
     todo_type: String,
@@ -65,6 +67,8 @@ where
         .iter()
         .map(|c| get_regex_for_comment(tags, c).unwrap())
         .collect();
+
+    trace!("capturing content against {} regexs", regexs.len());
 
     let mut todos = Vec::new();
     for (line_num, line_result) in content_buf.lines().enumerate() {

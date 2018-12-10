@@ -155,11 +155,6 @@ impl TodoRBuilder {
             .ok_or(TodoRError::InvalidDefaultExtension { ext: default_ext })?
             .clone();
 
-        debug!(
-            "todor parser built with tags: {}",
-            tags.join(", ").to_uppercase()
-        );
-
         let config = TodoRConfig {
             tags,
             ignore_paths,
@@ -167,6 +162,8 @@ impl TodoRBuilder {
             ext_to_comment_types,
             default_comment_types,
         };
+
+        debug!("todor parser built: {:?}", config);
 
         Ok(TodoR::with_config(config))
     }
@@ -270,6 +267,7 @@ pub fn write_example_config(out_buffer: &mut impl Write) -> Result<(), Error> {
 /// Configuration for `TodoR`.
 ///
 /// `tags` gives a list of the TODO terms to search for.
+#[derive(Debug, Clone)]
 struct TodoRConfig {
     tags: Vec<String>,
     styles: StyleConfig,
@@ -279,6 +277,7 @@ struct TodoRConfig {
 }
 
 /// Parser for finding TODOs in comments and storing them on a per-file basis.
+#[derive(Debug, Clone)]
 pub struct TodoR {
     config: TodoRConfig,
     todo_files: Vec<TodoFile>,

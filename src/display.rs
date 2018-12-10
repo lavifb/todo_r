@@ -42,6 +42,7 @@ impl Default for StyleConfig {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct TodoFile {
     pub filepath: PathBuf,
     pub todos: Vec<Todo>,
