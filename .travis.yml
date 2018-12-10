@@ -15,7 +15,7 @@ matrix:
       script:
         - cargo build --verbose --all
         - cd tests/inputs
-        - RUST_LOG=debug ../../target/debug/$PROJECT_NAME
+        - ../../target/debug/$PROJECT_NAME
 
     # Beta test
     # - os: linux
