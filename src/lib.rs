@@ -376,7 +376,11 @@ impl TodoR {
             &self.config.tags,
         )?);
 
-        debug!("found {} TODOs in `{}`", todo_file.len(), filepath.display());
+        debug!(
+            "found {} TODOs in `{}`",
+            todo_file.len(),
+            filepath.display()
+        );
 
         self.todo_files.push(todo_file);
         Ok(())

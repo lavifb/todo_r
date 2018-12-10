@@ -1,9 +1,9 @@
 // Module for deleting TODO comments from files
 
 use failure::Error;
+use log::debug;
 use std::fs::{rename, File};
 use std::io::{BufRead, BufReader, BufWriter, Write};
-use log::debug;
 
 use crate::display::TodoFile;
 use crate::errors::TodoRError;
@@ -19,8 +19,12 @@ pub fn remove_todo_by_index(todo_file: &mut TodoFile, ind: usize) -> Result<(), 
     let mut file_writer = BufWriter::new(temp_file);
 
     let todo_line = todo_file.todos.remove(ind).line;
-    
-    debug!("removing content in `{}` on line {}", todo_file.filepath.display(), todo_line);
+
+    debug!(
+        "removing content in `{}` on line {}",
+        todo_file.filepath.display(),
+        todo_line
+    );
     copy_except_line(&mut file_reader, &mut file_writer, todo_line)?;
 
     for todo in &mut todo_file.todos[ind..] {
@@ -62,7 +66,11 @@ pub fn remove_todo_by_line(todo_file: &mut TodoFile, line: usize) -> Result<(), 
         let mut file_reader = BufReader::new(old_file);
         let mut file_writer = BufWriter::new(temp_file);
 
-        debug!("removing content in `{}` on line {}", todo_file.filepath.display(), line);
+        debug!(
+            "removing content in `{}` on line {}",
+            todo_file.filepath.display(),
+            line
+        );
         copy_except_line(&mut file_reader, &mut file_writer, line)?;
 
         // replace old file with temp file

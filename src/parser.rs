@@ -1,10 +1,10 @@
 // Module for finding TODOs in files
 
 use ansi_term::Style;
+use log::trace;
 use regex::Regex;
 use std::fmt;
 use std::io::BufRead;
-use log::trace;
 
 use crate::comments::CommentTypes;
 use crate::custom_tags::get_regex_for_comment;
