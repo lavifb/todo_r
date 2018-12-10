@@ -15,7 +15,6 @@ exclude = [
 
 [dependencies]
 log = { version = "0.4", features = ["max_level_trace", "release_max_level_warn"] }
-simple_logger = "1"
 env_logger = "0.6"
 clap = "2.32"
 ignore = "0.4"

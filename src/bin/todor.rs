@@ -24,7 +24,7 @@ pub fn eprint_error(err: &Error) {
 
 /// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
-    simple_logger::init().unwrap();
+    // TODO: use env_logger for debugging and logs and verbose
 
     // TODO: add subcommand for just content so it can be piped
     let matches = clap_app!(todo_r =>

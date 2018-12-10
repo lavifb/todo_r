@@ -4,6 +4,8 @@ mod display;
 mod parser;
 mod remover;
 
+// TODO: use log for debugging and logs
+
 pub mod errors {
     use failure::Fail;
 
