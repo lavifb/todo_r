@@ -19,7 +19,6 @@ use todo_r::{TodoR, TodoRBuilder};
 /// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
     // TODO: add subcommand for just content so it can be piped
-    // TODO: flag to suppress non-panic errors
     let matches = clap_app!(todo_r =>
         (version: env!("CARGO_PKG_VERSION"))
         (author: "Lavi Blumberg <lavifb@gmail.com>")
@@ -149,7 +148,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                     )
                 })?;
 
-                // Fix windows paths
                 let ignore_string = if path::MAIN_SEPARATOR != '/' {
                     format!(
                         "!{}",
