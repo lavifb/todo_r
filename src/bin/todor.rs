@@ -124,7 +124,12 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                     })?,
                 );
 
-                let ignore_path_str = ignore_path.to_str().unwrap();
+                let ignore_path_str = ignore_path.to_str().ok_or_else(|| {
+                    format_err!(
+                        "Path `{}` contains invalid Unicode and cannot be processed",
+                        ignore_path.to_string_lossy()
+                    )
+                })?;
                 let ignore_string;
                 // Fix windows paths
                 if path::MAIN_SEPARATOR != '/' {
