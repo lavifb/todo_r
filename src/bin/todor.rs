@@ -62,15 +62,10 @@ fn main() {
 
             let log_prefix = match record.module_path() {
                 Some(mod_path) => format!("[{} {}]", mod_path, record.level()),
-                None => format!("[{}]", record.level())
+                None => format!("[{}]", record.level()),
             };
 
-            writeln!(
-                buf,
-                "{}: - {}",
-                log_prefix,
-                record.args()
-            )
+            writeln!(buf, "{}: - {}", log_prefix, record.args())
         })
         .target(env_logger::Target::Stderr)
         .init();
