@@ -48,7 +48,7 @@ use std::path::Path;
 use failure::Error;
 use fnv::FnvHashMap;
 use globset::{Glob, GlobSet, GlobSetBuilder};
-use log::info;
+use log::debug;
 
 use crate::comments::{CommentTypes, TodorConfigFileSerial};
 use crate::display::{write_file_todos, StyleConfig, TodoFile};
@@ -72,7 +72,6 @@ static EXAMPLE_CONFIG: &str = include_str!("example_config.hjson");
 
 #[derive(Debug, Default, Clone)]
 pub struct TodoRBuilder {
-    override_verbose: Option<bool>,
     added_tags: Vec<String>,
     override_tags: Option<Vec<String>>,
     override_ignore_paths: Option<GlobSetBuilder>,
@@ -111,9 +110,6 @@ impl TodoRBuilder {
                     message: err.to_string(),
                 })?;
 
-        let verbose = self
-            .override_verbose
-            .unwrap_or_else(|| config_struct.verbose);
         let mut tags = self
             .override_tags
             .unwrap_or_else(|| config_struct.tags.to_owned());
@@ -159,13 +155,12 @@ impl TodoRBuilder {
             .ok_or(TodoRError::InvalidDefaultExtension { ext: default_ext })?
             .clone();
 
-        info!(
+        debug!(
             "todor parser built with tags: {}",
             tags.join(", ").to_uppercase()
         );
 
         let config = TodoRConfig {
-            verbose,
             tags,
             ignore_paths,
             styles: self.styles,
@@ -225,12 +220,6 @@ impl TodoRBuilder {
         self
     }
 
-    /// Overrides verbose from config files.
-    pub fn set_verbose(&mut self, verbose: bool) -> &mut Self {
-        self.override_verbose = Some(verbose);
-        self
-    }
-
     /// Sets the terminal output of TodoR to be with no styles.
     pub fn set_no_style(&mut self) -> &mut Self {
         self.styles = StyleConfig::no_style();
@@ -280,10 +269,8 @@ pub fn write_example_config(out_buffer: &mut impl Write) -> Result<(), Error> {
 
 /// Configuration for `TodoR`.
 ///
-/// `verbose` holds whether to print extra content.
 /// `tags` gives a list of the TODO terms to search for.
 struct TodoRConfig {
-    verbose: bool,
     tags: Vec<String>,
     styles: StyleConfig,
     ignore_paths: GlobSet,
@@ -423,7 +410,7 @@ impl TodoR {
     /// Writes TODOs to out_buffer.
     pub fn write_todos(&self, out_buffer: &mut Write) -> Result<(), Error> {
         for todo_file in &self.todo_files {
-            if todo_file.is_empty() && !self.config.verbose {
+            if todo_file.is_empty() {
                 continue;
             }
 

@@ -64,7 +64,7 @@ fn main() {
                 None => format!("[{}]", record.level()),
             };
 
-            writeln!(buf, "{}: - {}", log_prefix, record.args())
+            writeln!(buf, "{}: {}", style.value(log_prefix), record.args())
         })
         .target(env_logger::Target::Stderr)
         .init();
@@ -101,11 +101,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
         builder.add_override_tags(tags_iter);
     }
 
-    let verbose: bool = matches.is_present("VERBOSE");
-    if verbose {
-        builder.set_verbose(verbose);
-    }
-
     if matches.is_present("NOSTYLE") {
         builder.set_no_style();
     }
@@ -118,7 +113,9 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
     match matches.values_of("FILE") {
         Some(files) => {
             todor = builder.build()?;
+            debug!("todor parser built");
             for file in files {
+                info!("looking at `{}`...", file);
                 todor
                     .open_todos(Path::new(file))
                     .unwrap_or_else(|err| warn!("{}", err));
@@ -201,6 +198,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                 .parents(false);
             let walk = walk_builder.build();
             todor = builder.build()?;
+            debug!("todor parser built");
 
             for entry in walk {
                 let dir_entry = entry?;
@@ -209,6 +207,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                 debug!("found {} in walk", path.display());
 
                 if path.is_file() {
+                    info!("looking at `{}`...", path.display());
                     todor
                         .open_todos(path)
                         .unwrap_or_else(|err| warn!("{}", err));
