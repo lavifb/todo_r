@@ -15,6 +15,7 @@ use std::path::{self, Path, PathBuf};
 
 use todo_r::{TodoR, TodoRBuilder};
 
+// TODO: make into macro
 /// Prints error message to stderr using a red identifier.
 pub fn eprint_error(err: &Error) {
     match err {
@@ -27,6 +28,7 @@ fn main() {
     // TODO: use env_logger for debugging and logs and verbose
 
     // TODO: add subcommand for just content so it can be piped
+    // TODO: flag to suppress non-panic errors
     let matches = clap_app!(todo_r =>
         (version: env!("CARGO_PKG_VERSION"))
         (author: "Lavi Blumberg <lavifb@gmail.com>")

@@ -12,6 +12,9 @@ matrix:
     - os: windows
       rust: stable
       env: TARGET=x86_64-pc-windows-gnu
+      script:
+        - cargo build --verbose --all --target-dir $TARGET
+        - cargo test --verbose --all --target-dir $TARGET
 
     # Beta test
     - os: linux
@@ -23,6 +26,9 @@ matrix:
     - os: windows
       rust: beta
       env: TARGET=x86_64-pc-windows-gnu
+      script:
+        - cargo build --verbose --all --target-dir $TARGET
+        - cargo test --verbose --all --target-dir $TARGET
 
     # Nightly test
     - os: linux
@@ -34,6 +40,9 @@ matrix:
     - os: windows
       rust: nightly
       env: TARGET=x86_64-pc-windows-gnu
+      script:
+        - cargo build --verbose --all --target-dir $TARGET
+        - cargo test --verbose --all --target-dir $TARGET
 
     # Code formatting check
     - os: linux
