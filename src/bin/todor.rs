@@ -122,6 +122,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
             }
         }
         None => {
+            // TODO: pull out walk building into smaller function
             // Recurse down and try to find either .git or .todor as the root folder
             info!("Looking for .git or .todor to use as workspace root...");
 

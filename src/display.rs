@@ -66,6 +66,10 @@ impl TodoFile {
     pub fn is_empty(&self) -> bool {
         self.todos.is_empty()
     }
+
+    pub fn len(&self) -> usize {
+        self.todos.len()
+    }
 }
 
 // TODO: other printing options: json, xml, etc.
