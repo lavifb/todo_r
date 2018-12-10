@@ -42,13 +42,12 @@ fn main() {
     .get_matches();
 
     // Set up log output
-    let mut log_env = env_logger::Env::default();
     let verbose: bool = matches.is_present("VERBOSE");
-    if verbose {
-        log_env = log_env.default_filter_or("info");
+    let log_env = if verbose {
+        env_logger::Env::default().default_filter_or("info")
     } else {
-        log_env = log_env.default_filter_or("error");
-    }
+        env_logger::Env::default().default_filter_or("error")
+    };
 
     env_logger::Builder::from_env(log_env)
         .format(|buf, record| {
@@ -151,16 +150,16 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                         ignore_path.to_string_lossy()
                     )
                 })?;
-                let ignore_string;
+
                 // Fix windows paths
-                if path::MAIN_SEPARATOR != '/' {
-                    ignore_string = format!(
+                let ignore_string = if path::MAIN_SEPARATOR != '/' {
+                    format!(
                         "!{}",
                         ignore_path_str.replace(&path::MAIN_SEPARATOR.to_string(), "/")
-                    );
+                    )
                 } else {
-                    ignore_string = format!("!{}", ignore_path_str);
-                }
+                    format!("!{}", ignore_path_str)
+                };
 
                 debug!("adding {} in walker override", &ignore_string);
                 ignore_builder.add(&ignore_string).unwrap();
