@@ -126,6 +126,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                     })?)
                     .to_string_lossy()
                     .into_owned();
+                debug!("ignoring: {:?}", ignore_path);
                 ignore_builder.add(&format!("!{}", &ignore_path)).unwrap();
 
                 let todor_path = path.with_file_name(".todor");
@@ -172,7 +173,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 
             for entry in walk {
                 let dir_entry = entry?;
-                let path = dir_entry.path().strip_prefix("./").unwrap();
+                let path = dir_entry.path().strip_prefix(".").unwrap();
 
                 debug!("walking: {}", path.display());
 
