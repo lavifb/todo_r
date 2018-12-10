@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Fixed -->
 <!-- ### Security -->
 
+## [Unreleased]
+### Added
+- debug statements using log crate
+
+### Changed
+- stderr output using `--verbose` flag
+
 ## v0.4.2 (2018-12-10)
 ### Added
 - Windows release
