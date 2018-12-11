@@ -3,22 +3,21 @@
 mod select;
 mod clap_app;
 mod logger;
+mod walk;
 
 use clap::ArgMatches;
 use env_logger;
-use failure::{format_err, Error};
-use ignore::overrides::OverrideBuilder;
-use ignore::WalkBuilder;
+use failure::Error;
 use log::*;
-use std::env::*;
 use std::fs::File;
-use std::path::{self, Path, PathBuf};
+use std::path::Path;
 
 use todo_r::TodoRBuilder;
 
 use self::clap_app::get_cli_matches;
 use self::select::run_delete;
 use self::logger::init_logger;
+use self::walk::build_walker;
 
 /// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
@@ -81,81 +80,8 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
             }
         }
         None => {
-            // TODO: pull out walk building into smaller function
-            // Recurse down and try to find either .git or .todor as the root folder
             info!("Looking for .git or .todor to use as workspace root...");
-
-            let mut curr_dir = current_dir()?;
-            let mut ignore_builder = OverrideBuilder::new(&curr_dir);
-            curr_dir.push(".todor");
-            let mut relative_path = PathBuf::from(".");
-            let mut walk_builder = WalkBuilder::new(&relative_path);
-            let mut found_walker_root = false;
-
-            for path in curr_dir.ancestors() {
-                let ignore_path = relative_path.strip_prefix(".").unwrap().with_file_name(
-                    path.file_name().ok_or_else(|| {
-                        format_err!(
-                            "No input files provided and no git repo or todor workspace found"
-                        )
-                    })?,
-                );
-
-                let ignore_path_str = ignore_path.to_str().ok_or_else(|| {
-                    format_err!(
-                        "Path `{}` contains invalid Unicode and cannot be processed",
-                        ignore_path.to_string_lossy()
-                    )
-                })?;
-
-                let ignore_string = if path::MAIN_SEPARATOR != '/' {
-                    format!(
-                        "!{}",
-                        ignore_path_str.replace(&path::MAIN_SEPARATOR.to_string(), "/")
-                    )
-                } else {
-                    format!("!{}", ignore_path_str)
-                };
-
-                debug!("adding {} in walker override", &ignore_string);
-                ignore_builder.add(&ignore_string).unwrap();
-
-                let todor_path = path.with_file_name(".todor");
-                if todor_path.exists() {
-                    found_walker_root = true;
-                    info!("Found workspace root: '{}'", todor_path.display());
-                    info!("Applying config file '{}'...", todor_path.display());
-
-                    // check for empty file before adding
-                    if todor_path.metadata().unwrap().len() > 2 {
-                        builder.add_config_file(&todor_path)?;
-                    }
-                    break;
-                }
-
-                let git_path = path.with_file_name(".git");
-                if git_path.exists() {
-                    found_walker_root = true;
-                    info!("Found workspace root: '{}'", git_path.display());
-                    break;
-                }
-
-                relative_path.push("..");
-                walk_builder.add(&relative_path);
-            }
-
-            if !found_walker_root {
-                return Err(format_err!(
-                    "No input files provided and no git repo or todor workspace found"
-                ));
-            }
-
-            walk_builder
-                .overrides(ignore_builder.build()?)
-                .sort_by_file_name(std::ffi::OsStr::cmp)
-                .add_custom_ignore_filename(".todorignore")
-                .parents(false);
-            let walk = walk_builder.build();
+            let walk = build_walker(&mut builder)?;
             todor = builder.build()?;
             debug!("todor parser built");
 
