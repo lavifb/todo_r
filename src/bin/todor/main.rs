@@ -1,9 +1,10 @@
 // Binary for finding TODOs in specified files
 
-use ansi_term::Color::Red;
-use clap::clap_app;
+mod select;
+mod clap_app;
+mod logger;
+
 use clap::ArgMatches;
-use dialoguer::Select;
 use env_logger;
 use failure::{format_err, Error};
 use ignore::overrides::OverrideBuilder;
@@ -11,62 +12,21 @@ use ignore::WalkBuilder;
 use log::*;
 use std::env::*;
 use std::fs::File;
-use std::io::Write;
 use std::path::{self, Path, PathBuf};
 
-use todo_r::{TodoR, TodoRBuilder};
+use todo_r::TodoRBuilder;
+
+use self::clap_app::get_cli_matches;
+use self::select::run_delete;
+use self::logger::init_logger;
 
 /// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
-    // TODO: add subcommand for just content so it can be piped
-    let matches = clap_app!(todo_r =>
-        (version: env!("CARGO_PKG_VERSION"))
-        (author: "Lavi Blumberg <lavifb@gmail.com>")
-        (about: "Lists TODO comments in code")
-        (@arg FILE: ... "File to search for TODO items.")
-        (@arg CONFIG: -c --("config") +takes_value "Takes configuration from file.")
-        (@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
-        (@arg TAGS: -t --("tag") +takes_value +multiple "TODO tags to search for.")
-        (@arg IGNORE: -i --("ignore") +takes_value +multiple "Paths to be ignored.")
-        (@arg OVERRIDE_TAGS: -T --("override-tags") +takes_value +multiple
-            "Overrides default TODO tags to only search custom ones.")
-        (@arg VERBOSE: -v --("verbose") "Provide verbose output.")
-        (@arg CHECK: --("check") "Exits nicely only if no TODO tags are found.")
-        (@arg DELETE_MODE: -d --("delete") "Interactive delete mode.")
-        (@subcommand init =>
-            (about: "Creates example config file")
-            (author: "Lavi Blumberg <lavifb@gmail.com>")
-        )
-    )
-    .get_matches();
+    let matches = get_cli_matches();
 
-    // Set up log output
     let verbose: bool = matches.is_present("VERBOSE");
-    let log_env = if verbose {
-        env_logger::Env::default().default_filter_or("info")
-    } else {
-        env_logger::Env::default().default_filter_or("error")
-    };
-
-    env_logger::Builder::from_env(log_env)
-        .format(|buf, record| {
-            let mut style = buf.style();
-
-            match record.level() {
-                log::Level::Error => style.set_color(env_logger::fmt::Color::Red),
-                log::Level::Warn => style.set_color(env_logger::fmt::Color::Yellow),
-                _ => style.set_color(env_logger::fmt::Color::White),
-            };
-
-            let log_prefix = match record.module_path() {
-                Some(mod_path) => format!("[{} {}]", mod_path, record.level()),
-                None => format!("[{}]", record.level()),
-            };
-
-            writeln!(buf, "{}: {}", style.value(log_prefix), record.args())
-        })
-        .target(env_logger::Target::Stderr)
-        .init();
+    // Set up log output
+    init_logger(verbose);
 
     // Run program
     let exit_code = if matches.subcommand_matches("init").is_some() {
@@ -216,25 +176,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
     }
 
     if matches.is_present("DELETE_MODE") {
-        loop {
-            let file_selection = match select_file(&todor) {
-                Some(file_selection) => file_selection,
-                None => return Ok(0),
-            };
-
-            let filepath = Path::new(&file_selection);
-            let selected_todo = select_todo(&todor, filepath)?;
-
-            let todo_ind = match selected_todo {
-                Some(todo_ind) => todo_ind,
-                None => continue,
-            };
-
-            todor
-                .remove_todo(filepath, todo_ind)
-                .unwrap_or_else(|err| warn!("{}", err));
-            println!("Comment removed");
-        }
+        run_delete(&mut todor)?;
     } else {
         todor.print_todos();
     }
@@ -262,50 +204,4 @@ fn run_init() -> i32 {
             1
         }
     }
-}
-
-fn select_file(todor: &TodoR) -> Option<String> {
-    let option_quit = format!("{}", Red.paint("QUIT"));
-    let mut tracked_files = todor.get_tracked_files();
-    tracked_files.push(&option_quit);
-    // IMPR: Cache tracked_files for when you go back
-
-    let mut file_selector = Select::new();
-    file_selector
-        .with_prompt("Pick a file to delete comment")
-        .items(&tracked_files)
-        .default(0);
-
-    let file_ind = file_selector.interact().unwrap();
-    if file_ind + 1 == tracked_files.len() {
-        return None;
-    }
-
-    Some(tracked_files[file_ind].to_string())
-}
-
-fn select_todo(todor: &TodoR, filepath: &Path) -> Result<Option<usize>, Error> {
-    let mut todos_buf: Vec<u8> = Vec::new();
-    todor.write_todos_from_file(filepath, &mut todos_buf)?;
-
-    let todos_string = String::from_utf8_lossy(&todos_buf);
-    let mut todos_lines = todos_string.lines();
-    let styled_filename = todos_lines.next().unwrap();
-
-    let option_back = format!("{}", Red.paint("BACK"));
-    let mut todos_items: Vec<&str> = todos_lines.collect();
-    todos_items.push(&option_back);
-
-    let mut todo_selector = Select::new();
-    todo_selector
-        .with_prompt(styled_filename)
-        .items(&todos_items)
-        .default(0);
-
-    let todo_ind = todo_selector.interact().unwrap();
-    if todo_ind + 1 == todos_items.len() {
-        return Ok(None);
-    }
-
-    Ok(Some(todo_ind))
 }
