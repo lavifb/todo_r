@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - stderr output using `--verbose` flag
+- pulled `bin/todor.rs` into separate files for potentially better compilation optimization
 
 ## v0.4.2 (2018-12-10)
 ### Added
