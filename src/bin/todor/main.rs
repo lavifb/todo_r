@@ -1,8 +1,8 @@
 // Binary for finding TODOs in specified files
 
-mod select;
 mod clap_app;
 mod logger;
+mod select;
 mod walk;
 
 use clap::ArgMatches;
@@ -15,8 +15,8 @@ use std::path::Path;
 use todo_r::TodoRBuilder;
 
 use self::clap_app::get_cli_matches;
-use self::select::run_delete;
 use self::logger::init_logger;
+use self::select::run_delete;
 use self::walk::build_walker;
 
 /// Parses command line arguments and use TodoR to find TODO comments.

@@ -1,8 +1,8 @@
-use dialoguer::Select;
 use ansi_term::Color::Red;
+use dialoguer::Select;
 use failure::Error;
-use std::path::Path;
 use log::warn;
+use std::path::Path;
 
 use todo_r::TodoR;
 

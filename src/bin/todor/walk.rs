@@ -1,9 +1,9 @@
-use ignore::{Walk, WalkBuilder};
-use ignore::overrides::OverrideBuilder;
-use std::path::{self, Path, PathBuf};
-use std::env::current_dir;
-use log::{info, debug};
 use failure::{format_err, Error};
+use ignore::overrides::OverrideBuilder;
+use ignore::{Walk, WalkBuilder};
+use log::{debug, info};
+use std::env::current_dir;
+use std::path::{self, Path, PathBuf};
 
 use todo_r::TodoRBuilder;
 
@@ -70,13 +70,13 @@ pub fn build_walker(todor_builder: &mut TodoRBuilder) -> Result<Walk, Error> {
 /// Gets the ignore string for ignore::overrides::OverrideBuilder to use.
 /// Uses the fact that the file_name in abs_path is the previous directory.
 fn get_ignore_string(abs_path: &Path, rel_path: &Path) -> Result<String, Error> {
-    let ignore_path = rel_path.strip_prefix(".").unwrap().with_file_name(
-        abs_path.file_name().ok_or_else(|| {
-            format_err!(
-                "No input files provided and no git repo or todor workspace found"
-            )
-        })?,
-    );
+    let ignore_path =
+        rel_path
+            .strip_prefix(".")
+            .unwrap()
+            .with_file_name(abs_path.file_name().ok_or_else(|| {
+                format_err!("No input files provided and no git repo or todor workspace found")
+            })?);
 
     let ignore_path_str = ignore_path.to_str().ok_or_else(|| {
         format_err!(

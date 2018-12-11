@@ -1,6 +1,6 @@
-use std::io::Write;
 use env_logger::fmt::Formatter;
 use log::Record;
+use std::io::Write;
 
 pub fn init_logger(verbose: bool) {
     let log_env = if verbose {
