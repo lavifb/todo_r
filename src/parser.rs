@@ -13,17 +13,19 @@ use crate::custom_tags::get_regex_for_comment;
 #[derive(Debug, Clone)]
 pub struct Todo {
     pub line: usize,
-    todo_type: String,
+    tag: String,
     content: String,
+    user: String,
 }
 
 impl Todo {
     /// Create new TODO struct
-    fn new(line: usize, todo_type_str: &str, content_str: &str) -> Todo {
+    fn new(line: usize, tag_str: &str, content_str: &str, user_str: &str) -> Todo {
         Todo {
             line,
-            todo_type: todo_type_str.to_uppercase(),
+            tag: tag_str.to_uppercase(),
             content: content_str.to_string(),
+            user: user_str.to_string(),
         }
     }
 
@@ -38,7 +40,7 @@ impl Todo {
             "  {}  {}  {}",
             // Columns align for up to 100,000 lines which should be fine
             line_style.paint(format!("line {:<5}", self.line)),
-            todo_style.paint(format!("{:5}", &self.todo_type)),
+            todo_style.paint(format!("{:5}", &self.tag)),
             content_style.paint(&self.content),
         )
     }
@@ -49,7 +51,7 @@ impl fmt::Display for Todo {
         write!(
             f,
             "line {}\t{}\t{}",
-            self.line, self.todo_type, self.content,
+            self.line, self.tag, self.content,
         )
     }
 }
@@ -76,7 +78,7 @@ where
 
         for re in regexs.iter() {
             if let Some(todo_content) = re.captures(&line) {
-                let todo = Todo::new(line_num + 1, todo_content[1].trim(), todo_content[2].trim());
+                let todo = Todo::new(line_num + 1, todo_content[1].trim(), todo_content[3].trim(), "");
                 todos.push(todo);
             };
         }

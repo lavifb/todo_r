@@ -5,8 +5,19 @@ use std::borrow::Borrow;
 
 use crate::comments::CommentType;
 
-// MAYB: use a better regex to find TODOs
-// TODO: collect tags like `// TODO(lavifb): item` or `// TODO: item @lavifb`
+/// Returns Regex that matches TODO comment.
+///
+/// Optionally, you can specify a user tag in one of two ways:
+/// - using perenthesis after the TODO tag such as `// TODO(user): content`.
+/// - using @ in the content like this `// TODO: tag @user in this`
+///
+///
+/// The capture groups in the Regex are:
+/// 1. TODO tag
+/// 2. Optional user tag
+/// 3. Content
+/// 4. Optional user tag
+///
 pub(crate) fn get_regex_for_comment<S>(
     custom_tags: &[S],
     comment_type: &CommentType,
@@ -16,11 +27,13 @@ where
 {
     let tags_string = custom_tags.join("|");
 
+    // use something like ^\s*\/\/\s*(TODO)\s?(?:\((\S+)\))?[:\s]?\s+((?:.*?@(\S+))?.*?)\s*$
     Regex::new(&format!(
-        r"(?i)^\s*{}\s*({})\s*:?\s+{}{}", // whitespace and optional colon
+        r"(?i)^\s*{}\s*({})\s?{}[:\s]?\s+{}\s*{}", // whitespace and optional colon
         comment_type.prefix(),            // comment prefix token
         tags_string,                      // custom tags
-        r"(.*?)",                         // content
+        r"(?:\(@?(\S+)\))?",              // optional user tag in ()`s
+        r"((?:.*?@(\S+))?.*?)",           // content with optional user subcapture
         comment_type.suffix(),            // comment prefix token
     ))
 }
@@ -34,7 +47,7 @@ mod tests {
         let re = get_regex_for_comment(&["TODO", "FIXME"], comment_type).unwrap();
         let todo_content = re.captures(content);
         match todo_content {
-            Some(todo_content) => assert_eq!(exp_result, todo_content[2].trim()),
+            Some(todo_content) => assert_eq!(exp_result, todo_content[3].trim()),
             None => assert_eq!(exp_result, "NONE"),
         };
     }
@@ -158,4 +171,6 @@ mod tests {
             &CommentType::new_block("/*", "*/"),
         );
     }
+
+    // TODO: write tests for user finding
 }
