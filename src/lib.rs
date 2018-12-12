@@ -100,7 +100,7 @@ impl TodoRBuilder {
     }
 
     /// Consumes self and builds TodoR.
-    pub fn build(self) -> Result<TodoR, Error> {
+    pub fn build<'a>(self) -> Result<TodoR<'a>, Error> {
         let mut config_struct: TodorConfigFileSerial =
             self.inner_config
                 .try_into()
@@ -276,27 +276,27 @@ struct TodoRConfig {
 
 /// Parser for finding TODOs in comments and storing them on a per-file basis.
 #[derive(Debug, Clone)]
-pub struct TodoR {
+pub struct TodoR<'a> {
     config: TodoRConfig,
-    todo_files: Vec<TodoFile>,
+    todo_files: Vec<TodoFile<'a>>,
 }
 
-impl Default for TodoR {
-    fn default() -> TodoR {
+impl<'a> Default for TodoR<'a> {
+    fn default() -> TodoR<'a> {
         TodoRBuilder::new().build().unwrap()
     }
 }
 
-impl TodoR {
+impl<'a> TodoR<'a> {
     /// Creates new TodoR that looks for provided keywords.
-    pub fn new() -> TodoR {
+    pub fn new<'b>() -> TodoR<'b> {
         TodoR::default()
     }
 
-    pub fn with_tags<'a, I, S>(tags: I) -> TodoR
+    pub fn with_tags<'b, I, S>(tags: I) -> TodoR<'b>
     where
         I: IntoIterator<Item = S>,
-        S: Into<Cow<'a, str>>,
+        S: Into<Cow<'b, str>>,
     {
         let mut builder = TodoRBuilder::new();
         builder.add_override_tags(tags);
@@ -304,7 +304,7 @@ impl TodoR {
     }
 
     /// Creates new TodoR using given configuration.
-    fn with_config(config: TodoRConfig) -> TodoR {
+    fn with_config<'b>(config: TodoRConfig) -> TodoR<'b> {
         TodoR {
             config,
             todo_files: Vec::new(),
@@ -322,7 +322,7 @@ impl TodoR {
     }
 
     /// Returns all tracked files that contain TODOs
-    pub fn get_tracked_files<'a>(&'a self) -> Vec<&'a str> {
+    pub fn get_tracked_files<>(& self) -> Vec<& str> {
         self.todo_files
             .iter()
             .filter(|tf| !tf.todos.is_empty())
@@ -331,7 +331,7 @@ impl TodoR {
     }
 
     /// Returns all tracked files even if they have no TODOs
-    pub fn get_all_tracked_files<'a>(&'a self) -> Vec<&'a str> {
+    pub fn get_all_tracked_files<'b>(&'b self) -> Vec<&'b str> {
         self.todo_files
             .iter()
             .map(|tf| tf.filepath.to_str().unwrap())

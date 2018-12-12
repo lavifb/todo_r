@@ -43,13 +43,13 @@ impl Default for StyleConfig {
 }
 
 #[derive(Debug, Clone)]
-pub struct TodoFile {
+pub struct TodoFile<'a> {
     pub filepath: PathBuf,
-    pub todos: Vec<Todo>,
+    pub todos: Vec<Todo<'a>>,
 }
 
-impl TodoFile {
-    pub fn new<'a, P>(filepath: P) -> TodoFile
+impl<'a> TodoFile<'a> {
+    pub fn new<'b, P>(filepath: P) -> TodoFile<'b>
     where
         P: Into<Cow<'a, Path>>,
     {
@@ -60,7 +60,7 @@ impl TodoFile {
         }
     }
 
-    pub fn set_todos(&mut self, todos: Vec<Todo>) {
+    pub fn set_todos(&mut self, todos: Vec<Todo<'a>>) {
         self.todos = todos;
     }
 

@@ -2,7 +2,7 @@
 
 use ansi_term::Style;
 use log::trace;
-use regex::Regex;
+use regex::{Regex, Match};
 use std::fmt;
 use std::io::BufRead;
 
@@ -11,22 +11,24 @@ use crate::custom_tags::get_regex_for_comment;
 
 /// A struct holding the TODO and all the needed meta-information for it.
 #[derive(Debug, Clone)]
-pub struct Todo {
+pub struct Todo<'a> {
     pub line: usize,
     tag: String,
     content: String,
     user: Option<String>,
     // TODO: add slices that represent all in-text users 
+    user_locs: Option<Vec<Match<'a>>>,
 }
 
-impl Todo {
+impl<'a> Todo<'a> {
     /// Create new TODO struct
-    fn new(line: usize, tag_str: &str, content_str: &str, user_str: Option<&str>) -> Todo {
+    fn new<'b>(line: usize, tag_str: &str, content_str: &str, user_str: Option<&str>) -> Todo<'b> {
         Todo {
             line,
             tag: tag_str.to_uppercase(),
             content: content_str.to_string(),
             user: user_str.map(|u| format!("@{}", u)),
+            user_locs: None,
         }
     }
 
@@ -53,22 +55,23 @@ impl Todo {
         )
 
         // Test(user): item
-        // Test: item @me woo
+        // Test: item @me @you woo hoo
+        // Test:      item @you woo hoo @wow    
     }
 }
 
-impl fmt::Display for Todo {
+impl<'a> fmt::Display for Todo<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "line {}\t{}\t{}", self.line, self.tag, self.content,)
     }
 }
 
 /// Parses content and Creates a list of TODOs found in content
-pub(crate) fn parse_content<B>(
+pub(crate) fn parse_content<'a, B>(
     content_buf: &mut B,
     comment_types: &CommentTypes,
     tags: &[String],
-) -> Result<Vec<Todo>, std::io::Error>
+) -> Result<Vec<Todo<'a>>, std::io::Error>
 where
     B: BufRead,
 {
@@ -79,6 +82,8 @@ where
 
     trace!("capturing content against {} regexs", regexs.len());
 
+    let user_regex = Regex::new(r"(@\S+)").unwrap();
+
     let mut todos = Vec::new();
     for (line_num, line_result) in content_buf.lines().enumerate() {
         let line = line_result?;
@@ -87,11 +92,16 @@ where
             if let Some(todo_caps) = re.captures(&line) {
                 // TODO: stick todo_caps[2] at the front of content
                 // TODO: store locations of users in content for painting in output
+                let users: Vec<Match> = user_regex.find_iter(&todo_caps[3]).collect();
+                for u in users {
+                    println!("{},{}: {}", u.start(), u.end(), u.as_str());
+                }
+
                 let todo = Todo::new(
                     line_num + 1,
-                    todo_caps[1].trim(),
-                    todo_caps[3].trim(),
-                    todo_caps.get(2).or(todo_caps.get(4)).map(|s| s.as_str().trim()),
+                    &todo_caps[1],
+                    &todo_caps[3],
+                    todo_caps.get(2).or(todo_caps.get(4)).map(|s| s.as_str()),
                 );
                 todos.push(todo);
             };
