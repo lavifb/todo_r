@@ -26,7 +26,7 @@ impl Todo {
             line,
             tag: tag_str.to_uppercase(),
             content: content_str.to_string(),
-            user: user_str.map(String::from),
+            user: user_str.map(|u| format!("@{}", u)),
         }
     }
 
@@ -38,13 +38,22 @@ impl Todo {
         todo_style: &Style,
         content_style: &Style,
     ) -> String {
+
+        let content_out: String = match &self.user {
+            Some(user) => format!("{}{}{} {}", line_style.prefix(), user, line_style.infix(*content_style), &self.content),
+            None => content_style.paint(&self.content).to_string(),
+        };
+
         format!(
             "  {}  {}  {}",
             // Columns align for up to 100,000 lines which should be fine
             line_style.paint(format!("line {:<5}", self.line)),
             todo_style.paint(format!("{:5}", &self.tag)),
-            content_style.paint(&self.content),
+            content_style.paint(content_out),
         )
+
+        // Test(user): item
+        // Test: item @me woo
     }
 }
 
@@ -75,12 +84,14 @@ where
         let line = line_result?;
 
         for re in regexs.iter() {
-            if let Some(todo_content) = re.captures(&line) {
+            if let Some(todo_caps) = re.captures(&line) {
+                // TODO: stick todo_caps[2] at the front of content
+                // TODO: store locations of users in content for painting in output
                 let todo = Todo::new(
                     line_num + 1,
-                    todo_content[1].trim(),
-                    todo_content[3].trim(),
-                    todo_content.get(2).or(todo_content.get(4)).map(|s| s.as_str().trim()),
+                    todo_caps[1].trim(),
+                    todo_caps[3].trim(),
+                    todo_caps.get(2).or(todo_caps.get(4)).map(|s| s.as_str().trim()),
                 );
                 todos.push(todo);
             };
