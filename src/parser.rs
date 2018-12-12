@@ -16,6 +16,7 @@ pub struct Todo {
     tag: String,
     content: String,
     user: Option<String>,
+    // TODO: add slices that represent all in-text users 
 }
 
 impl Todo {
@@ -30,6 +31,7 @@ impl Todo {
     }
 
     /// Returns colored output string
+    // TODO: style for tagged users 
     pub fn style_string(
         &self,
         line_style: &Style,
@@ -78,7 +80,7 @@ where
                     line_num + 1,
                     todo_content[1].trim(),
                     todo_content[3].trim(),
-                    None,
+                    todo_content.get(2).or(todo_content.get(4)).map(|s| s.as_str().trim()),
                 );
                 todos.push(todo);
             };
@@ -95,7 +97,7 @@ mod tests {
 
     use crate::comments::CommentTypes;
 
-    fn test_content(content: &str, exp_result: &str, file_ext: &str) {
+    fn test_content(content: &str, exp_result: Option<&str>, file_ext: &str) {
         let comment_types = match file_ext {
             "rs" => CommentTypes::new().add_single("//").add_block("/*", "*/"),
             "c" => CommentTypes::new().add_single("//").add_block("/*", "*/"),
@@ -109,44 +111,46 @@ mod tests {
         let todos = parse_content(&mut content_buf, &comment_types, &["TODO".to_string()]).unwrap();
 
         if todos.is_empty() {
-            assert_eq!(exp_result, "NONE");
+            assert_eq!(exp_result, None);
         } else {
-            assert_eq!(exp_result, todos[0].content);
+            assert_eq!(exp_result, Some(todos[0].content.as_str()));
         }
     }
 
     #[test]
     fn find_todos_block_and_line1() {
-        test_content("/* // todo: item */", "NONE", "rs");
+        test_content("/* // todo: item */", None, "rs");
     }
 
     #[test]
     fn find_todos_block_and_line2() {
-        test_content("/* todo: // item */", "// item", "rs");
+        test_content("/* todo: // item */", Some("// item"), "rs");
     }
 
     #[test]
     fn find_todos_block_and_line3() {
-        test_content(" // /* todo: item */", "NONE", "rs");
+        test_content(" // /* todo: item */", None, "rs");
     }
 
     #[test]
     fn find_todos_block_and_line4() {
-        test_content(" //   todo:  /* item */", "/* item */", "rs");
+        test_content(" //   todo:  /* item */", Some("/* item */"), "rs");
     }
 
     #[test]
     fn find_todos_py_in_c_file() {
-        test_content("# todo: item \t ", "NONE", "c");
+        test_content("# todo: item \t ", None, "c");
     }
 
     #[test]
     fn find_todos_c_comment_in_py_comment() {
-        test_content("# todo: \\ todo: item \t ", "\\ todo: item", "py");
+        test_content("# todo: \\ todo: item \t ", Some("\\ todo: item"), "py");
     }
 
     #[test]
     fn find_todos_c_comment_in_py_comment_in_c_file() {
-        test_content("# todo: \\ todo: item \t ", "NONE", "c");
+        test_content("# todo: \\ todo: item \t ", None, "c");
     }
+
+    // TODO: add tests for user
 }

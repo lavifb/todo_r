@@ -16,7 +16,7 @@ use crate::comments::CommentType;
 /// 1. TODO tag
 /// 2. Optional user tag
 /// 3. Content
-/// 4. Optional user tag
+/// 4. Optional in text user tag
 ///
 pub(crate) fn get_regex_for_comment<S>(
     custom_tags: &[S],
