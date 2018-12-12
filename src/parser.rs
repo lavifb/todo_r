@@ -15,17 +15,17 @@ pub struct Todo {
     pub line: usize,
     tag: String,
     content: String,
-    user: String,
+    user: Option<String>,
 }
 
 impl Todo {
     /// Create new TODO struct
-    fn new(line: usize, tag_str: &str, content_str: &str, user_str: &str) -> Todo {
+    fn new(line: usize, tag_str: &str, content_str: &str, user_str: Option<&str>) -> Todo {
         Todo {
             line,
             tag: tag_str.to_uppercase(),
             content: content_str.to_string(),
-            user: user_str.to_string(),
+            user: user_str.map(String::from),
         }
     }
 
@@ -48,11 +48,7 @@ impl Todo {
 
 impl fmt::Display for Todo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "line {}\t{}\t{}",
-            self.line, self.tag, self.content,
-        )
+        write!(f, "line {}\t{}\t{}", self.line, self.tag, self.content,)
     }
 }
 
@@ -78,7 +74,12 @@ where
 
         for re in regexs.iter() {
             if let Some(todo_content) = re.captures(&line) {
-                let todo = Todo::new(line_num + 1, todo_content[1].trim(), todo_content[3].trim(), "");
+                let todo = Todo::new(
+                    line_num + 1,
+                    todo_content[1].trim(),
+                    todo_content[3].trim(),
+                    None,
+                );
                 todos.push(todo);
             };
         }
