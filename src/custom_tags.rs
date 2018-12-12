@@ -213,7 +213,6 @@ mod tests {
         );
     }
 
-    // TODO  write more tests for user finding
     #[test]
     fn regex_basic_user() {
         test_user_regex(
@@ -251,6 +250,66 @@ mod tests {
             Some("item @userA item2"),
             Some("userA"),
             &CommentType::new_single("//"),
+        );
+    }
+
+    #[test]
+    fn regex_tricky_user() {
+        test_user_regex(
+            "@ TODO: item @userA item2",
+            Some("item @userA item2"),
+            Some("userA"),
+            &CommentType::new_single("@"),
+        );
+    }
+
+    #[test]
+    fn regex_user_twice() {
+        test_user_regex(
+            "// TODO(user1): item @user2 item2",
+            Some("item @user2 item2"),
+            Some("user1"),
+            &CommentType::new_single("//"),
+        );
+    }
+
+    #[test]
+    fn regex_user_twice2() {
+        test_user_regex(
+            "// TODO: item @user1 item2 @user2",
+            Some("item @user1 item2 @user2"),
+            Some("user1"),
+            &CommentType::new_single("//"),
+        );
+    }
+
+    #[test]
+    fn regex_at_in_user() {
+        test_user_regex(
+            "// TODO: item @user@web.com ",
+            Some("item @user@web.com"),
+            Some("user@web.com"),
+            &CommentType::new_single("//"),
+        );
+    }
+
+    #[test]
+    fn regex_user_block() {
+        test_user_regex(
+            "/* TODO: item @user */",
+            Some("item @user"),
+            Some("user"),
+            &CommentType::new_block("/*", "*/"),
+        );
+    }
+
+    #[test]
+    fn regex_user_block2() {
+        test_user_regex(
+            "/* TODO(user): item */",
+            Some("item"),
+            Some("user"),
+            &CommentType::new_block("/*", "*/"),
         );
     }
 }
