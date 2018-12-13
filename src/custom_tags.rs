@@ -16,7 +16,6 @@ use crate::comments::CommentType;
 /// 1. TODO tag
 /// 2. Optional user tag
 /// 3. Content
-/// 4. Optional in text user tag
 ///
 pub(crate) fn get_regex_for_comment<S>(
     custom_tags: &[S],
@@ -33,7 +32,7 @@ where
         comment_type.prefix(),                     // comment prefix token
         tags_string,                               // custom tags
         r"(?:\(@?(\S+)\))?",                       // optional user tag in ()`s
-        r"((?:.*?@(\S+))?.*?)",                    // content with optional user subcapture
+        r"(.*?)",                                  // content 
         comment_type.suffix(),                     // comment prefix token
     ))
 }
@@ -55,7 +54,7 @@ mod tests {
         };
     }
 
-    fn test_user_regex(
+    fn test_paren_user_regex(
         content: &str,
         exp_content: Option<&str>,
         exp_user: Option<&str>,
@@ -68,10 +67,7 @@ mod tests {
                 assert_eq!(exp_content, Some(todo_content[3].trim()));
                 assert_eq!(
                     exp_user,
-                    todo_content
-                        .get(2)
-                        .or(todo_content.get(4))
-                        .map(|s| s.as_str())
+                    todo_content.get(2).map(|s| s.as_str())
                 );
             }
             None => {
@@ -215,7 +211,7 @@ mod tests {
 
     #[test]
     fn regex_basic_user() {
-        test_user_regex(
+        test_paren_user_regex(
             "// TODO(userA): item",
             Some("item"),
             Some("userA"),
@@ -225,47 +221,47 @@ mod tests {
 
     #[test]
     fn regex_basic_user2() {
-        test_user_regex(
+        test_paren_user_regex(
             "// TODO: item @userA",
             Some("item @userA"),
-            Some("userA"),
+            None,
             &CommentType::new_single("//"),
         );
     }
 
     #[test]
     fn regex_basic_user3() {
-        test_user_regex(
+        test_paren_user_regex(
             "// TODO: @userA   item",
             Some("@userA   item"),
-            Some("userA"),
+            None,
             &CommentType::new_single("//"),
         );
     }
 
     #[test]
     fn regex_basic_user4() {
-        test_user_regex(
+        test_paren_user_regex(
             "// TODO: item @userA item2",
             Some("item @userA item2"),
-            Some("userA"),
+            None,
             &CommentType::new_single("//"),
         );
     }
 
     #[test]
     fn regex_tricky_user() {
-        test_user_regex(
+        test_paren_user_regex(
             "@ TODO: item @userA item2",
             Some("item @userA item2"),
-            Some("userA"),
+            None,
             &CommentType::new_single("@"),
         );
     }
 
     #[test]
     fn regex_user_twice() {
-        test_user_regex(
+        test_paren_user_regex(
             "// TODO(user1): item @user2 item2",
             Some("item @user2 item2"),
             Some("user1"),
@@ -275,41 +271,51 @@ mod tests {
 
     #[test]
     fn regex_user_twice2() {
-        test_user_regex(
+        test_paren_user_regex(
             "// TODO: item @user1 item2 @user2",
             Some("item @user1 item2 @user2"),
-            Some("user1"),
+            None,
             &CommentType::new_single("//"),
         );
     }
 
     #[test]
     fn regex_at_in_user() {
-        test_user_regex(
+        test_paren_user_regex(
             "// TODO: item @user@web.com ",
             Some("item @user@web.com"),
-            Some("user@web.com"),
+            None,
             &CommentType::new_single("//"),
         );
     }
 
     #[test]
     fn regex_user_block() {
-        test_user_regex(
+        test_paren_user_regex(
             "/* TODO: item @user */",
             Some("item @user"),
-            Some("user"),
+            None,
             &CommentType::new_block("/*", "*/"),
         );
     }
 
     #[test]
     fn regex_user_block2() {
-        test_user_regex(
+        test_paren_user_regex(
             "/* TODO(user): item */",
             Some("item"),
             Some("user"),
             &CommentType::new_block("/*", "*/"),
+        );
+    }
+
+    #[test]
+    fn regex_paren_in_user() {
+        test_paren_user_regex(
+            "// TODO(smiles:)): item \t ",
+            Some("item"),
+            Some("smiles:)"),
+            &CommentType::new_single("//"),
         );
     }
 }

@@ -67,7 +67,8 @@ impl<'a> Todo<'a> {
         // Test(other):      item @you woo hoo @wow    
     }
 
-    pub fn users(&'a mut self) -> Vec<&'a str> {
+    /// Returns all is tagged in the Todo.
+    pub fn users(&'a self) -> Vec<&'a str> {
         USER_REGEX.find_iter(&self.content).map(|s| s.as_str()).collect()
 
         // let out = if self.users.is_some() {
@@ -79,6 +80,18 @@ impl<'a> Todo<'a> {
         // };
 
         // out
+    }
+
+    /// Returns true if user is tagged in the Todo.
+    pub fn tags_user(&self, user: &str) -> bool {
+        for u in self.users() {
+            println!("{}", u);
+            if &u[1..] == user {
+                return true;
+            }
+        }
+
+        false
     }
 }
 
@@ -155,6 +168,30 @@ mod tests {
         }
     }
 
+    fn test_users(content: &str, exp_content: Option<&str>, exp_users:&[&str], file_ext: &str) {
+        let comment_types = match file_ext {
+            "rs" => CommentTypes::new().add_single("//").add_block("/*", "*/"),
+            "c" => CommentTypes::new().add_single("//").add_block("/*", "*/"),
+            "py" => CommentTypes::new()
+                .add_single("#")
+                .add_block("\"\"\"", "\"\"\""),
+            _ => CommentTypes::new().add_single("//").add_block("/*", "*/"),
+        };
+
+        let mut content_buf = Cursor::new(content);
+        let todos = parse_content(&mut content_buf, &comment_types, &["TODO".to_string()]).unwrap();
+
+        if todos.is_empty() {
+            assert_eq!(exp_content, None);
+        } else {
+            assert_eq!(exp_content, Some(todos[0].content.as_str()));
+            assert_eq!(exp_users.len(), todos[0].users().len());
+            for user in exp_users {
+                assert!(todos[0].tags_user(user));
+            }
+        }
+    }
+
     #[test]
     fn find_todos_block_and_line1() {
         test_content("/* // todo: item */", None, "rs");
@@ -190,5 +227,14 @@ mod tests {
         test_content("# todo: \\ todo: item \t ", None, "c");
     }
 
-    // TODO: add tests for user
+    #[test]
+    fn find_user() {
+        test_users("// todo(u): item  \t ", Some("@u item"), &["u"], "c");
+    }
+
+    #[test]
+    fn find_users() {
+        test_users("// todo(u): @u1 item @u2 \t ", Some("@u @u1 item @u2"), &["u", "u1", "u2"], "c");
+    }
+
 }
