@@ -2,12 +2,18 @@
 
 use ansi_term::Style;
 use log::trace;
-use regex::{Regex, Match};
+use regex::Regex;
 use std::fmt;
 use std::io::BufRead;
+use lazy_static::lazy_static;
+use std::borrow::Cow;
 
 use crate::comments::CommentTypes;
 use crate::custom_tags::get_regex_for_comment;
+
+lazy_static! {
+    static ref USER_REGEX: Regex = Regex::new(r"(@\S+)").unwrap();
+}
 
 /// A struct holding the TODO and all the needed meta-information for it.
 #[derive(Debug, Clone)]
@@ -15,36 +21,37 @@ pub struct Todo<'a> {
     pub line: usize,
     tag: String,
     content: String,
-    user: Option<String>,
     // TODO: add slices that represent all in-text users 
-    user_locs: Option<Vec<Match<'a>>>,
+    users: Option<Vec<&'a str>>,
+    // users: std::marker::PhantomData<&'a str>,
 }
 
 impl<'a> Todo<'a> {
     /// Create new TODO struct
-    fn new<'b>(line: usize, tag_str: &str, content_str: &str, user_str: Option<&str>) -> Todo<'b> {
+    fn new<'b, 'c>(line: usize, tag_str: &str, content: impl Into<Cow<'c, str>>) -> Todo<'b> {
         Todo {
             line,
             tag: tag_str.to_uppercase(),
-            content: content_str.to_string(),
-            user: user_str.map(|u| format!("@{}", u)),
-            user_locs: None,
+            content: content.into().into_owned(),
+            users: None,
         }
     }
 
     /// Returns colored output string
-    // TODO: style for tagged users 
     pub fn style_string(
         &self,
         line_style: &Style,
         todo_style: &Style,
         content_style: &Style,
     ) -> String {
+        // TODO: style for tagged users 
+        let user_style = line_style;
 
-        let content_out: String = match &self.user {
-            Some(user) => format!("{}{}{} {}", line_style.prefix(), user, line_style.infix(*content_style), &self.content),
-            None => content_style.paint(&self.content).to_string(),
-        };
+        // Paint users using user_style by wrapping users with infix ansi-strings
+        let cs_to_us = content_style.infix(*user_style);
+        let us_to_cs = user_style.infix(*content_style);
+        let paint_users = |c: &regex::Captures| format!("{}{}{}", cs_to_us, &c[1], us_to_cs);
+        let content_out = USER_REGEX.replace_all(&self.content, paint_users);
 
         format!(
             "  {}  {}  {}",
@@ -57,6 +64,21 @@ impl<'a> Todo<'a> {
         // Test(user): item
         // Test: item @me @you woo hoo
         // Test:      item @you woo hoo @wow    
+        // Test(other):      item @you woo hoo @wow    
+    }
+
+    pub fn users(&'a mut self) -> Vec<&'a str> {
+        USER_REGEX.find_iter(&self.content).map(|s| s.as_str()).collect()
+
+        // let out = if self.users.is_some() {
+        //     self.users.unwrap()
+        // } else {
+        //     let new_out = USER_REGEX.find_iter(&self.content).map(|s| s.as_str()).collect();
+        //     self.users = Some(new_out);
+        //     new_out
+        // };
+
+        // out
     }
 }
 
@@ -82,26 +104,21 @@ where
 
     trace!("capturing content against {} regexs", regexs.len());
 
-    let user_regex = Regex::new(r"(@\S+)").unwrap();
-
     let mut todos = Vec::new();
     for (line_num, line_result) in content_buf.lines().enumerate() {
         let line = line_result?;
 
         for re in regexs.iter() {
             if let Some(todo_caps) = re.captures(&line) {
-                // TODO: stick todo_caps[2] at the front of content
-                // TODO: store locations of users in content for painting in output
-                let users: Vec<Match> = user_regex.find_iter(&todo_caps[3]).collect();
-                for u in users {
-                    println!("{},{}: {}", u.start(), u.end(), u.as_str());
-                }
+                let content: Cow<str> = match todo_caps.get(2) {
+                    Some(user) => Cow::Owned(format!("@{} {}", user.as_str(), todo_caps.get(3).unwrap().as_str())),
+                    None => Cow::Borrowed(&todo_caps[3]),
+                };
 
                 let todo = Todo::new(
                     line_num + 1,
                     &todo_caps[1],
-                    &todo_caps[3],
-                    todo_caps.get(2).or(todo_caps.get(4)).map(|s| s.as_str()),
+                    content,
                 );
                 todos.push(todo);
             };
