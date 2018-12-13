@@ -338,7 +338,8 @@ fn users() {
             "ignore_this.rs
   line 1      TODO   @user1 ignore1
   line 2      TODO   @user1 ignore2 @user2
-  line 3      TODO   ignore3 @user1\n")
+  line 3      TODO   ignore3 @user1\n",
+        )
         .stderr("");
 }
 

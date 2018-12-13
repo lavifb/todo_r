@@ -26,13 +26,12 @@ where
 {
     let tags_string = custom_tags.join("|");
 
-    // use something like ^\s*\/\/\s*(TODO)\s?(?:\((\S+)\))?[:\s]?\s+((?:.*?@(\S+))?.*?)\s*$
     Regex::new(&format!(
         r"(?i)^\s*{}\s*({})\s?{}[:\s]?\s+{}\s*{}", // whitespace and optional colon
         comment_type.prefix(),                     // comment prefix token
         tags_string,                               // custom tags
         r"(?:\(@?(\S+)\))?",                       // optional user tag in ()`s
-        r"(.*?)",                                  // content 
+        r"(.*?)",                                  // content
         comment_type.suffix(),                     // comment prefix token
     ))
 }
@@ -67,10 +66,7 @@ mod tests {
         match todo_content {
             Some(todo_content) => {
                 assert_eq!(exp_content, Some(todo_content[3].trim()));
-                assert_eq!(
-                    exp_user,
-                    todo_content.get(2).map(|s| s.as_str())
-                );
+                assert_eq!(exp_user, todo_content.get(2).map(|s| s.as_str()));
             }
             None => {
                 assert_eq!(exp_content, None);

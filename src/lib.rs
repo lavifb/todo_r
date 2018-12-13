@@ -322,7 +322,7 @@ impl<'a> TodoR<'a> {
     }
 
     /// Returns all tracked files that contain TODOs
-    pub fn get_tracked_files<>(& self) -> Vec<& str> {
+    pub fn get_tracked_files(&self) -> Vec<&str> {
         self.todo_files
             .iter()
             .filter(|tf| !tf.todos.is_empty())

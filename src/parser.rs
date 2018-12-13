@@ -1,12 +1,12 @@
 // Module for finding TODOs in files
 
 use ansi_term::Style;
+use lazy_static::lazy_static;
 use log::trace;
 use regex::Regex;
+use std::borrow::Cow;
 use std::fmt;
 use std::io::BufRead;
-use lazy_static::lazy_static;
-use std::borrow::Cow;
 
 use crate::comments::CommentTypes;
 use crate::custom_tags::get_regex_for_comment;
@@ -21,7 +21,7 @@ pub struct Todo<'a> {
     pub line: usize,
     tag: String,
     content: String,
-    // TODO: add slices that represent all in-text users 
+    // TODO: add slices that represent all in-text users
     users: Option<Vec<&'a str>>,
 }
 
@@ -43,7 +43,7 @@ impl<'a> Todo<'a> {
         todo_style: &Style,
         content_style: &Style,
     ) -> String {
-        // TODO: style for tagged users 
+        // TODO: style for tagged users
         let user_style = line_style;
 
         // Paint users using user_style by wrapping users with infix ansi-strings
@@ -64,7 +64,10 @@ impl<'a> Todo<'a> {
     #[allow(dead_code)]
     /// Returns all is tagged in the Todo.
     pub fn users(&'a self) -> Vec<&'a str> {
-        USER_REGEX.find_iter(&self.content).map(|s| s.as_str()).collect()
+        USER_REGEX
+            .find_iter(&self.content)
+            .map(|s| s.as_str())
+            .collect()
 
         // let out = if self.users.is_some() {
         //     self.users.unwrap()
@@ -106,6 +109,7 @@ pub(crate) fn parse_content<'a, B>(
 where
     B: BufRead,
 {
+    // TODO: cache regexs
     let regexs: Vec<Regex> = comment_types
         .iter()
         .map(|c| get_regex_for_comment(tags, c).unwrap())
@@ -120,15 +124,15 @@ where
         for re in regexs.iter() {
             if let Some(todo_caps) = re.captures(&line) {
                 let content: Cow<str> = match todo_caps.get(2) {
-                    Some(user) => Cow::Owned(format!("@{} {}", user.as_str(), todo_caps.get(3).unwrap().as_str())),
+                    Some(user) => Cow::Owned(format!(
+                        "@{} {}",
+                        user.as_str(),
+                        todo_caps.get(3).unwrap().as_str()
+                    )),
                     None => Cow::Borrowed(&todo_caps[3]),
                 };
 
-                let todo = Todo::new(
-                    line_num + 1,
-                    &todo_caps[1],
-                    content,
-                );
+                let todo = Todo::new(line_num + 1, &todo_caps[1], content);
                 todos.push(todo);
             };
         }
@@ -164,7 +168,7 @@ mod tests {
         }
     }
 
-    fn test_users(content: &str, exp_content: Option<&str>, exp_users:&[&str], file_ext: &str) {
+    fn test_users(content: &str, exp_content: Option<&str>, exp_users: &[&str], file_ext: &str) {
         let comment_types = match file_ext {
             "rs" => CommentTypes::new().add_single("//").add_block("/*", "*/"),
             "c" => CommentTypes::new().add_single("//").add_block("/*", "*/"),
@@ -230,7 +234,12 @@ mod tests {
 
     #[test]
     fn find_users() {
-        test_users("// todo(u): @u1 item @u2 \t ", Some("@u @u1 item @u2"), &["u", "u1", "u2"], "c");
+        test_users(
+            "// todo(u): @u1 item @u2 \t ",
+            Some("@u @u1 item @u2"),
+            &["u", "u1", "u2"],
+            "c",
+        );
     }
 
 }
