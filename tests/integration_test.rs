@@ -326,3 +326,18 @@ fn check2() {
         .assert()
         .success();
 }
+
+#[test]
+fn users() {
+    todor()
+        .current_dir("tests/inputt")
+        .arg("ignore_this.rs")
+        .assert()
+        .success()
+        .stdout(
+            "ignore_this.rs
+  line 1      TODO   @user1 ignore1
+  line 2      TODO   @user1 ignore2 @user2
+  line 3      TODO   ignore3 @user1\n")
+        .stderr("");
+}

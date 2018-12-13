@@ -117,3 +117,5 @@ pub fn write_file_todos(
 
     Ok(())
 }
+
+// TODO: make write_user_file_todos() that only ouputs user tagged TODOs

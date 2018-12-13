@@ -37,6 +37,8 @@ where
     ))
 }
 
+// MAYB: look only for TODOs with specified user/users
+
 #[cfg(test)]
 mod tests {
     use super::*;

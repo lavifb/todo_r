@@ -23,7 +23,6 @@ pub struct Todo<'a> {
     content: String,
     // TODO: add slices that represent all in-text users 
     users: Option<Vec<&'a str>>,
-    // users: std::marker::PhantomData<&'a str>,
 }
 
 impl<'a> Todo<'a> {
@@ -60,13 +59,9 @@ impl<'a> Todo<'a> {
             todo_style.paint(format!("{:5}", &self.tag)),
             content_style.paint(content_out),
         )
-
-        // Test(user): item
-        // Test: item @me @you woo hoo
-        // Test:      item @you woo hoo @wow    
-        // Test(other):      item @you woo hoo @wow    
     }
 
+    #[allow(dead_code)]
     /// Returns all is tagged in the Todo.
     pub fn users(&'a self) -> Vec<&'a str> {
         USER_REGEX.find_iter(&self.content).map(|s| s.as_str()).collect()
@@ -82,6 +77,7 @@ impl<'a> Todo<'a> {
         // out
     }
 
+    #[allow(dead_code)]
     /// Returns true if user is tagged in the Todo.
     pub fn tags_user(&self, user: &str) -> bool {
         for u in self.users() {
