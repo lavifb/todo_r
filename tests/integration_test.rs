@@ -341,3 +341,18 @@ fn users() {
   line 3      TODO   ignore3 @user1\n")
         .stderr("");
 }
+
+#[test]
+fn users_color() {
+    let mut cmd = CARGO_RUN.command();
+    cmd.current_dir("tests/inputt")
+        .arg("ignore_this.rs")
+        .assert()
+        .success()
+        .stdout(
+            "[4mignore_this.rs[0m
+  [38;5;8mline 1    [0m  [32mTODO [0m  [36m[38;5;8m@user1[36m ignore1[0m
+  [38;5;8mline 2    [0m  [32mTODO [0m  [36m[38;5;8m@user1[36m ignore2 [38;5;8m@user2[36m[0m
+  [38;5;8mline 3    [0m  [32mTODO [0m  [36mignore3 [38;5;8m@user1[36m[0m\n")
+        .stderr("");
+}
