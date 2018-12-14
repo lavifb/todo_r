@@ -338,7 +338,7 @@ fn users() {
             "ignore_this.rs
   line 1      TODO   @user1 ignore1
   line 2      TODO   @user1 ignore2 @user2
-  line 3      TODO   ignore3 @user1\n",
+  line 3      TODO   ignore3 @user1 @user3\n",
         )
         .stderr("");
 }
@@ -354,6 +354,40 @@ fn users_color() {
             "[4mignore_this.rs[0m
   [38;5;8mline 1    [0m  [32mTODO [0m  [36m[38;5;8m@user1[36m ignore1[0m
   [38;5;8mline 2    [0m  [32mTODO [0m  [36m[38;5;8m@user1[36m ignore2 [38;5;8m@user2[36m[0m
-  [38;5;8mline 3    [0m  [32mTODO [0m  [36mignore3 [38;5;8m@user1[36m[0m\n")
+  [38;5;8mline 3    [0m  [32mTODO [0m  [36mignore3 [38;5;8m@user1[36m [38;5;8m@user3[36m[0m\n")
+        .stderr("");
+}
+
+#[test]
+fn select_users1() {
+    todor()
+        .current_dir("tests/inputt")
+        .arg("ignore_this.rs")
+        .arg("-u")
+        .arg("user2")
+        .assert()
+        .success()
+        .stdout(
+            "ignore_this.rs
+  line 2      TODO   @user1 ignore2 @user2\n",
+        )
+        .stderr("");
+}
+
+#[test]
+fn select_users2() {
+    todor()
+        .current_dir("tests/inputt")
+        .arg("ignore_this.rs")
+        .arg("-u")
+        .arg("user2")
+        .arg("user3")
+        .assert()
+        .success()
+        .stdout(
+            "ignore_this.rs
+  line 2      TODO   @user1 ignore2 @user2
+  line 3      TODO   ignore3 @user1 @user3\n",
+        )
         .stderr("");
 }
