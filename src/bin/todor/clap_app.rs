@@ -2,8 +2,6 @@ use clap::{clap_app, ArgMatches};
 
 pub fn get_cli_matches<'a>() -> ArgMatches<'a> {
     // TODO: add subcommand for just content so it can be piped
-    // TODO: flag -u to select only user
-    // TODO: flag -U to select only user and non user-tagged
     clap_app!(todo_r =>
         (version: env!("CARGO_PKG_VERSION"))
         (author: "Lavi Blumberg <lavifb@gmail.com>")

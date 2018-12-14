@@ -7,12 +7,17 @@ It is pronounced "todoer" like someone that does todos.
 
 A lot is adapted from [leasot](https://github.com/pgilad/leasot) but runs much faster.
 
+<!-- TODO: rewrite overview -->
 ### Current support
 
 * Only separate line comments are supported. So `statement; // TODO: this` is unsupported.
 * Block comments like `/* TODO: this */` that stick to one line are supported.
 * Custom tags are searched using the `-t` flag.
+* Tagged user references
 * Interactive mode for deleting comments is launched using the `-d` flag.
+
+<!-- TODO: write about installation -->
+<!-- ### Installation -->
 
 ### Language support
 
@@ -44,6 +49,8 @@ A lot is adapted from [leasot](https://github.com/pgilad/leasot) but runs much f
 |TypeScript   |`.ts`,`.tsx`         |`//`,`/* */`   |
 |YAML         |`.yaml`,`.yml`       |`#`            |
 
+<!-- TODO: write about features -->
+<!-- ### Features -->
 
 ---
 written by Lavi Blumberg

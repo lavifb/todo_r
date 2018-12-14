@@ -70,7 +70,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 
     let mut pred = None;
     if let Some(users_iter) = matches.values_of("USER") {
-        // let users: Vec<String> = users_iter.map(|s| s.to_string()).collect();
         let users: Vec<&str> = users_iter.collect();
         pred = Some(move |t: &Todo| users.iter().any(|u| t.tags_user(*u)));
     }
