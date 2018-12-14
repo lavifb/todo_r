@@ -44,7 +44,9 @@ impl Todo {
             styles
                 .line_number_style
                 .paint(format!("line {:<5}", self.line)),
-            styles.tag_style.paint(format!("{:5}", &self.tag)),
+            styles
+                .tag_style(&self.tag)
+                .paint(format!("{:5}", &self.tag)),
             styles.content_style.paint(content_out),
         )
     }

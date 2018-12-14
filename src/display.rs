@@ -1,7 +1,9 @@
 // Module for displaying output
 
+use ansi_term::Color::{Cyan, Fixed, Green};
 use ansi_term::Style;
 use failure::Error;
+use fnv::FnvHashMap;
 use log::debug;
 use std::io::{self, Write};
 
@@ -12,9 +14,24 @@ use crate::todo::{Todo, TodoFile};
 pub struct StyleConfig {
     pub filepath_style: Style,
     pub line_number_style: Style,
-    pub tag_style: Style,
     pub user_style: Style,
     pub content_style: Style,
+    tag_styles: FnvHashMap<String, Style>,
+    default_tag_style: Style,
+}
+
+impl Default for StyleConfig {
+    /// Creates new StyleConfig with the default color printing style.
+    fn default() -> StyleConfig {
+        StyleConfig {
+            filepath_style: Style::new().underline(),
+            line_number_style: Style::from(Fixed(8)),
+            user_style: Style::from(Fixed(8)),
+            content_style: Style::from(Cyan),
+            default_tag_style: Style::from(Green),
+            tag_styles: FnvHashMap::default(),
+        }
+    }
 }
 
 impl StyleConfig {
@@ -23,24 +40,22 @@ impl StyleConfig {
         StyleConfig {
             filepath_style: Style::new(),
             line_number_style: Style::new(),
-            tag_style: Style::new(),
             user_style: Style::new(),
             content_style: Style::new(),
+            default_tag_style: Style::new(),
+            tag_styles: FnvHashMap::default(),
         }
     }
-}
 
-use ansi_term::Color::{Cyan, Fixed, Green};
-impl Default for StyleConfig {
-    /// Creates new StyleConfig with the default color printing style.
-    fn default() -> StyleConfig {
-        StyleConfig {
-            filepath_style: Style::new().underline(),
-            line_number_style: Style::from(Fixed(8)),
-            tag_style: Style::from(Green),
-            user_style: Style::from(Fixed(8)),
-            content_style: Style::from(Cyan),
-        }
+    /// Adds style for printing given tag
+    pub fn add_tag_style(mut self, tag: impl ToString, style: Style) -> Self {
+        self.tag_styles.insert(tag.to_string(), style);
+        self
+    }
+
+    /// Returns tag style for given tag.
+    pub fn tag_style(&self, tag: &str) -> &Style {
+        self.tag_styles.get(tag).unwrap_or(&self.default_tag_style)
     }
 }
 
