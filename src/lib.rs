@@ -48,11 +48,12 @@ use failure::Error;
 use fnv::FnvHashMap;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use log::debug;
+use regex::Regex;
 
 use crate::comments::{CommentTypes, TodorConfigFileSerial};
 use crate::display::*;
 use crate::errors::TodoRError;
-use crate::parser::parse_content;
+use crate::parser::{build_parser_regexs, parse_content};
 use crate::todo::{Todo, TodoFile};
 
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
@@ -281,6 +282,7 @@ struct TodoRConfig {
 pub struct TodoR<'a> {
     config: TodoRConfig,
     todo_files: Vec<TodoFile<'a>>,
+    ext_to_regexs: FnvHashMap<String, Vec<Regex>>,
 }
 
 impl<'a> Default for TodoR<'a> {
@@ -310,6 +312,7 @@ impl<'a> TodoR<'a> {
         TodoR {
             config,
             todo_files: Vec::new(),
+            ext_to_regexs: FnvHashMap::default(),
         }
     }
 
@@ -340,6 +343,27 @@ impl<'a> TodoR<'a> {
             .collect()
     }
 
+    /// Returns the parser regexs for the provided extension.
+    /// Results are cached so regexes do not have to be rebuilt.
+    fn get_parser_regexs(&mut self, ext: impl AsRef<str>) -> &Vec<Regex> {
+        let config = &self.config;
+
+        self.ext_to_regexs
+            .entry(ext.as_ref().to_string())
+            .or_insert_with(|| {
+                debug!(
+                    "Regexs for `{}` not found. Building regexs...",
+                    ext.as_ref()
+                );
+                let comment_types = config
+                    .ext_to_comment_types
+                    .get(ext.as_ref())
+                    .unwrap_or(&config.default_comment_types);
+
+                build_parser_regexs(comment_types, &config.tags)
+            })
+    }
+
     /// Opens file at given filepath and process it by finding all its TODOs.
     pub fn open_todos(&mut self, filepath: &Path) -> Result<(), Error> {
         let mut todo_file = TodoFile::new(filepath);
@@ -363,20 +387,16 @@ impl<'a> TodoR<'a> {
             }
         }
 
-        let file_ext = filepath.extension().unwrap_or_else(|| OsStr::new(".sh"));
-        let comment_types = self
-            .config
-            .ext_to_comment_types
-            .get(file_ext.to_str().unwrap())
-            .unwrap_or(&self.config.default_comment_types);
+        let file_ext = filepath
+            .extension()
+            .unwrap_or_else(|| OsStr::new(".sh"))
+            .to_str()
+            .unwrap();
+        let parser_regexs = self.get_parser_regexs(file_ext);
 
         let file = File::open(filepath)?;
         let mut file_reader = BufReader::new(file);
-        todo_file.set_todos(parse_content(
-            &mut file_reader,
-            &comment_types,
-            &self.config.tags,
-        )?);
+        todo_file.set_todos(parse_content(&mut file_reader, &parser_regexs)?);
 
         debug!(
             "found {} TODOs in `{}`",
@@ -394,11 +414,9 @@ impl<'a> TodoR<'a> {
     pub fn find_todos(&mut self, content: &str) -> Result<(), Error> {
         let mut todo_file = TodoFile::new(Path::new(""));
         let mut content_buf = Cursor::new(content);
-        todo_file.set_todos(parse_content(
-            &mut content_buf,
-            &self.config.default_comment_types,
-            &self.config.tags,
-        )?);
+        let parser_regexs = self.get_parser_regexs(".sh");
+
+        todo_file.set_todos(parse_content(&mut content_buf, &parser_regexs)?);
 
         self.todo_files.push(todo_file);
         Ok(())

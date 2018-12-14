@@ -9,21 +9,22 @@ use crate::comments::CommentTypes;
 use crate::custom_tags::get_regex_for_comment;
 use crate::todo::Todo;
 
-/// Parses content and Creates a list of TODOs found in content
-pub(crate) fn parse_content<'a, B>(
+/// Builds Regexs for use with parse_content.
+pub fn build_parser_regexs(comment_types: &CommentTypes, tags: &[String]) -> Vec<Regex> {
+    comment_types
+        .iter()
+        .map(|c| get_regex_for_comment(tags, c).unwrap())
+        .collect()
+}
+
+/// Parses content and creates a list of TODOs found in content
+pub fn parse_content<'a, B>(
     content_buf: &mut B,
-    comment_types: &CommentTypes,
-    tags: &[String],
+    regexs: &[Regex],
 ) -> Result<Vec<Todo<'a>>, std::io::Error>
 where
     B: BufRead,
 {
-    // TODO: cache regexs
-    let regexs: Vec<Regex> = comment_types
-        .iter()
-        .map(|c| get_regex_for_comment(tags, c).unwrap())
-        .collect();
-
     trace!("capturing content against {} regexs", regexs.len());
 
     let mut todos = Vec::new();
@@ -68,7 +69,11 @@ mod tests {
         };
 
         let mut content_buf = Cursor::new(content);
-        let todos = parse_content(&mut content_buf, &comment_types, &["TODO".to_string()]).unwrap();
+        let todos = parse_content(
+            &mut content_buf,
+            &build_parser_regexs(&comment_types, &["TODO".to_string()]),
+        )
+        .unwrap();
 
         if todos.is_empty() {
             assert_eq!(exp_result, None);
@@ -88,7 +93,11 @@ mod tests {
         };
 
         let mut content_buf = Cursor::new(content);
-        let todos = parse_content(&mut content_buf, &comment_types, &["TODO".to_string()]).unwrap();
+        let todos = parse_content(
+            &mut content_buf,
+            &build_parser_regexs(&comment_types, &["TODO".to_string()]),
+        )
+        .unwrap();
 
         if todos.is_empty() {
             assert_eq!(exp_content, None);
