@@ -64,16 +64,6 @@ impl<'a> Todo<'a> {
             .find_iter(&self.content)
             .map(|s| s.as_str())
             .collect()
-
-        // let out = if self.users.is_some() {
-        //     self.users.unwrap()
-        // } else {
-        //     let new_out = USER_REGEX.find_iter(&self.content).map(|s| s.as_str()).collect();
-        //     self.users = Some(new_out);
-        //     new_out
-        // };
-
-        // out
     }
 
     #[allow(dead_code)]
