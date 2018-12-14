@@ -84,7 +84,6 @@ impl<'a> Todo<'a> {
     /// Returns true if user is tagged in the Todo.
     pub fn tags_user(&self, user: &str) -> bool {
         for u in self.users() {
-            println!("{}", u);
             if &u[1..] == user {
                 return true;
             }

@@ -1,7 +1,7 @@
 pub mod comments;
 mod custom_tags;
 mod display;
-mod parser;
+pub mod parser;
 mod remover;
 
 pub mod errors {
@@ -49,9 +49,10 @@ use globset::{Glob, GlobSet, GlobSetBuilder};
 use log::debug;
 
 use crate::comments::{CommentTypes, TodorConfigFileSerial};
-use crate::display::{write_file_todos, StyleConfig, TodoFile};
+use crate::display::*;
 use crate::errors::TodoRError;
 use crate::parser::parse_content;
+use crate::parser::Todo;
 
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 static EXAMPLE_CONFIG: &str = include_str!("example_config.hjson");
@@ -420,6 +421,31 @@ impl<'a> TodoR<'a> {
             }
 
             write_file_todos(out_buffer, &todo_file, &self.config.styles)?;
+        }
+
+        Ok(())
+    }
+
+    /// Prints TODOs to stdout. Only prints TODOs that fulfill pred.
+    pub fn print_filtered_todos<P>(&self, pred: &P)
+    where
+        P: Fn(&Todo) -> bool,
+    {
+        // lock stdout to print faster
+        let stdout = io::stdout();
+        let lock = stdout.lock();
+        let mut out_buffer = io::BufWriter::new(lock);
+
+        self.write_filtered_todos(&mut out_buffer, pred).unwrap();
+    }
+
+    /// Writes TODOs to out_buffer. Only writes TODOs that fulfill pred.
+    pub fn write_filtered_todos<P>(&self, out_buffer: &mut Write, pred: &P) -> Result<(), Error>
+    where
+        P: Fn(&Todo) -> bool,
+    {
+        for todo_file in &self.todo_files {
+            write_filtered_file_todos(out_buffer, &todo_file, &self.config.styles, pred)?;
         }
 
         Ok(())

@@ -4,6 +4,7 @@ use crate::parser::Todo;
 
 use ansi_term::Style;
 use failure::Error;
+use log::debug;
 use std::borrow::Cow;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -118,4 +119,46 @@ pub fn write_file_todos(
     Ok(())
 }
 
-// TODO: make write_user_file_todos() that only ouputs user tagged TODOs
+pub fn write_filtered_file_todos<P>(
+    out_buffer: &mut Write,
+    todo_file: &TodoFile,
+    styles: &StyleConfig,
+    pred: &P,
+) -> Result<(), Error>
+where
+    P: Fn(&Todo) -> bool,
+{
+    let mut tmp: Vec<u8> = Vec::new();
+    for todo in &todo_file.todos {
+        if pred(todo) {
+            writeln!(
+                tmp,
+                "{}",
+                todo.style_string(
+                    &styles.line_number_style,
+                    &styles.tag_style,
+                    &styles.content_style
+                )
+            )?;
+        }
+    }
+
+    if !tmp.is_empty() {
+        writeln!(
+            out_buffer,
+            "{}",
+            styles
+                .filepath_style
+                .paint(todo_file.filepath.to_string_lossy())
+        )?;
+
+        out_buffer.write_all(&tmp)?;
+    } else {
+        debug!(
+            "No filtered TODOs found in `{}`",
+            todo_file.filepath.to_string_lossy()
+        )
+    }
+
+    Ok(())
+}

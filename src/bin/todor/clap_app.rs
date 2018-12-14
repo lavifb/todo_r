@@ -12,9 +12,11 @@ pub fn get_cli_matches<'a>() -> ArgMatches<'a> {
         (@arg CONFIG: -c --("config") +takes_value "Takes configuration from file.")
         (@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
         (@arg TAGS: -t --("tag") +takes_value +multiple "TODO tags to search for.")
-        (@arg IGNORE: -i --("ignore") +takes_value +multiple "Paths to be ignored.")
         (@arg OVERRIDE_TAGS: -T --("override-tags") +takes_value +multiple
             "Overrides default TODO tags to only search custom ones.")
+        (@arg USER: -u --("user") +takes_value +multiple
+            "Filter output to only feature provided users.")
+        (@arg IGNORE: -i --("ignore") +takes_value +multiple "Paths to be ignored.")
         (@arg VERBOSE: -v --("verbose") "Provide verbose output.")
         (@arg CHECK: --("check") "Exits nicely only if no TODO tags are found.")
         (@arg DELETE_MODE: -d --("delete") "Interactive delete mode.")

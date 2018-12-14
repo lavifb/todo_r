@@ -12,6 +12,7 @@ use log::*;
 use std::fs::File;
 use std::path::Path;
 
+use todo_r::parser::Todo;
 use todo_r::TodoRBuilder;
 
 use self::clap_app::get_cli_matches;
@@ -67,6 +68,13 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
         builder.add_override_ignore_paths(ignore_paths_iter)?;
     }
 
+    let mut pred = None;
+    if let Some(users_iter) = matches.values_of("USER") {
+        // let users: Vec<String> = users_iter.map(|s| s.to_string()).collect();
+        let users: Vec<&str> = users_iter.collect();
+        pred = Some(move |t: &Todo| users.iter().any(|u| t.tags_user(*u)));
+    }
+
     let mut todor;
     match matches.values_of("FILE") {
         Some(files) => {
@@ -104,7 +112,11 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
     if matches.is_present("DELETE_MODE") {
         run_delete(&mut todor)?;
     } else {
-        todor.print_todos();
+        if let Some(p) = pred {
+            todor.print_filtered_todos(&p);
+        } else {
+            todor.print_todos();
+        }
     }
 
     if matches.is_present("CHECK") && todor.num_todos() > 0 {
