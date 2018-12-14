@@ -14,13 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- debug statements using log crate
 - user tagging
 	- Types
 		1. `// TODO(user): item`
 		2. `// TODO: @user1 item @user2 @user3`
 	- User tags are color highlighted in output
 	- output only specific users using `-u` or `--user` flag
+- regex caching to not rebuild the same regexs over and over again
+- debug statements using log crate
 
 ### Changed
 - stderr output using `--verbose` flag
