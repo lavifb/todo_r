@@ -1,11 +1,12 @@
 // Module for holding Todo types.
 
-use ansi_term::Style;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::borrow::Cow;
 use std::fmt;
 use std::path::{Path, PathBuf};
+
+use crate::display::StyleConfig;
 
 lazy_static! {
     static ref USER_REGEX: Regex = Regex::new(r"(@\S+)").unwrap();
@@ -32,28 +33,22 @@ impl<'a> Todo<'a> {
         }
     }
 
-    /// Returns colored output string
-    pub fn style_string(
-        &self,
-        line_style: &Style,
-        todo_style: &Style,
-        content_style: &Style,
-    ) -> String {
-        // TODO: style for tagged users
-        let user_style = line_style;
-
+    /// Returns ANSI colored output string
+    pub fn style_string(&self, styles: &StyleConfig) -> String {
         // Paint users using user_style by wrapping users with infix ansi-strings
-        let cs_to_us = content_style.infix(*user_style);
-        let us_to_cs = user_style.infix(*content_style);
+        let cs_to_us = styles.content_style.infix(styles.user_style);
+        let us_to_cs = styles.user_style.infix(styles.content_style);
         let paint_users = |c: &regex::Captures| format!("{}{}{}", cs_to_us, &c[1], us_to_cs);
         let content_out = USER_REGEX.replace_all(&self.content, paint_users);
 
         format!(
             "  {}  {}  {}",
             // Columns align for up to 100,000 lines which should be fine
-            line_style.paint(format!("line {:<5}", self.line)),
-            todo_style.paint(format!("{:5}", &self.tag)),
-            content_style.paint(content_out),
+            styles
+                .line_number_style
+                .paint(format!("line {:<5}", self.line)),
+            styles.tag_style.paint(format!("{:5}", &self.tag)),
+            styles.content_style.paint(content_out),
         )
     }
 

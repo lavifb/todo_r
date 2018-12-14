@@ -10,10 +10,11 @@ use crate::todo::{Todo, TodoFile};
 /// Struct for holding ansi color printing options
 #[derive(Debug, Clone)]
 pub struct StyleConfig {
-    filepath_style: Style,
-    line_number_style: Style,
-    tag_style: Style,
-    content_style: Style,
+    pub filepath_style: Style,
+    pub line_number_style: Style,
+    pub tag_style: Style,
+    pub user_style: Style,
+    pub content_style: Style,
 }
 
 impl StyleConfig {
@@ -23,6 +24,7 @@ impl StyleConfig {
             filepath_style: Style::new(),
             line_number_style: Style::new(),
             tag_style: Style::new(),
+            user_style: Style::new(),
             content_style: Style::new(),
         }
     }
@@ -36,6 +38,7 @@ impl Default for StyleConfig {
             filepath_style: Style::new().underline(),
             line_number_style: Style::from(Fixed(8)),
             tag_style: Style::from(Green),
+            user_style: Style::from(Fixed(8)),
             content_style: Style::from(Cyan),
         }
     }
@@ -72,15 +75,7 @@ pub fn write_file_todos(
             .paint(todo_file.filepath.to_string_lossy())
     )?;
     for todo in &todo_file.todos {
-        writeln!(
-            out_buffer,
-            "{}",
-            todo.style_string(
-                &styles.line_number_style,
-                &styles.tag_style,
-                &styles.content_style
-            )
-        )?;
+        writeln!(out_buffer, "{}", todo.style_string(styles),)?;
     }
 
     Ok(())
@@ -98,15 +93,7 @@ where
     let mut tmp: Vec<u8> = Vec::new();
     for todo in &todo_file.todos {
         if pred(todo) {
-            writeln!(
-                tmp,
-                "{}",
-                todo.style_string(
-                    &styles.line_number_style,
-                    &styles.tag_style,
-                    &styles.content_style
-                )
-            )?;
+            writeln!(tmp, "{}", todo.style_string(styles))?;
         }
     }
 
