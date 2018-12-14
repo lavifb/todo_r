@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - stderr output using `--verbose` flag
 - pulled `bin/todor.rs` into separate files for potentially better compilation optimization
+- move `Todo` and `TodoFile` types into `todo` module
+
 
 ## v0.4.2 (2018-12-10)
 ### Added
@@ -33,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - [Windows]: path walker when files are not specified
+
 
 ## v0.4.1 (2018-12-8)
 ### Added

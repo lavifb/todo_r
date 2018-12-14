@@ -1,8 +1,9 @@
 pub mod comments;
 mod custom_tags;
 mod display;
-pub mod parser;
+mod parser;
 mod remover;
+pub mod todo;
 
 pub mod errors {
     use failure::Fail;
@@ -52,7 +53,7 @@ use crate::comments::{CommentTypes, TodorConfigFileSerial};
 use crate::display::*;
 use crate::errors::TodoRError;
 use crate::parser::parse_content;
-use crate::parser::Todo;
+use crate::todo::{Todo, TodoFile};
 
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 static EXAMPLE_CONFIG: &str = include_str!("example_config.hjson");

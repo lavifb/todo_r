@@ -12,7 +12,7 @@ use log::*;
 use std::fs::File;
 use std::path::Path;
 
-use todo_r::parser::Todo;
+use todo_r::todo::Todo;
 use todo_r::TodoRBuilder;
 
 use self::clap_app::get_cli_matches;

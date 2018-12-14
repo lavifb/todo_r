@@ -1,13 +1,11 @@
 // Module for displaying output
 
-use crate::parser::Todo;
-
 use ansi_term::Style;
 use failure::Error;
 use log::debug;
-use std::borrow::Cow;
 use std::io::{self, Write};
-use std::path::{Path, PathBuf};
+
+use crate::todo::{Todo, TodoFile};
 
 /// Struct for holding ansi color printing options
 #[derive(Debug, Clone)]
@@ -40,37 +38,6 @@ impl Default for StyleConfig {
             tag_style: Style::from(Green),
             content_style: Style::from(Cyan),
         }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct TodoFile<'a> {
-    pub filepath: PathBuf,
-    pub todos: Vec<Todo<'a>>,
-}
-
-impl<'a> TodoFile<'a> {
-    pub fn new<'b, P>(filepath: P) -> TodoFile<'b>
-    where
-        P: Into<Cow<'a, Path>>,
-    {
-        TodoFile {
-            filepath: filepath.into().into_owned(),
-            // do not allocate because it will be replaced
-            todos: Vec::with_capacity(0),
-        }
-    }
-
-    pub fn set_todos(&mut self, todos: Vec<Todo<'a>>) {
-        self.todos = todos;
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.todos.is_empty()
-    }
-
-    pub fn len(&self) -> usize {
-        self.todos.len()
     }
 }
 
