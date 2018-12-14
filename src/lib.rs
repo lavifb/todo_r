@@ -103,7 +103,7 @@ impl TodoRBuilder {
     }
 
     /// Consumes self and builds TodoR.
-    pub fn build<'a>(self) -> Result<TodoR<'a>, Error> {
+    pub fn build(self) -> Result<TodoR, Error> {
         let mut config_struct: TodorConfigFileSerial =
             self.inner_config
                 .try_into()
@@ -197,7 +197,7 @@ impl TodoRBuilder {
     }
 
     /// Adds tag for TodoR to look for. This overrides tags from config files.
-    pub fn add_override_tag<'a, S: Into<Cow<'a, str>>>(&mut self, tag: S) -> &mut Self {
+    pub fn add_override_tag<'t, S: Into<Cow<'t, str>>>(&mut self, tag: S) -> &mut Self {
         self.override_tags
             .get_or_insert_with(Vec::new)
             .push(tag.into().into_owned());
@@ -205,10 +205,10 @@ impl TodoRBuilder {
     }
 
     /// Adds tags for TodoR to look for. This overrides tags from config files.
-    pub fn add_override_tags<'a, I, S>(&mut self, tags: I) -> &mut Self
+    pub fn add_override_tags<'t, I, S>(&mut self, tags: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
-        S: Into<Cow<'a, str>>,
+        S: Into<Cow<'t, str>>,
     {
         {
             let tws = self.override_tags.get_or_insert_with(Vec::new);
@@ -279,28 +279,28 @@ struct TodoRConfig {
 
 /// Parser for finding TODOs in comments and storing them on a per-file basis.
 #[derive(Debug, Clone)]
-pub struct TodoR<'a> {
+pub struct TodoR {
     config: TodoRConfig,
-    todo_files: Vec<TodoFile<'a>>,
+    todo_files: Vec<TodoFile>,
     ext_to_regexs: FnvHashMap<String, Vec<Regex>>,
 }
 
-impl<'a> Default for TodoR<'a> {
-    fn default() -> TodoR<'a> {
+impl Default for TodoR {
+    fn default() -> TodoR {
         TodoRBuilder::new().build().unwrap()
     }
 }
 
-impl<'a> TodoR<'a> {
+impl TodoR {
     /// Creates new TodoR that looks for provided keywords.
-    pub fn new<'b>() -> TodoR<'b> {
+    pub fn new() -> TodoR {
         TodoR::default()
     }
 
-    pub fn with_tags<'b, I, S>(tags: I) -> TodoR<'b>
+    pub fn with_tags<'t, I, S>(tags: I) -> TodoR
     where
         I: IntoIterator<Item = S>,
-        S: Into<Cow<'b, str>>,
+        S: Into<Cow<'t, str>>,
     {
         let mut builder = TodoRBuilder::new();
         builder.add_override_tags(tags);
@@ -308,7 +308,7 @@ impl<'a> TodoR<'a> {
     }
 
     /// Creates new TodoR using given configuration.
-    fn with_config<'b>(config: TodoRConfig) -> TodoR<'b> {
+    fn with_config(config: TodoRConfig) -> TodoR {
         TodoR {
             config,
             todo_files: Vec::new(),

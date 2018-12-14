@@ -18,10 +18,7 @@ pub fn build_parser_regexs(comment_types: &CommentTypes, tags: &[String]) -> Vec
 }
 
 /// Parses content and creates a list of TODOs found in content
-pub fn parse_content<'a, B>(
-    content_buf: &mut B,
-    regexs: &[Regex],
-) -> Result<Vec<Todo<'a>>, std::io::Error>
+pub fn parse_content<B>(content_buf: &mut B, regexs: &[Regex]) -> Result<Vec<Todo>, std::io::Error>
 where
     B: BufRead,
 {

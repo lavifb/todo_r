@@ -14,22 +14,19 @@ lazy_static! {
 
 /// A struct holding the TODO and all the needed meta-information for it.
 #[derive(Debug, Clone)]
-pub struct Todo<'a> {
+pub struct Todo {
     pub line: usize,
     pub tag: String,
     pub content: String,
-    // TODO: add slices that represent all in-text users
-    users: Option<Vec<&'a str>>,
 }
 
-impl<'a> Todo<'a> {
+impl Todo {
     /// Create new TODO struct
-    pub fn new<'b, 'c>(line: usize, tag_str: &str, content: impl Into<Cow<'c, str>>) -> Todo<'b> {
+    pub fn new<'c>(line: usize, tag_str: &str, content: impl Into<Cow<'c, str>>) -> Todo {
         Todo {
             line,
             tag: tag_str.to_uppercase(),
             content: content.into().into_owned(),
-            users: None,
         }
     }
 
@@ -54,7 +51,7 @@ impl<'a> Todo<'a> {
 
     #[allow(dead_code)]
     /// Returns all is tagged in the Todo.
-    pub fn users(&'a self) -> Vec<&'a str> {
+    pub fn users(&self) -> Vec<&str> {
         USER_REGEX
             .find_iter(&self.content)
             .map(|s| s.as_str())
@@ -74,7 +71,7 @@ impl<'a> Todo<'a> {
     }
 }
 
-impl<'a> fmt::Display for Todo<'a> {
+impl fmt::Display for Todo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "line {}\t{}\t{}", self.line, self.tag, self.content,)
     }
@@ -82,16 +79,13 @@ impl<'a> fmt::Display for Todo<'a> {
 
 /// A struct holding the a list of TODOs associated with a file.
 #[derive(Debug, Clone)]
-pub struct TodoFile<'a> {
+pub struct TodoFile {
     pub filepath: PathBuf,
-    pub todos: Vec<Todo<'a>>,
+    pub todos: Vec<Todo>,
 }
 
-impl<'a> TodoFile<'a> {
-    pub fn new<'b, P>(filepath: P) -> TodoFile<'b>
-    where
-        P: Into<Cow<'a, Path>>,
-    {
+impl TodoFile {
+    pub fn new<'p>(filepath: impl Into<Cow<'p, Path>>) -> TodoFile {
         TodoFile {
             filepath: filepath.into().into_owned(),
             // do not allocate because it will be replaced
@@ -99,7 +93,7 @@ impl<'a> TodoFile<'a> {
         }
     }
 
-    pub fn set_todos(&mut self, todos: Vec<Todo<'a>>) {
+    pub fn set_todos(&mut self, todos: Vec<Todo>) {
         self.todos = todos;
     }
 
