@@ -23,31 +23,30 @@ pub struct TodoRStyles {
 impl Default for TodoRStyles {
     /// Creates new StyleConfig with the default color printing style.
     fn default() -> TodoRStyles {
-        TodoRStyles {
-            filepath_style: Style::new().underline(),
-            line_number_style: Style::from(Fixed(8)),
-            user_style: Style::from(Fixed(8)),
-            content_style: Style::from(Cyan),
-            default_tag_style: Style::from(Green),
-            tag_styles: FnvHashMap::default(),
-        }
+        TodoRStyles::new(
+            Style::new().underline(),
+            Style::from(Fixed(8)),
+            Style::from(Fixed(8)),
+            Style::from(Cyan),
+            Style::from(Green),
+        )
     }
 }
 
 impl TodoRStyles {
     pub fn new(
-        filepath_style: impl Into<Style>,
-        line_number_style: impl Into<Style>,
-        user_style: impl Into<Style>,
-        content_style: impl Into<Style>,
-        default_tag_style: impl Into<Style>,
+        filepath_style: Style,
+        line_number_style: Style,
+        user_style: Style,
+        content_style: Style,
+        default_tag_style: Style,
     ) -> TodoRStyles {
         TodoRStyles {
-            filepath_style: filepath_style.into(),
-            line_number_style: line_number_style.into(),
-            user_style: user_style.into(),
-            content_style: content_style.into(),
-            default_tag_style: default_tag_style.into(),
+            filepath_style,
+            line_number_style,
+            user_style,
+            content_style,
+            default_tag_style,
             tag_styles: FnvHashMap::default(),
         }
     }
@@ -65,8 +64,8 @@ impl TodoRStyles {
     }
 
     /// Adds style for printing given tag
-    pub fn add_tag_style(mut self, tag: &str, style: impl Into<Style>) -> Self {
-        self.tag_styles.insert(tag.to_uppercase(), style.into());
+    pub fn add_tag_style(mut self, tag: &str, style: Style) -> Self {
+        self.tag_styles.insert(tag.to_uppercase(), style);
         self
     }
 

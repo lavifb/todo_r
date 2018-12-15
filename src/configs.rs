@@ -75,10 +75,10 @@ impl Into<TodoRStyles> for StylesConfig {
     fn into(self) -> TodoRStyles {
         TodoRStyles::new(
             Style::new().underline(),
-            self.line_number,
-            self.user,
-            self.content,
-            self.tag,
+            self.line_number.into(),
+            self.user.into(),
+            self.content.into(),
+            self.tag.into(),
         )
     }
 }
