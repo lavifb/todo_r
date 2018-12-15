@@ -51,7 +51,6 @@ impl Todo {
         )
     }
 
-    #[allow(dead_code)]
     /// Returns all is tagged in the Todo.
     pub fn users(&self) -> Vec<&str> {
         USER_REGEX
@@ -60,7 +59,6 @@ impl Todo {
             .collect()
     }
 
-    #[allow(dead_code)]
     /// Returns true if user is tagged in the Todo.
     pub fn tags_user(&self, user: &str) -> bool {
         for u in self.users() {
