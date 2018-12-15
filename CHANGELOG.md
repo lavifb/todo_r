@@ -21,12 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 	- User tags are color highlighted in output
 	- output only specific users using `-u` or `--user` flag
 - regex caching to not rebuild the same regexs over and over again
-- debug statements using log crate
+- support for changing ANSI printing styles in config files
 
 ### Changed
 - stderr output using `--verbose` flag
+
+### Library changes
+- debug statements using log crate
 - pulled `bin/todor.rs` into separate files for potentially better compilation optimization
-- move `Todo` and `TodoFile` types into `todo` module
+- moved `Todo` and `TodoFile` types into `todo` module
+- pulled config related types out of `comments.rs` and into `configs.rs`
 
 
 ## v0.4.2 (2018-12-10)
