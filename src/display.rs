@@ -48,8 +48,8 @@ impl StyleConfig {
     }
 
     /// Adds style for printing given tag
-    pub fn add_tag_style(mut self, tag: &str, style: Style) -> Self {
-        self.tag_styles.insert(tag.to_uppercase(), style);
+    pub fn add_tag_style(mut self, tag: &str, style: impl Into<Style>) -> Self {
+        self.tag_styles.insert(tag.to_uppercase(), style.into());
         self
     }
 
