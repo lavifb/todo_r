@@ -11,7 +11,7 @@ use crate::todo::{Todo, TodoFile};
 
 /// Struct for holding ansi color printing options
 #[derive(Debug, Clone)]
-pub struct StyleConfig {
+pub struct TodoRStyles {
     pub filepath_style: Style,
     pub line_number_style: Style,
     pub user_style: Style,
@@ -20,10 +20,10 @@ pub struct StyleConfig {
     default_tag_style: Style,
 }
 
-impl Default for StyleConfig {
+impl Default for TodoRStyles {
     /// Creates new StyleConfig with the default color printing style.
-    fn default() -> StyleConfig {
-        StyleConfig {
+    fn default() -> TodoRStyles {
+        TodoRStyles {
             filepath_style: Style::new().underline(),
             line_number_style: Style::from(Fixed(8)),
             user_style: Style::from(Fixed(8)),
@@ -34,10 +34,10 @@ impl Default for StyleConfig {
     }
 }
 
-impl StyleConfig {
+impl TodoRStyles {
     /// Creates new StyleConfig with plaintext printing (no colors).
-    pub fn no_style() -> StyleConfig {
-        StyleConfig {
+    pub fn no_style() -> TodoRStyles {
+        TodoRStyles {
             filepath_style: Style::new(),
             line_number_style: Style::new(),
             user_style: Style::new(),
@@ -63,7 +63,7 @@ impl StyleConfig {
 
 #[allow(dead_code)]
 /// Prints file path and a list of Todos to stdout
-pub fn print_file_todos(todo_file: &TodoFile, styles: &StyleConfig, verbose: bool) {
+pub fn print_file_todos(todo_file: &TodoFile, styles: &TodoRStyles, verbose: bool) {
     if todo_file.todos.is_empty() && !verbose {
         return;
     }
@@ -80,7 +80,7 @@ pub fn print_file_todos(todo_file: &TodoFile, styles: &StyleConfig, verbose: boo
 pub fn write_file_todos(
     out_buffer: &mut Write,
     todo_file: &TodoFile,
-    styles: &StyleConfig,
+    styles: &TodoRStyles,
 ) -> Result<(), Error> {
     writeln!(
         out_buffer,
@@ -99,7 +99,7 @@ pub fn write_file_todos(
 pub fn write_filtered_file_todos<P>(
     out_buffer: &mut Write,
     todo_file: &TodoFile,
-    styles: &StyleConfig,
+    styles: &TodoRStyles,
     pred: &P,
 ) -> Result<(), Error>
 where

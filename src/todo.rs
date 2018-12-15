@@ -6,7 +6,7 @@ use std::borrow::Cow;
 use std::fmt;
 use std::path::{Path, PathBuf};
 
-use crate::display::StyleConfig;
+use crate::display::TodoRStyles;
 
 lazy_static! {
     static ref USER_REGEX: Regex = Regex::new(r"(@\S+)").unwrap();
@@ -31,7 +31,7 @@ impl Todo {
     }
 
     /// Returns ANSI colored output string
-    pub fn style_string(&self, styles: &StyleConfig) -> String {
+    pub fn style_string(&self, styles: &TodoRStyles) -> String {
         // Paint users using user_style by wrapping users with infix ansi-strings
         let cs_to_us = styles.content_style.infix(styles.user_style);
         let us_to_cs = styles.user_style.infix(styles.content_style);

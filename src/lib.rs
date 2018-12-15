@@ -77,7 +77,7 @@ pub struct TodoRBuilder {
     override_tags: Option<Vec<String>>,
     override_ignore_paths: Option<GlobSetBuilder>,
     override_default_ext: Option<String>,
-    styles: StyleConfig,
+    styles: TodoRStyles,
     // Config from files. Parameters with override_ override inner_config.
     inner_config: config::Config,
 }
@@ -221,7 +221,7 @@ impl TodoRBuilder {
 
     /// Sets the terminal output of TodoR to be with no styles.
     pub fn set_no_style(&mut self) -> &mut Self {
-        self.styles = StyleConfig::no_style();
+        self.styles = TodoRStyles::no_style();
         self
     }
 
@@ -272,7 +272,7 @@ pub fn write_example_config(out_buffer: &mut impl Write) -> Result<(), Error> {
 #[derive(Debug, Clone)]
 struct TodoRConfig {
     tags: Vec<String>,
-    styles: StyleConfig,
+    styles: TodoRStyles,
     ignore_paths: GlobSet,
     ext_to_comment_types: FnvHashMap<String, CommentTypes>,
     default_comment_types: CommentTypes,
