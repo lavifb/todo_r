@@ -1,4 +1,5 @@
 pub mod comments;
+mod configs;
 mod custom_tags;
 mod display;
 mod parser;
@@ -50,7 +51,8 @@ use globset::{Glob, GlobSet, GlobSetBuilder};
 use log::debug;
 use regex::Regex;
 
-use crate::comments::{CommentTypes, TodorConfigFileSerial};
+use crate::comments::CommentTypes;
+use crate::configs::TodorConfigFileSerial;
 use crate::display::*;
 use crate::errors::TodoRError;
 use crate::parser::{build_parser_regexs, parse_content};
