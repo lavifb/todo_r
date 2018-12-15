@@ -112,6 +112,7 @@ impl TodoRBuilder {
                 .map_err(|err| TodoRError::InvalidConfigFile {
                     message: err.to_string(),
                 })?;
+        debug!("configuration successfully loaded");
 
         let mut tags = self
             .override_tags

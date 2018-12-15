@@ -1,6 +1,7 @@
 use crate::display::TodoRStyles;
 use ansi_term::Color;
 use ansi_term::Style;
+use log::debug;
 use serde::Deserialize;
 
 use crate::comments::CommentType;
@@ -28,6 +29,7 @@ enum StyleConfig {
     Fixed(u8),
 }
 
+// TODO: use Try_into
 impl Into<Style> for StyleConfig {
     fn into(self) -> Style {
         match self {
@@ -40,7 +42,10 @@ impl Into<Style> for StyleConfig {
                 "PURPLE" => Style::from(Color::Purple),
                 "CYAN" => Style::from(Color::Cyan),
                 "WHITE" => Style::from(Color::White),
-                _ => Style::from(Color::White),
+                _ => {
+                    debug!("invalid color choice");
+                    Style::from(Color::White)
+                }
             },
             StyleConfig::Fixed(n) => Style::from(Color::Fixed(n)),
         }
