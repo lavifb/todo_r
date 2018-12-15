@@ -31,6 +31,7 @@ enum StyleConfig {
 
 impl StyleConfig {
     pub fn into_style(self) -> Result<Style, Error> {
+        // TODO: allow "bold_green" etc using rsplit("_")
         let style = match self {
             StyleConfig::Named(s) => match s.to_uppercase().as_str() {
                 "BLACK" => Style::from(Color::Black),

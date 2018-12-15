@@ -10,10 +10,6 @@
   "ignore" : [
   ],
 
-  "styles" : {
-    "tag": "reds"
-  }
-
   // Default extension fall-back
   "default_ext": "sh",
 
