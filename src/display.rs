@@ -16,8 +16,8 @@ pub struct TodoRStyles {
     pub line_number_style: Style,
     pub user_style: Style,
     pub content_style: Style,
-    tag_styles: FnvHashMap<String, Style>,
     default_tag_style: Style,
+    tag_styles: FnvHashMap<String, Style>,
 }
 
 impl Default for TodoRStyles {
@@ -35,6 +35,23 @@ impl Default for TodoRStyles {
 }
 
 impl TodoRStyles {
+    pub fn new(
+        filepath_style: impl Into<Style>,
+        line_number_style: impl Into<Style>,
+        user_style: impl Into<Style>,
+        content_style: impl Into<Style>,
+        default_tag_style: impl Into<Style>,
+    ) -> TodoRStyles {
+        TodoRStyles {
+            filepath_style: filepath_style.into(),
+            line_number_style: line_number_style.into(),
+            user_style: user_style.into(),
+            content_style: content_style.into(),
+            default_tag_style: default_tag_style.into(),
+            tag_styles: FnvHashMap::default(),
+        }
+    }
+
     /// Creates new StyleConfig with plaintext printing (no colors).
     pub fn no_style() -> TodoRStyles {
         TodoRStyles {

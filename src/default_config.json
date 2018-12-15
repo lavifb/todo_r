@@ -8,6 +8,13 @@
   "ignore" : [
   ],
 
+  "styles": {
+    "tag": "green",
+    "content": "cyan",
+    "line_number": 8,
+    "user": 8
+  },
+
   "default_ext": "sh",
 
   "default_comments": [

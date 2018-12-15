@@ -177,6 +177,67 @@ impl CommentsConfig {
     }
 }
 
+use crate::display::TodoRStyles;
+use ansi_term::Color;
+use ansi_term::Style;
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(untagged)]
+enum StyleConfig {
+    Named(String),
+    Fixed(u8),
+}
+
+impl Into<Style> for StyleConfig {
+    fn into(self) -> Style {
+        match self {
+            StyleConfig::Named(s) => match s.to_uppercase().as_str() {
+                "BLACK" => Style::from(Color::Black),
+                "RED" => Style::from(Color::Red),
+                "GREEN" => Style::from(Color::Green),
+                "YELLOW" => Style::from(Color::Yellow),
+                "BLUE" => Style::from(Color::Blue),
+                "PURPLE" => Style::from(Color::Purple),
+                "CYAN" => Style::from(Color::Cyan),
+                "WHITE" => Style::from(Color::White),
+                _ => Style::from(Color::White),
+            },
+            StyleConfig::Fixed(n) => Style::from(Color::Fixed(n)),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub(crate) struct StylesConfig {
+    tag: StyleConfig,
+    content: StyleConfig,
+    line_number: StyleConfig,
+    user: StyleConfig,
+}
+
+impl Default for StylesConfig {
+    fn default() -> StylesConfig {
+        StylesConfig {
+            tag: StyleConfig::Named("GREEN".to_string()),
+            content: StyleConfig::Named("CYAN".to_string()),
+            line_number: StyleConfig::Fixed(8),
+            user: StyleConfig::Fixed(8),
+        }
+    }
+}
+
+impl Into<TodoRStyles> for StylesConfig {
+    fn into(self) -> TodoRStyles {
+        TodoRStyles::new(
+            Style::new().underline(),
+            self.line_number,
+            self.user,
+            self.content,
+            self.tag,
+        )
+    }
+}
+
 #[derive(Debug, Default, Clone, Deserialize)]
 pub(crate) struct TodorConfigFileSerial {
     #[serde(default)]
@@ -191,4 +252,6 @@ pub(crate) struct TodorConfigFileSerial {
     pub default_comments: Vec<CommentsConfig>,
     #[serde(default)]
     pub comments: Vec<CommentsConfig>,
+    #[serde(default)]
+    pub styles: StylesConfig,
 }

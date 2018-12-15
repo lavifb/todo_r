@@ -77,7 +77,7 @@ pub struct TodoRBuilder {
     override_tags: Option<Vec<String>>,
     override_ignore_paths: Option<GlobSetBuilder>,
     override_default_ext: Option<String>,
-    styles: TodoRStyles,
+    override_styles: Option<TodoRStyles>,
     // Config from files. Parameters with override_ override inner_config.
     inner_config: config::Config,
 }
@@ -118,6 +118,9 @@ impl TodoRBuilder {
             .override_default_ext
             .unwrap_or_else(|| config_struct.default_ext.to_owned());
         tags.append(&mut self.added_tags.clone());
+
+        let config_styles = config_struct.styles;
+        let styles = self.override_styles.unwrap_or_else(|| config_styles.into());
 
         let ignore_paths = match self.override_ignore_paths {
             Some(glob_builder) => glob_builder.build()?,
@@ -160,7 +163,7 @@ impl TodoRBuilder {
         let config = TodoRConfig {
             tags,
             ignore_paths,
-            styles: self.styles,
+            styles: styles,
             ext_to_comment_types,
             default_comment_types,
         };
@@ -221,7 +224,7 @@ impl TodoRBuilder {
 
     /// Sets the terminal output of TodoR to be with no styles.
     pub fn set_no_style(&mut self) -> &mut Self {
-        self.styles = TodoRStyles::no_style();
+        self.override_styles = Some(TodoRStyles::no_style());
         self
     }
 
