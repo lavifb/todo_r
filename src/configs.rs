@@ -1,7 +1,7 @@
 use crate::display::TodoRStyles;
 use ansi_term::Color;
 use ansi_term::Style;
-use log::debug;
+use failure::{format_err, Error};
 use serde::Deserialize;
 
 use crate::comments::CommentType;
@@ -29,10 +29,9 @@ enum StyleConfig {
     Fixed(u8),
 }
 
-// TODO: use Try_into
-impl Into<Style> for StyleConfig {
-    fn into(self) -> Style {
-        match self {
+impl StyleConfig {
+    pub fn into_style(self) -> Result<Style, Error> {
+        let style = match self {
             StyleConfig::Named(s) => match s.to_uppercase().as_str() {
                 "BLACK" => Style::from(Color::Black),
                 "RED" => Style::from(Color::Red),
@@ -42,13 +41,12 @@ impl Into<Style> for StyleConfig {
                 "PURPLE" => Style::from(Color::Purple),
                 "CYAN" => Style::from(Color::Cyan),
                 "WHITE" => Style::from(Color::White),
-                _ => {
-                    debug!("invalid color choice");
-                    Style::from(Color::White)
-                }
+                _ => return Err(format_err!("'{}' is not a valid style.", s)),
             },
             StyleConfig::Fixed(n) => Style::from(Color::Fixed(n)),
-        }
+        };
+
+        Ok(style)
     }
 }
 
@@ -71,15 +69,17 @@ impl Default for StylesConfig {
     }
 }
 
-impl Into<TodoRStyles> for StylesConfig {
-    fn into(self) -> TodoRStyles {
-        TodoRStyles::new(
+impl StylesConfig {
+    pub fn into_todo_r_styles(self) -> Result<TodoRStyles, Error> {
+        let styles = TodoRStyles::new(
             Style::new().underline(),
-            self.line_number.into(),
-            self.user.into(),
-            self.content.into(),
-            self.tag.into(),
-        )
+            self.line_number.into_style()?,
+            self.user.into_style()?,
+            self.content.into_style()?,
+            self.tag.into_style()?,
+        );
+
+        Ok(styles)
     }
 }
 

@@ -123,7 +123,9 @@ impl TodoRBuilder {
         tags.append(&mut self.added_tags.clone());
 
         let config_styles = config_struct.styles;
-        let styles = self.override_styles.unwrap_or_else(|| config_styles.into());
+        let styles = self
+            .override_styles
+            .unwrap_or(config_styles.into_todo_r_styles()?);
 
         let ignore_paths = match self.override_ignore_paths {
             Some(glob_builder) => glob_builder.build()?,
@@ -166,7 +168,7 @@ impl TodoRBuilder {
         let config = TodoRConfig {
             tags,
             ignore_paths,
-            styles: styles,
+            styles,
             ext_to_comment_types,
             default_comment_types,
         };

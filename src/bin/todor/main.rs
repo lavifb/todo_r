@@ -110,12 +110,10 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 
     if matches.is_present("DELETE_MODE") {
         run_delete(&mut todor)?;
+    } else if let Some(p) = pred {
+        todor.print_filtered_todos(&p);
     } else {
-        if let Some(p) = pred {
-            todor.print_filtered_todos(&p);
-        } else {
-            todor.print_todos();
-        }
+        todor.print_todos();
     }
 
     if matches.is_present("CHECK") && todor.num_todos() > 0 {
