@@ -6,6 +6,14 @@
     "fixme"
   ],
 
+  "styles": {
+    tags: {
+      "fix": "red"
+      "fixme": "red"
+      "mayb": "magenta"
+    }
+  },
+
   // Default extension fall-back
   "default_ext": "sh",
 

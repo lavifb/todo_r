@@ -92,7 +92,6 @@ pub fn print_file_todos(todo_file: &TodoFile, styles: &TodoRStyles, verbose: boo
 }
 
 /// Writes file path and a list of Todos to out_buffer
-// MAYB: have different colors for different TODOs
 pub fn write_file_todos(
     out_buffer: &mut Write,
     todo_file: &TodoFile,

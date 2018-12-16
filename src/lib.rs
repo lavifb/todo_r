@@ -234,7 +234,6 @@ impl TodoRBuilder {
     }
 
     /// Adds path for TodoR to ignore. This overrides ignore paths from config files.
-    // MAYB: use ignore crate instead of globset
     pub fn add_override_ignore_path(&mut self, path: &str) -> Result<&mut Self, Error> {
         let new_glob = Glob::new(path).map_err(|err| TodoRError::InvalidIgnorePath {
             message: err.to_string(),

@@ -2,6 +2,7 @@ use crate::display::TodoRStyles;
 use ansi_term::Color;
 use ansi_term::Style;
 use failure::Error;
+use fnv::FnvHashMap;
 use serde::Deserialize;
 
 use crate::comments::CommentType;
@@ -43,7 +44,7 @@ impl StyleConfig {
                     "GREEN" => Style::from(Color::Green),
                     "YELLOW" => Style::from(Color::Yellow),
                     "BLUE" => Style::from(Color::Blue),
-                    "PURPLE" => Style::from(Color::Purple),
+                    "PURPLE" | "MAGENTA" => Style::from(Color::Purple),
                     "CYAN" => Style::from(Color::Cyan),
                     "WHITE" => Style::from(Color::White),
                     "" => Style::new(),
@@ -94,6 +95,7 @@ pub(crate) struct StylesConfig {
     content: StyleConfig,
     line_number: StyleConfig,
     user: StyleConfig,
+    tags: FnvHashMap<String, StyleConfig>,
 }
 
 impl Default for StylesConfig {
@@ -104,19 +106,24 @@ impl Default for StylesConfig {
             content: StyleConfig::Named("CYAN".to_string()),
             line_number: StyleConfig::Fixed(8),
             user: StyleConfig::Fixed(8),
+            tags: FnvHashMap::default(),
         }
     }
 }
 
 impl StylesConfig {
-    pub fn into_todo_r_styles(self) -> Result<TodoRStyles, Error> {
-        let styles = TodoRStyles::new(
+    pub fn into_todo_r_styles(mut self) -> Result<TodoRStyles, Error> {
+        let mut styles = TodoRStyles::new(
             self.filepath.into_style()?,
             self.line_number.into_style()?,
             self.user.into_style()?,
             self.content.into_style()?,
             self.tag.into_style()?,
         );
+
+        for (tag, style_conf) in self.tags.drain() {
+            styles = styles.add_tag_style(&tag, style_conf.into_style()?);
+        }
 
         Ok(styles)
     }
