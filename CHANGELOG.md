@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Fixed -->
 <!-- ### Security -->
 
-## [Unreleased]
+## v0.5.0 (2018-12-16)
 ### Added
 - user tagging
 	- Types
@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## v0.4.1 (2018-12-8)
 ### Added
 - releases on Github using Travis CI
+
 
 ## v0.4 (2018-12-7)
 - Initial release
