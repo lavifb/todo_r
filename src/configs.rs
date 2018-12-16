@@ -34,7 +34,7 @@ impl StyleConfig {
     pub fn into_style(self) -> Result<Style, Error> {
         let style = match self {
             StyleConfig::Named(s) => {
-                let mut style_parts = s.rsplit("_");
+                let mut style_parts = s.rsplit('_');
 
                 let color = style_parts.next().unwrap();
                 let mut style_from_string = match color.to_uppercase().as_str() {
