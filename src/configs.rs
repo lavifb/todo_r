@@ -46,6 +46,7 @@ impl StyleConfig {
                     "PURPLE" => Style::from(Color::Purple),
                     "CYAN" => Style::from(Color::Cyan),
                     "WHITE" => Style::from(Color::White),
+                    "" => Style::new(),
                     _ => {
                         return Err(InvalidConfigFile {
                             message: format!("'{}' is not a valid ANSI color.", color),
