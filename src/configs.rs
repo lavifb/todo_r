@@ -1,11 +1,12 @@
 use crate::display::TodoRStyles;
 use ansi_term::Color;
 use ansi_term::Style;
-use failure::{format_err, Error};
+use failure::Error;
 use serde::Deserialize;
 
 use crate::comments::CommentType;
 use crate::comments::CommentTypes;
+use crate::errors::TodoRError::InvalidConfigFile;
 
 #[derive(Debug, Default, Clone, Deserialize)]
 pub(crate) struct CommentsConfig {
@@ -45,7 +46,12 @@ impl StyleConfig {
                     "PURPLE" => Style::from(Color::Purple),
                     "CYAN" => Style::from(Color::Cyan),
                     "WHITE" => Style::from(Color::White),
-                    _ => return Err(format_err!("'{}' is not a valid ANSI color.", color)),
+                    _ => {
+                        return Err(InvalidConfigFile {
+                            message: format!("'{}' is not a valid ANSI color.", color),
+                        }
+                        .into())
+                    }
                 };
 
                 for modifier in style_parts {
@@ -60,10 +66,13 @@ impl StyleConfig {
                             style_from_string = style_from_string.underline();
                         }
                         _ => {
-                            return Err(format_err!(
+                            return Err(InvalidConfigFile {
+                                message: format!(
                             "'{}' is not a valid ANSI style modifier. Try using 'b', 'i', or 'u'",
                             modifier
-                        ))
+                        ),
+                            }
+                            .into())
                         }
                     }
                 }
