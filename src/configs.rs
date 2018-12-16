@@ -31,19 +31,45 @@ enum StyleConfig {
 
 impl StyleConfig {
     pub fn into_style(self) -> Result<Style, Error> {
-        // TODO: allow "bold_green" etc using rsplit("_")
         let style = match self {
-            StyleConfig::Named(s) => match s.to_uppercase().as_str() {
-                "BLACK" => Style::from(Color::Black),
-                "RED" => Style::from(Color::Red),
-                "GREEN" => Style::from(Color::Green),
-                "YELLOW" => Style::from(Color::Yellow),
-                "BLUE" => Style::from(Color::Blue),
-                "PURPLE" => Style::from(Color::Purple),
-                "CYAN" => Style::from(Color::Cyan),
-                "WHITE" => Style::from(Color::White),
-                _ => return Err(format_err!("'{}' is not a valid style.", s)),
-            },
+            StyleConfig::Named(s) => {
+                let mut style_parts = s.rsplit("_");
+
+                let color = style_parts.next().unwrap();
+                let mut style_from_string = match color.to_uppercase().as_str() {
+                    "BLACK" => Style::from(Color::Black),
+                    "RED" => Style::from(Color::Red),
+                    "GREEN" => Style::from(Color::Green),
+                    "YELLOW" => Style::from(Color::Yellow),
+                    "BLUE" => Style::from(Color::Blue),
+                    "PURPLE" => Style::from(Color::Purple),
+                    "CYAN" => Style::from(Color::Cyan),
+                    "WHITE" => Style::from(Color::White),
+                    _ => return Err(format_err!("'{}' is not a valid ANSI color.", color)),
+                };
+
+                for modifier in style_parts {
+                    match modifier.to_uppercase().as_str() {
+                        "BOLD" | "B" => {
+                            style_from_string = style_from_string.bold();
+                        }
+                        "ITALIC" | "I" | "IT" => {
+                            style_from_string = style_from_string.italic();
+                        }
+                        "UNDERLINE" | "U" => {
+                            style_from_string = style_from_string.underline();
+                        }
+                        _ => {
+                            return Err(format_err!(
+                            "'{}' is not a valid ANSI style modifier. Try using 'b', 'i', or 'u'",
+                            modifier
+                        ))
+                        }
+                    }
+                }
+
+                style_from_string
+            }
             StyleConfig::Fixed(n) => Style::from(Color::Fixed(n)),
         };
 
@@ -53,6 +79,7 @@ impl StyleConfig {
 
 #[derive(Debug, Clone, Deserialize)]
 pub(crate) struct StylesConfig {
+    filepath: StyleConfig,
     tag: StyleConfig,
     content: StyleConfig,
     line_number: StyleConfig,
@@ -62,6 +89,7 @@ pub(crate) struct StylesConfig {
 impl Default for StylesConfig {
     fn default() -> StylesConfig {
         StylesConfig {
+            filepath: StyleConfig::Named("U_WHITE".to_string()),
             tag: StyleConfig::Named("GREEN".to_string()),
             content: StyleConfig::Named("CYAN".to_string()),
             line_number: StyleConfig::Fixed(8),
@@ -73,7 +101,7 @@ impl Default for StylesConfig {
 impl StylesConfig {
     pub fn into_todo_r_styles(self) -> Result<TodoRStyles, Error> {
         let styles = TodoRStyles::new(
-            Style::new().underline(),
+            self.filepath.into_style()?,
             self.line_number.into_style()?,
             self.user.into_style()?,
             self.content.into_style()?,
