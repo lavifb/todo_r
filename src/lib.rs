@@ -164,7 +164,6 @@ impl TodoRBuilder {
             .ok_or(TodoRError::InvalidDefaultExtension { ext: default_ext })?
             .clone();
 
-        // TODO: allow custom styles
         let config = TodoRConfig {
             tags,
             ignore_paths,

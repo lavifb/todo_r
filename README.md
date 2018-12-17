@@ -1,23 +1,48 @@
 Todo_r
-===
+======
 [![Build Status](https://travis-ci.org/lavifb/todo_r.svg?branch=master)](https://travis-ci.org/lavifb/todo_r)
+
+### Find all your notes with one command!
 
 Todo_r is a simple rust command line utility that keeps track of your todo items in code.
 It is pronounced "todoer" like someone that does todos.
 
+Find all your notes with one command!
+
 A lot is adapted from [leasot](https://github.com/pgilad/leasot) but runs much faster.
 
-<!-- TODO: rewrite overview -->
-### Current support
+## Installation
 
-* Only separate line comments are supported. So `statement; // TODO: this` is unsupported.
-* Block comments like `/* TODO: this */` that stick to one line are supported.
-* Custom tags are searched using the `-t` flag.
-* Tagged user references
-* Interactive mode for deleting comments is launched using the `-d` flag.
+The latest release can be downloaded from the releases page.
 
-<!-- TODO: write about installation -->
-<!-- ### Installation -->
+## Features
+
+- Reads TODO comments that are on their own line.
+```rust
+// TODO: do this
+/* TODO: do that */
+```
+    -  Note: comments that are not on their own line are __not__ supported.
+
+- User references are tracked and can be found using `--user` flag.
+```rust
+// TODO(user1): item
+// TODO: tagging @user2 and @user3
+// TODO(user1): @user3 both are also found!
+```
+Comments 1 and 3 are found with `todor -u user1`.
+
+- Custom tags can be searched using the `-t` flag.
+- Interactive mode for deleting comments is launched using the `-d` flag.
+- If files are not provided for input, todo_r searches the entire git repository.
+    - .gitignore files are respected
+    - More ignores can be added using .todorignore files that use the same syntax
+    - If you are not using git, you can instead use a .todor file in the root directory
+
+## Config files
+Create a .todor file in the root of your workspace with `todor init`.
+
+.todor files can also used as a config file to set custom tags, comments types, output styles, etc.
 
 ### Language support
 
@@ -49,8 +74,6 @@ A lot is adapted from [leasot](https://github.com/pgilad/leasot) but runs much f
 |TypeScript   |`.ts`,`.tsx`         |`//`,`/* */`   |
 |YAML         |`.yaml`,`.yml`       |`#`            |
 
-<!-- TODO: write about features -->
-<!-- ### Features -->
 
 ---
 written by Lavi Blumberg
