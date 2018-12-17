@@ -52,7 +52,7 @@ use log::debug;
 use regex::Regex;
 
 use crate::comments::CommentTypes;
-use crate::configs::TodorConfigFileSerial;
+use crate::configs::TodoRConfigFileSerial;
 use crate::display::*;
 use crate::errors::TodoRError;
 use crate::parser::{build_parser_regexs, parse_content};
@@ -106,7 +106,7 @@ impl TodoRBuilder {
 
     /// Consumes self and builds TodoR.
     pub fn build(self) -> Result<TodoR, Error> {
-        let mut config_struct: TodorConfigFileSerial =
+        let mut config_struct: TodoRConfigFileSerial =
             self.inner_config
                 .try_into()
                 .map_err(|err| TodoRError::InvalidConfigFile {

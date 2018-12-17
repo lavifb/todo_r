@@ -9,21 +9,24 @@ use crate::comments::CommentType;
 use crate::comments::CommentTypes;
 use crate::errors::TodoRError::InvalidConfigFile;
 
+/// Comments configuration as read from the config file
 #[derive(Debug, Default, Clone, Deserialize)]
 pub(crate) struct CommentsConfig {
     #[serde(default)]
-    pub ext: String,
+    ext: String,
     #[serde(default)]
-    pub exts: Vec<String>,
-    pub(self) types: Vec<CommentType>,
+    exts: Vec<String>,
+    types: Vec<CommentType>,
 }
 
 impl CommentsConfig {
+    /// Consume the CommentsConfig type and return its parts
     pub fn break_apart(self) -> (String, Vec<String>, CommentTypes) {
         (self.ext, self.exts, self.types.into())
     }
 }
 
+/// Style as read from the config file
 #[derive(Debug, Clone, Deserialize)]
 #[serde(untagged)]
 enum StyleConfig {
@@ -32,52 +35,17 @@ enum StyleConfig {
 }
 
 impl StyleConfig {
+    /// Converts StyleConfig into ansi_term::Style type
     pub fn into_style(self) -> Result<Style, Error> {
         let style = match self {
             StyleConfig::Named(s) => {
                 let mut style_parts = s.rsplit('_');
 
-                // TODO: seperate into smaller functions
                 let color = style_parts.next().unwrap();
-                let mut style_from_string = match color.to_uppercase().as_str() {
-                    "BLACK" => Style::from(Color::Black),
-                    "RED" => Style::from(Color::Red),
-                    "GREEN" => Style::from(Color::Green),
-                    "YELLOW" => Style::from(Color::Yellow),
-                    "BLUE" => Style::from(Color::Blue),
-                    "PURPLE" | "MAGENTA" => Style::from(Color::Purple),
-                    "CYAN" => Style::from(Color::Cyan),
-                    "WHITE" => Style::from(Color::White),
-                    "" => Style::new(),
-                    _ => {
-                        return Err(InvalidConfigFile {
-                            message: format!("'{}' is not a valid ANSI color.", color),
-                        }
-                        .into())
-                    }
-                };
+                let mut style_from_string = parse_style_color(color)?;
 
                 for modifier in style_parts {
-                    match modifier.to_uppercase().as_str() {
-                        "BOLD" | "B" => {
-                            style_from_string = style_from_string.bold();
-                        }
-                        "ITALIC" | "I" | "IT" => {
-                            style_from_string = style_from_string.italic();
-                        }
-                        "UNDERLINE" | "U" => {
-                            style_from_string = style_from_string.underline();
-                        }
-                        _ => {
-                            return Err(InvalidConfigFile {
-                                message: format!(
-                            "'{}' is not a valid ANSI style modifier. Try using 'b', 'i', or 'u'",
-                            modifier
-                        ),
-                            }
-                            .into())
-                        }
-                    }
+                    style_from_string = parse_style_modifier(style_from_string, modifier)?;
                 }
 
                 style_from_string
@@ -89,6 +57,50 @@ impl StyleConfig {
     }
 }
 
+/// Parses color str to get a color Style
+fn parse_style_color(color: &str) -> Result<Style, Error> {
+    let colored_style = match color.to_uppercase().as_str() {
+        "BLACK" => Style::from(Color::Black),
+        "RED" => Style::from(Color::Red),
+        "GREEN" => Style::from(Color::Green),
+        "YELLOW" => Style::from(Color::Yellow),
+        "BLUE" => Style::from(Color::Blue),
+        "PURPLE" | "MAGENTA" => Style::from(Color::Purple),
+        "CYAN" => Style::from(Color::Cyan),
+        "WHITE" => Style::from(Color::White),
+        "" => Style::new(),
+        _ => {
+            return Err(InvalidConfigFile {
+                message: format!("'{}' is not a valid ANSI color.", color),
+            }
+            .into())
+        }
+    };
+
+    Ok(colored_style)
+}
+
+/// Parses modifier str to modify a Style and return the result
+fn parse_style_modifier(unmodified_style: Style, modifier: &str) -> Result<Style, Error> {
+    let style = match modifier.to_uppercase().as_str() {
+        "BOLD" | "B" => unmodified_style.bold(),
+        "ITALIC" | "I" | "IT" => unmodified_style.italic(),
+        "UNDERLINE" | "U" => unmodified_style.underline(),
+        _ => {
+            return Err(InvalidConfigFile {
+                message: format!(
+                    "'{}' is not a valid ANSI style modifier. Try using 'b', 'i', or 'u'",
+                    modifier
+                ),
+            }
+            .into())
+        }
+    };
+
+    Ok(style)
+}
+
+/// Styles as read from the config file
 #[derive(Debug, Clone, Deserialize)]
 pub(crate) struct StylesConfig {
     filepath: StyleConfig,
@@ -113,6 +125,7 @@ impl Default for StylesConfig {
 }
 
 impl StylesConfig {
+    /// Converts StyleConfig into TodoRStyles type
     pub fn into_todo_r_styles(mut self) -> Result<TodoRStyles, Error> {
         let mut styles = TodoRStyles::new(
             self.filepath.into_style()?,
@@ -130,8 +143,9 @@ impl StylesConfig {
     }
 }
 
+/// TodoR configuration settings as read from the config file
 #[derive(Debug, Default, Clone, Deserialize)]
-pub(crate) struct TodorConfigFileSerial {
+pub(crate) struct TodoRConfigFileSerial {
     #[serde(default)]
     pub verbose: bool,
     #[serde(default)]
