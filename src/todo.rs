@@ -38,6 +38,7 @@ impl Todo {
         let paint_users = |c: &regex::Captures| format!("{}{}{}", cs_to_us, &c[1], us_to_cs);
         let content_out = USER_REGEX.replace_all(&self.content, paint_users);
 
+        // TODO: use tabwriter
         format!(
             "  {}  {}  {}",
             // Columns align for up to 100,000 lines which should be fine
