@@ -7,7 +7,7 @@ Todo_r
 Todo_r is a simple rust command line utility that keeps track of your todo items in code.
 It is pronounced "todoer" like someone that does todos.
 
-Find all your notes with one command!
+Find all your TODO notes with one command!
 
 A lot is adapted from [leasot](https://github.com/pgilad/leasot) but runs much faster.
 
