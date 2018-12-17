@@ -22,7 +22,7 @@ The latest release can be downloaded from the releases page.
 // TODO: do this
 /* TODO: do that */
 ```
-    -  Note: comments that are not on their own line are __not__ supported.
+Note: comments that are not on their own line are __not__ supported.
 
 - User references are tracked and can be found using `--user` flag.
 ```rust
