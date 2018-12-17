@@ -37,6 +37,7 @@ impl StyleConfig {
             StyleConfig::Named(s) => {
                 let mut style_parts = s.rsplit('_');
 
+                // TODO: seperate into smaller functions
                 let color = style_parts.next().unwrap();
                 let mut style_from_string = match color.to_uppercase().as_str() {
                     "BLACK" => Style::from(Color::Black),
