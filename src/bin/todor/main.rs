@@ -65,6 +65,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
     }
 
     if let Some(ignore_paths_iter) = matches.values_of("IGNORE") {
+        // TODO: use ignore walker instead
         builder.add_override_ignore_paths(ignore_paths_iter)?;
     }
 

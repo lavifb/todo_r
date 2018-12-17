@@ -77,6 +77,7 @@ static EXAMPLE_CONFIG: &str = include_str!("example_config.hjson");
 pub struct TodoRBuilder {
     added_tags: Vec<String>,
     override_tags: Option<Vec<String>>,
+    // TODO: run all ignoreing from todor walker
     override_ignore_paths: Option<GlobSetBuilder>,
     override_default_ext: Option<String>,
     override_styles: Option<TodoRStyles>,
