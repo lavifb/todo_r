@@ -53,7 +53,7 @@ fn colors() {
         .success()
         .stdout(
             "[4mtest1.rs[0m
-  [38;5;8mline 2    [0m  [32mTODO [0m  [36mitem[0m\n",
+  [38;5;8mline 2    [0m  [32mTODO[0m   [36mitem[0m\n",
         )
         .stderr("");
 }
@@ -352,9 +352,9 @@ fn users_color() {
         .success()
         .stdout(
             "[4mignore_this.rs[0m
-  [38;5;8mline 1    [0m  [32mTODO [0m  [36m[38;5;8m@user1[36m ignore1[0m
-  [38;5;8mline 2    [0m  [32mTODO [0m  [36m[38;5;8m@user1[36m ignore2 [38;5;8m@user2[36m[0m
-  [38;5;8mline 3    [0m  [32mTODO [0m  [36mignore3 [38;5;8m@user1[36m [38;5;8m@user3[36m[0m\n")
+  [38;5;8mline 1    [0m  [32mTODO[0m   [36m[38;5;8m@user1[36m ignore1[0m
+  [38;5;8mline 2    [0m  [32mTODO[0m   [36m[38;5;8m@user1[36m ignore2 [38;5;8m@user2[36m[0m
+  [38;5;8mline 3    [0m  [32mTODO[0m   [36mignore3 [38;5;8m@user1[36m [38;5;8m@user3[36m[0m\n")
         .stderr("");
 }
 
