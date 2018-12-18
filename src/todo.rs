@@ -38,16 +38,17 @@ impl Todo {
         let paint_users = |c: &regex::Captures| format!("{}{}{}", cs_to_us, &c[1], us_to_cs);
         let content_out = USER_REGEX.replace_all(&self.content, paint_users);
 
-        // TODO: use tabwriter
+        let tag_width = &self.tag.len().min(5);
         format!(
-            "  {}  {}  {}",
+            "  {}  {}{}  {}",
             // Columns align for up to 100,000 lines which should be fine
             styles
                 .line_number_style
                 .paint(format!("line {:<5}", self.line)),
             styles
                 .tag_style(&self.tag)
-                .paint(format!("{:5}", &self.tag)),
+                .paint(format!("{:w$}", &self.tag, w = tag_width)),
+            format!("{:w$}", "", w = 5 - tag_width),
             styles.content_style.paint(content_out),
         )
     }

@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Fixed -->
 <!-- ### Security -->
 
+## [Unreleased]
+### Fixed
+- Fixed output when tags are styled to be underlined
+
+
 ## v0.5.0 (2018-12-16)
 ### Added
 - user tagging

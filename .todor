@@ -7,7 +7,7 @@
   ],
 
   "styles": {
-    tags: {
+    "tags": {
       "fix": "red"
       "fixme": "red"
       "mayb": "magenta"
