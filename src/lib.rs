@@ -291,6 +291,7 @@ pub struct TodoR {
     config: TodoRConfig,
     todo_files: Vec<TodoFile>,
     ext_to_regexs: FnvHashMap<String, Vec<Regex>>,
+    // TODO: set filter for todor
 }
 
 impl Default for TodoR {
@@ -332,6 +333,16 @@ impl TodoR {
     /// Returns the number of TODOs currently tracked by TodoR
     pub fn num_todos(&self) -> usize {
         self.todo_files.iter().fold(0, |s, tf| s + tf.todos.len())
+    }
+
+    /// Returns the number of TODOs currently tracked by TodoR
+    pub fn num_filtered_todos<P>(&self, pred: &P) -> usize
+    where
+        P: Fn(&Todo) -> bool,
+    {
+        self.todo_files
+            .iter()
+            .fold(0, |s, tf| s + tf.todos.iter().filter(|t| pred(*t)).count())
     }
 
     /// Returns all tracked files that contain TODOs
