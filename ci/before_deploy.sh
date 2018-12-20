@@ -29,12 +29,12 @@ main() {
     mkdir $stage/complete
     ls target/"$TARGET"/release/
     ls target/"$TARGET"/release/build/
-    ls target/"$TARGET"/release/build/"$PROJECT_NAME"-*
-    ls target/"$TARGET"/release/build/"$PROJECT_NAME"-*/out/
-    cp target/"$TARGET"/release/build/"$PROJECT_NAME"-*/out/"$PROJECT_NAME".bash $stage/complete/${PROJECT_NAME}.bash-completion
-    cp target/"$TARGET"/release/build/"$PROJECT_NAME"-*/out/"$PROJECT_NAME".fish $stage/complete/
-    cp target/"$TARGET"/release/build/"$PROJECT_NAME"-*/out/_"$PROJECT_NAME" $stage/complete/
-    cp target/"$TARGET"/release/build/"$PROJECT_NAME"-*/out/_"$PROJECT_NAME".ps1 $stage/complete/
+    ls target/"$TARGET"/release/build/todo_r-*
+    ls target/"$TARGET"/release/build/todo_r-*/out/
+    cp target/"$TARGET"/release/build/todo_r-*/out/"$PROJECT_NAME".bash $stage/complete/${PROJECT_NAME}.bash-completion
+    cp target/"$TARGET"/release/build/todo_r-*/out/"$PROJECT_NAME".fish $stage/complete/
+    cp target/"$TARGET"/release/build/todo_r-*/out/_"$PROJECT_NAME" $stage/complete/
+    cp target/"$TARGET"/release/build/todo_r-*/out/_"$PROJECT_NAME".ps1 $stage/complete/
 
     cd $stage
     tar czf $src/$PROJECT_NAME-$TRAVIS_TAG-$TARGET.tar.gz *
