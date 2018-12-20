@@ -15,14 +15,14 @@ use std::path::Path;
 use todo_r::todo::Todo;
 use todo_r::TodoRBuilder;
 
-use self::clap_app::get_cli_matches;
+use self::clap_app::build_cli;
 use self::logger::init_logger;
 use self::select::run_delete;
 use self::walk::build_walker;
 
 /// Parses command line arguments and use TodoR to find TODO comments.
 fn main() {
-    let matches = get_cli_matches();
+    let matches = build_cli().get_matches();
 
     let verbose: bool = matches.is_present("VERBOSE");
     // Set up log output

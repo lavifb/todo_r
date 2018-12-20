@@ -22,7 +22,15 @@ main() {
 
     cargo build --target "$TARGET" --release --verbose --locked
 
+    # copy binary to stage
     cp "target/$TARGET/release/$PROJECT_NAME" $stage/
+
+    # copy completions to stage
+    mkdir $stage/complete
+    cp "target/$TARGET/release/build/$PROJECT_NAME-*/out/$PROJECT_NAME.bash" $stage/complete/${PROJECT_NAME}.bash-completion
+    cp "target/$TARGET/release/build/$PROJECT_NAME-*/out/$PROJECT_NAME.fish" $stage/complete/
+    cp "target/$TARGET/release/build/$PROJECT_NAME-*/out/_$PROJECT_NAME" $stage/complete/
+    cp "target/$TARGET/release/build/$PROJECT_NAME-*/out/_$PROJECT_NAME.ps1" $stage/complete/
 
     cd $stage
     tar czf $src/$PROJECT_NAME-$TRAVIS_TAG-$TARGET.tar.gz *

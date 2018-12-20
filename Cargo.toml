@@ -34,6 +34,9 @@ criterion = "0.2"
 escargot = "0.3"
 assert_cmd = "0.10"
 
+[build-dependencies]
+clap = "2.32"
+
 [[bench]]
 name = "bench"
 harness = false
