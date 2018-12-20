@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.5.1 (2018-12-19)
 ### Fixed
-- Fixed output when tags are styled to be underlined
-- Fixed `--check` output when you use `--user` to filter output
+- output when tags are styled to be underlined
+- `--check` output when you use `--user` to filter output
 
 
 ## v0.5.0 (2018-12-16)
