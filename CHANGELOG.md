@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - completions for bash, zsh, fish, and powershell
+- formula for `brew`
 
 
 ## v0.5.1 (2018-12-19)
