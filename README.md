@@ -17,8 +17,8 @@ The latest release can be downloaded from the releases page.
 
 If you use macOS Homebrew or Linuxbrew you can currently install the latest version using
 ```console
-brew tap lavifb/todo_r https://github.com/lavifb/todo_r.git
-brew install todor
+$ brew tap lavifb/todo_r https://github.com/lavifb/todo_r.git
+$ brew install todor
 ```
 
 ## Features
@@ -50,7 +50,11 @@ Create a .todor file in the root of your workspace with `todor init`.
 
 .todor files can also used as a config file to set custom tags, comments types, output styles, etc.
 
-### Language support
+Todo_r also supports a global config file at `~/.config/todor/todor.conf` for Mac/Linux and `~\AppData\Roaming\lavifb\todor\todor.conf` on Windows.
+
+<!-- TODO: document config file features -->
+
+## Language support
 
 | Filetype    | Extensions          | Comment Types |
 |-------------|---------------------|---------------|
