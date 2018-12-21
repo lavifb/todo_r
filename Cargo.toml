@@ -28,6 +28,7 @@ config = "0.9"
 serde = "1"
 serde_derive = "1"
 globset = "0.4"
+dirs = "1"
 
 [dev-dependencies]
 criterion = "0.2"

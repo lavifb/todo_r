@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - completions for bash, zsh, fish, and powershell
 - formula for `brew` package manager
+- global config support
 
 ### Changed
 - ignore paths are now entired handled by todor bin

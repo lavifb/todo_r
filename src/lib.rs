@@ -160,11 +160,20 @@ impl TodoRBuilder {
     }
 
     /// Adds config file for TodoR.
-    pub fn add_config_file(&mut self, config_path: &Path) -> Result<&mut Self, Error> {
-        let mut merge_file = config::File::from(config_path);
-        if config_path.file_name() == Some(OsStr::new(".todor")) {
-            merge_file = merge_file.format(config::FileFormat::Hjson);
-        }
+    pub fn add_config_file(&mut self, config_path: impl AsRef<Path>) -> Result<&mut Self, Error> {
+        self.inner_config
+            .merge(config::File::from(config_path.as_ref()))?;
+        Ok(self)
+    }
+
+    /// Adds config file for TodoR that is in the provided format.
+    pub fn add_config_file_with_format(
+        &mut self,
+        config_path: impl AsRef<Path>,
+        format: config::FileFormat,
+    ) -> Result<&mut Self, Error> {
+        let mut merge_file = config::File::from(config_path.as_ref());
+        merge_file = merge_file.format(format);
         self.inner_config.merge(merge_file)?;
         Ok(self)
     }

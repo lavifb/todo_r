@@ -1,3 +1,4 @@
+use config::FileFormat;
 use failure::{format_err, Error};
 use ignore::overrides::OverrideBuilder;
 use ignore::{Walk, WalkBuilder};
@@ -40,7 +41,7 @@ pub fn build_walker(
 
             // check for empty file before adding
             if todor_path.metadata().unwrap().len() > 2 {
-                todor_builder.add_config_file(&todor_path)?;
+                todor_builder.add_config_file_with_format(todor_path, FileFormat::Hjson)?;
             }
             break;
         }
