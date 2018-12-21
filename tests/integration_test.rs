@@ -225,22 +225,6 @@ fn ignore() {
 }
 
 #[test]
-fn config_ignore() {
-    todor()
-        .arg("test1.rs")
-        .arg("test2.py")
-        .arg("-c")
-        .arg("config3.toml")
-        .assert()
-        .success()
-        .stdout(
-            "test1.rs
-  line 2      TODO   item\n",
-        )
-        .stderr("");
-}
-
-#[test]
 fn init() {
     let mut cmd = CARGO_RUN.command();
     cmd.current_dir("tests/inputs")

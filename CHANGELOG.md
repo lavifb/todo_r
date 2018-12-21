@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - completions for bash, zsh, fish, and powershell
 - formula for `brew` package manager
 
+### Changed
+- ignore paths are now entired handled by todor bin
+
+### Deprecated
+- `ignore` config option
+	- use a `.todorignore` file or `-i` flag to ignore paths
+
 
 ## v0.5.1 (2018-12-19)
 ### Fixed

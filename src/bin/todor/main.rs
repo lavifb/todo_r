@@ -8,7 +8,9 @@ mod walk;
 use clap::ArgMatches;
 use env_logger;
 use failure::Error;
+use ignore::overrides::OverrideBuilder;
 use log::*;
+use std::env::current_dir;
 use std::fs::File;
 use std::path::Path;
 
@@ -64,9 +66,12 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
         builder.set_no_style();
     }
 
+    let curr_dir = current_dir()?;
+    let mut ignore_builder = OverrideBuilder::new(&curr_dir);
     if let Some(ignore_paths_iter) = matches.values_of("IGNORE") {
-        // TODO: use ignore walker instead
-        builder.add_override_ignore_paths(ignore_paths_iter)?;
+        for ignore_path in ignore_paths_iter {
+            ignore_builder.add(&format!("!{}", ignore_path))?;
+        }
     }
 
     let mut pred = None;
@@ -78,18 +83,23 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
     let mut todor;
     match matches.values_of("FILE") {
         Some(files) => {
+            let ignores = ignore_builder.build()?;
             todor = builder.build()?;
             debug!("todor parser built");
             for file in files {
                 info!("looking at `{}`...", file);
-                todor
-                    .open_todos(Path::new(file))
-                    .unwrap_or_else(|err| warn!("{}", err));
+
+                let file_path = Path::new(file);
+                if !ignores.matched(file_path, false).is_ignore() {
+                    todor
+                        .open_todos(file_path)
+                        .unwrap_or_else(|err| warn!("{}", err));
+                }
             }
         }
         None => {
             info!("Looking for .git or .todor to use as workspace root...");
-            let walk = build_walker(&mut builder)?;
+            let walk = build_walker(&mut builder, ignore_builder)?;
             todor = builder.build()?;
             debug!("todor parser built");
 

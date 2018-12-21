@@ -47,7 +47,6 @@ use std::path::Path;
 
 use failure::Error;
 use fnv::FnvHashMap;
-use globset::{Glob, GlobSet, GlobSetBuilder};
 use log::debug;
 use regex::Regex;
 
@@ -77,8 +76,6 @@ static EXAMPLE_CONFIG: &str = include_str!("example_config.hjson");
 pub struct TodoRBuilder {
     added_tags: Vec<String>,
     override_tags: Option<Vec<String>>,
-    // TODO: run all ignoreing from todor walker
-    override_ignore_paths: Option<GlobSetBuilder>,
     override_default_ext: Option<String>,
     override_styles: Option<TodoRStyles>,
     // Config from files. Parameters with override_ override inner_config.
@@ -128,21 +125,6 @@ impl TodoRBuilder {
             .override_styles
             .unwrap_or(config_styles.into_todo_r_styles()?);
 
-        let ignore_paths = match self.override_ignore_paths {
-            Some(glob_builder) => glob_builder.build()?,
-            None => {
-                let mut gb = GlobSetBuilder::new();
-                for path in config_struct.ignore {
-                    gb.add(
-                        Glob::new(&path).map_err(|err| TodoRError::InvalidConfigFile {
-                            message: format!("invalid ignore path: {}", err),
-                        })?,
-                    );
-                }
-                gb.build()?
-            }
-        };
-
         let mut ext_to_comment_types: FnvHashMap<String, CommentTypes> = FnvHashMap::default();
 
         // Put default comment types in hashmap.
@@ -167,7 +149,6 @@ impl TodoRBuilder {
 
         let config = TodoRConfig {
             tags,
-            ignore_paths,
             styles,
             ext_to_comment_types,
             default_comment_types,
@@ -233,29 +214,6 @@ impl TodoRBuilder {
         self
     }
 
-    /// Adds path for TodoR to ignore. This overrides ignore paths from config files.
-    pub fn add_override_ignore_path(&mut self, path: &str) -> Result<&mut Self, Error> {
-        let new_glob = Glob::new(path).map_err(|err| TodoRError::InvalidIgnorePath {
-            message: err.to_string(),
-        })?;
-        self.override_ignore_paths
-            .get_or_insert_with(GlobSetBuilder::new)
-            .add(new_glob);
-        Ok(self)
-    }
-
-    /// Adds paths for TodoR to ignore. This overrides ignore paths from config files.
-    pub fn add_override_ignore_paths<I, S>(&mut self, paths: I) -> Result<&mut Self, Error>
-    where
-        I: IntoIterator<Item = S>,
-        S: AsRef<str>,
-    {
-        for path in paths {
-            self.add_override_ignore_path(path.as_ref())?;
-        }
-        Ok(self)
-    }
-
     /// Sets the default fall-back extension for comments.
     ///
     /// For instance if you want to parse unknown extensions using C style comments,
@@ -280,7 +238,6 @@ pub fn write_example_config(out_buffer: &mut impl Write) -> Result<(), Error> {
 struct TodoRConfig {
     tags: Vec<String>,
     styles: TodoRStyles,
-    ignore_paths: GlobSet,
     ext_to_comment_types: FnvHashMap<String, CommentTypes>,
     default_comment_types: CommentTypes,
 }
@@ -386,10 +343,6 @@ impl TodoR {
     /// Opens file at given filepath and process it by finding all its TODOs.
     pub fn open_todos(&mut self, filepath: &Path) -> Result<(), Error> {
         let mut todo_file = TodoFile::new(filepath);
-
-        if self.config.ignore_paths.is_match(filepath) {
-            return Ok(());
-        }
 
         // Make sure the file is not a directory
         if !filepath.is_file() {

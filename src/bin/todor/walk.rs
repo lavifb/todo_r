@@ -8,13 +8,18 @@ use std::path::{self, Path, PathBuf};
 use todo_r::TodoRBuilder;
 
 /// Recurses down and try to find either .git or .todor as the root folder.
+/// Ignore builder should be initialized relative to current_dir().
+///
 /// Returns an iterator that iterates over all the tracked files.
 /// Measures are taken to make sure paths are returned in a nice relative path format.
-pub fn build_walker(todor_builder: &mut TodoRBuilder) -> Result<Walk, Error> {
+pub fn build_walker(
+    todor_builder: &mut TodoRBuilder,
+    mut ignore_builder: OverrideBuilder,
+) -> Result<Walk, Error> {
     info!("Looking for .git or .todor to use as workspace root...");
 
     let mut curr_dir = current_dir()?;
-    let mut ignore_builder = OverrideBuilder::new(&curr_dir);
+    // let mut ignore_builder = OverrideBuilder::new(&curr_dir);
     curr_dir.push(".todor");
     let mut relative_path = PathBuf::from(".");
     let mut walk_builder = WalkBuilder::new(&relative_path);

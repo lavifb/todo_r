@@ -6,10 +6,6 @@
     "fixme"
   ],
 
-  // Paths to ignore. You can use .gitignore style globs
-  "ignore" : [
-  ],
-
   // Default extension fall-back
   "default_ext": "sh",
 
