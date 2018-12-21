@@ -15,6 +15,12 @@ A lot is adapted from [leasot](https://github.com/pgilad/leasot) but runs much f
 
 The latest release can be downloaded from the releases page.
 
+If you use macOS Homebrew or Linuxbrew you can currently install the latest version using
+```console
+brew tap lavifb/todo_r https://github.com/lavifb/todo_r.git
+brew install todor
+```
+
 ## Features
 
 - Reads TODO comments that are on their own line.
