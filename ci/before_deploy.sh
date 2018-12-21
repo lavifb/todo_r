@@ -27,10 +27,6 @@ main() {
 
     # copy completions to stage
     mkdir $stage/complete
-    ls target/"$TARGET"/release/
-    ls target/"$TARGET"/release/build/
-    ls target/"$TARGET"/release/build/todo_r-*
-    ls target/"$TARGET"/release/build/todo_r-*/out/
     cp target/"$TARGET"/release/build/todo_r-*/out/"$PROJECT_NAME".bash $stage/complete/${PROJECT_NAME}.bash-completion
     cp target/"$TARGET"/release/build/todo_r-*/out/"$PROJECT_NAME".fish $stage/complete/
     cp target/"$TARGET"/release/build/todo_r-*/out/_"$PROJECT_NAME" $stage/complete/
