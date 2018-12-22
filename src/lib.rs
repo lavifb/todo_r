@@ -3,6 +3,7 @@ mod configs;
 mod custom_tags;
 mod display;
 mod parser;
+mod printer;
 mod remover;
 pub mod todo;
 
