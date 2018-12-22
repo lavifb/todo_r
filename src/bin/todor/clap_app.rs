@@ -3,6 +3,7 @@ use clap::{clap_app, App};
 pub fn build_cli() -> App<'static, 'static> {
     // TODO: add subcommand for just content so it can be piped
     clap_app!(todo_r =>
+        // TODO: add command to print using other formats
         (version: env!("CARGO_PKG_VERSION"))
         (author: "Lavi Blumberg <lavifb@gmail.com>")
         (about: "Lists TODO comments in code")
