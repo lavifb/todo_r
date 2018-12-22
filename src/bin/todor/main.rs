@@ -52,19 +52,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
     let mut builder = TodoRBuilder::new();
 
     // Search for global config file
-    if let Some(mut global_conf) = home_dir() {
-        if cfg!(windows) {
-            global_conf.push(r"AppData\Roaming\lavifb\todor\todor.conf");
-        } else {
-            global_conf.push(".config/todor/todor.conf");
-        }
-
-        info!("searching for global config in '{}'", global_conf.display());
-        if global_conf.exists() && global_conf.metadata().unwrap().len() > 2 {
-            info!("adding global config file...");
-            builder.add_config_file_with_format(global_conf, FileFormat::Hjson)?;
-        }
-    }
+    load_global_config(&mut builder)?;
 
     if let Some(config_path) = matches.value_of("CONFIG") {
         builder.add_config_file(Path::new(config_path))?;
@@ -151,6 +139,24 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
     }
 
     Ok(0)
+}
+
+fn load_global_config(builder: &mut TodoRBuilder) -> Result<(), Error> {
+    if let Some(mut global_conf) = home_dir() {
+        if cfg!(windows) {
+            global_conf.push(r"AppData\Roaming\lavifb\todor\todor.conf");
+        } else {
+            global_conf.push(".config/todor/todor.conf");
+        }
+
+        info!("searching for global config in '{}'", global_conf.display());
+        if global_conf.exists() && global_conf.metadata().unwrap().len() > 2 {
+            info!("adding global config file...");
+            builder.add_config_file_with_format(global_conf, FileFormat::Hjson)?;
+        }
+    }
+
+    Ok(())
 }
 
 fn run_init() -> i32 {
