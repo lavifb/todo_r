@@ -390,7 +390,6 @@ impl TodoR {
     }
 
     // MAYB: make open_user_todos() that only searches for todos with user tagged
-
     /// Finds TODO comments in the given content
     pub fn find_todos(&mut self, content: &str) -> Result<(), Error> {
         let mut todo_file = TodoFile::new(Path::new(""));
