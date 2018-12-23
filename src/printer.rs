@@ -17,6 +17,7 @@ struct PrintTodo<'a> {
 }
 
 impl<'a> PrintTodo<'a> {
+    #[allow(dead_code)]
     fn from_todo_with_path<'p>(todo: &'p Todo, filepath: &'p Path) -> Result<PrintTodo<'p>, Error> {
         let file = filepath.to_str().ok_or_else(|| {
             format_err!(
@@ -45,11 +46,13 @@ impl<'a> PrintTodo<'a> {
     }
 
     /// Returns String of TODO serialized in the JSON format
+    #[allow(dead_code)]
     fn to_json(&self) -> Result<String, Error> {
         Ok(serde_json::to_string(self)?)
     }
 
     /// Returns String of TODO serialized in a pretty JSON format
+    #[allow(dead_code)]
     fn to_json_pretty(&self) -> Result<String, Error> {
         Ok(serde_json::to_string_pretty(self)?)
     }
@@ -101,6 +104,7 @@ impl<'a> PrintTodos<'a> {
         Ok(PrintTodos { ptodos })
     }
 
+    #[allow(dead_code)]
     fn from_todo_file(todo_file: &TodoFile) -> Result<PrintTodos, Error> {
         let ptodos: Vec<PrintTodo> = PrintTodoIter::try_from(todo_file)?.collect();
 
@@ -117,9 +121,6 @@ impl<'a> PrintTodos<'a> {
         Ok(serde_json::to_string_pretty(&self.ptodos)?)
     }
 }
-
-// TODO: convert Vec<TodoFile> into PrintTodos
-// TODO: impl to_json(), to_json_pretty(), ... for PrintTodos
 
 pub enum ReportFormat {
     Json,

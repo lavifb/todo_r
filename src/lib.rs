@@ -490,6 +490,8 @@ impl TodoR {
             }
         };
 
+        report_todos(out_buffer, &self.todo_files, &report_format)?;
+
         Ok(())
     }
 
