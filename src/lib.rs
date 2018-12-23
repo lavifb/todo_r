@@ -37,6 +37,9 @@ pub mod errors {
         /// Error for invalid ignore path.
         #[fail(display = "invalid ignore path: {}", message)]
         InvalidIgnorePath { message: String },
+        /// Error for unsupported output format.
+        #[fail(display = "invalid output format: {}", message)]
+        InvalidOutputFormat { message: String },
     }
 }
 
@@ -56,6 +59,7 @@ use crate::configs::TodoRConfigFileSerial;
 use crate::display::*;
 use crate::errors::TodoRError;
 use crate::parser::{build_parser_regexs, parse_content};
+use crate::printer::{report_todos, ReportFormat};
 use crate::todo::{Todo, TodoFile};
 
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
@@ -409,7 +413,7 @@ impl TodoR {
     }
 
     /// Writes TODOs to out_buffer.
-    pub fn write_todos(&self, out_buffer: &mut Write) -> Result<(), Error> {
+    pub fn write_todos(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
         self.write_filtered_todos(out_buffer, &|_t| true)
     }
 
@@ -427,7 +431,11 @@ impl TodoR {
     }
 
     /// Writes TODOs to out_buffer. Only writes TODOs that fulfill pred.
-    pub fn write_filtered_todos<P>(&self, out_buffer: &mut Write, pred: &P) -> Result<(), Error>
+    pub fn write_filtered_todos<P>(
+        &self,
+        out_buffer: &mut impl Write,
+        pred: &P,
+    ) -> Result<(), Error>
     where
         P: Fn(&&Todo) -> bool,
     {
@@ -443,7 +451,7 @@ impl TodoR {
     pub fn write_todos_from_file(
         &self,
         filepath: &Path,
-        out_buffer: &mut Write,
+        out_buffer: &mut impl Write,
     ) -> Result<(), Error> {
         for todo_file in &self.todo_files {
             if todo_file.filepath == filepath {
@@ -451,6 +459,36 @@ impl TodoR {
                 break;
             }
         }
+
+        Ok(())
+    }
+
+    // TODO: add documentation
+    pub fn print_formatted_todos(&self, format: &str) -> Result<(), Error> {
+        // lock stdout to print faster
+        let stdout = io::stdout();
+        let lock = stdout.lock();
+        let mut out_buffer = io::BufWriter::new(lock);
+
+        self.write_formatted_todos(&mut out_buffer, format)
+    }
+
+    // TODO: add documentation
+    pub fn write_formatted_todos(
+        &self,
+        out_buffer: &mut impl Write,
+        out_format: &str,
+    ) -> Result<(), Error> {
+        let report_format = match out_format {
+            "json" => ReportFormat::Json,
+            "prettyjson" => ReportFormat::JsonPretty,
+            _ => {
+                return Err(TodoRError::InvalidOutputFormat {
+                    message: out_format.to_string(),
+                }
+                .into())
+            }
+        };
 
         Ok(())
     }

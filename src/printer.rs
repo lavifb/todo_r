@@ -34,28 +34,39 @@ impl<'a> PrintTodo<'a> {
         })
     }
 
+    /// Returns String of TODO serialized in the JSON format
     fn to_json(&self) -> Result<String, Error> {
         Ok(serde_json::to_string(self)?)
     }
 
+    /// Returns String of TODO serialized in a pretty JSON format
     fn to_json_pretty(&self) -> Result<String, Error> {
         Ok(serde_json::to_string_pretty(self)?)
     }
 }
 
-pub enum Reporter {
+#[derive(Serialize, Debug)]
+struct PrintTodos<'a> {
+    ptodos: Vec<PrintTodo<'a>>,
+}
+
+// TODO: convert Vec<TodoFile> into PrintTodos
+// TODO: impl to_json(), to_json_pretty(), ... for PrintTodos
+
+pub enum ReportFormat {
     Json,
     JsonPretty,
 }
 
-pub fn write_todos(
+/// Writes TODOs in `todo_files` to `out_buffer` in the format provided by `report_format`
+pub fn report_todos(
     out_buffer: &mut Write,
     todo_files: &[TodoFile],
-    reporter: &Reporter,
+    report_format: &ReportFormat,
 ) -> Result<(), Error> {
-    let report = match reporter {
-        Reporter::Json => PrintTodo::to_json,
-        Reporter::JsonPretty => PrintTodo::to_json_pretty,
+    let report = match report_format {
+        ReportFormat::Json => PrintTodo::to_json,
+        ReportFormat::JsonPretty => PrintTodo::to_json_pretty,
     };
 
     for tf in todo_files {
