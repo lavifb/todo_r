@@ -50,6 +50,39 @@ struct PrintTodos<'a> {
     ptodos: Vec<PrintTodo<'a>>,
 }
 
+impl<'a> PrintTodos<'a> {
+    fn from_todo_files(todo_files: &[TodoFile]) -> Result<PrintTodos, Error> {
+        let mut ptodos = Vec::new();
+
+        for tf in todo_files {
+            ptodos.extend(PrintTodos::from_todo_file(tf)?.ptodos);
+        }
+
+        Ok(PrintTodos { ptodos })
+    }
+
+    fn from_todo_file(todo_file: &TodoFile) -> Result<PrintTodos, Error> {
+        let filepath = &todo_file.filepath;
+        let ptodos: Result<Vec<_>, Error> = todo_file
+            .todos
+            .iter()
+            .map(|t| PrintTodo::from_todo(t, &filepath))
+            .collect();
+
+        Ok(PrintTodos { ptodos: ptodos? })
+    }
+
+    /// Returns String of TODOs serialized in the JSON format
+    fn to_json(&self) -> Result<String, Error> {
+        Ok(serde_json::to_string(self)?)
+    }
+
+    /// Returns String of TODOs serialized in a pretty JSON format
+    fn to_json_pretty(&self) -> Result<String, Error> {
+        Ok(serde_json::to_string_pretty(self)?)
+    }
+}
+
 // TODO: convert Vec<TodoFile> into PrintTodos
 // TODO: impl to_json(), to_json_pretty(), ... for PrintTodos
 
@@ -65,17 +98,12 @@ pub fn report_todos(
     report_format: &ReportFormat,
 ) -> Result<(), Error> {
     let report = match report_format {
-        ReportFormat::Json => PrintTodo::to_json,
-        ReportFormat::JsonPretty => PrintTodo::to_json_pretty,
+        ReportFormat::Json => PrintTodos::to_json,
+        ReportFormat::JsonPretty => PrintTodos::to_json_pretty,
     };
 
-    for tf in todo_files {
-        let filepath = &tf.filepath;
-        for todo in &tf.todos {
-            let ptodo = PrintTodo::from_todo(&todo, &filepath)?;
-            write!(out_buffer, "{}", report(&ptodo)?)?;
-        }
-    }
+    let ptodos = PrintTodos::from_todo_files(todo_files)?;
+    write!(out_buffer, "{}", report(&ptodos)?)?;
 
     Ok(())
 }
