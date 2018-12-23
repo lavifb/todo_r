@@ -1,11 +1,10 @@
 // Module for displaying output
 
-use ansi_term::Color::{Cyan, Fixed, Green};
 use ansi_term::Style;
 use failure::Error;
 use fnv::FnvHashMap;
 use log::debug;
-use std::io::{self, Write};
+use std::io::Write;
 
 use crate::todo::{Todo, TodoFile};
 
@@ -18,19 +17,6 @@ pub struct TodoRStyles {
     pub content_style: Style,
     default_tag_style: Style,
     tag_styles: FnvHashMap<String, Style>,
-}
-
-impl Default for TodoRStyles {
-    /// Creates new StyleConfig with the default color printing style.
-    fn default() -> TodoRStyles {
-        TodoRStyles::new(
-            Style::new().underline(),
-            Style::from(Fixed(8)),
-            Style::from(Fixed(8)),
-            Style::from(Cyan),
-            Style::from(Green),
-        )
-    }
 }
 
 impl TodoRStyles {
@@ -75,9 +61,10 @@ impl TodoRStyles {
     }
 }
 
-// TODO: other printing options: json, xml, etc.
-
 /// Writes file path and a list of Todos to out_buffer.
+/// Predicate `pred` is used to determine if a `Todo` should be printed.
+///
+/// If no there are no `Todo`s that satisfy `pred` in `todo_file`, nothing is printed.
 pub fn write_file_todos<P>(
     out_buffer: &mut Write,
     todo_file: &TodoFile,
