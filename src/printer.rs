@@ -74,12 +74,12 @@ impl<'a> PrintTodos<'a> {
 
     /// Returns String of TODOs serialized in the JSON format
     fn to_json(&self) -> Result<String, Error> {
-        Ok(serde_json::to_string(self)?)
+        Ok(serde_json::to_string(&self.ptodos)?)
     }
 
     /// Returns String of TODOs serialized in a pretty JSON format
     fn to_json_pretty(&self) -> Result<String, Error> {
-        Ok(serde_json::to_string_pretty(self)?)
+        Ok(serde_json::to_string_pretty(&self.ptodos)?)
     }
 }
 
@@ -152,6 +152,35 @@ mod test {
         assert_eq!(
             ptodo.to_json().unwrap(),
             r#"{"file":"tests/test.rs","kind":"TODO","line":2,"text":"@user1 item @user2","users":["user1","user2"]}"#,
+        );
+    }
+
+    #[test]
+    fn json_todos() {
+        let mut tf = TodoFile::new(Path::new("tests/test.rs"));
+        tf.todos.push(Todo::new(2, "TODO", "item1"));
+        tf.todos.push(Todo::new(5, "TODO", "item2"));
+        let ptodo = PrintTodos::from_todo_file(&tf).unwrap();
+
+        assert_eq!(
+            ptodo.to_json().unwrap(),
+            r#"[{"file":"tests/test.rs","kind":"TODO","line":2,"text":"item1","users":[]},{"file":"tests/test.rs","kind":"TODO","line":5,"text":"item2","users":[]}]"#,
+        );
+    }
+
+    #[test]
+    fn json_todos2() {
+        let mut tf1 = TodoFile::new(Path::new("test1.rs"));
+        tf1.todos.push(Todo::new(2, "TODO", "item1"));
+        let mut tf2 = TodoFile::new(Path::new("test2.rs"));
+        tf2.todos.push(Todo::new(5, "TODO", "item2"));
+
+        let tfs = [tf1, tf2];
+        let ptodo = PrintTodos::from_todo_files(&tfs).unwrap();
+
+        assert_eq!(
+            ptodo.to_json().unwrap(),
+            r#"[{"file":"test1.rs","kind":"TODO","line":2,"text":"item1","users":[]},{"file":"test2.rs","kind":"TODO","line":5,"text":"item2","users":[]}]"#,
         );
     }
 }
