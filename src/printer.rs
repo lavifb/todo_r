@@ -17,7 +17,7 @@ struct PrintTodo<'a> {
 }
 
 impl<'a> PrintTodo<'a> {
-    fn from_todo<'p>(todo: &'p Todo, filepath: &'p Path) -> Result<PrintTodo<'p>, Error> {
+    fn from_todo_with_path<'p>(todo: &'p Todo, filepath: &'p Path) -> Result<PrintTodo<'p>, Error> {
         let file = filepath.to_str().ok_or_else(|| {
             format_err!(
                 "error converting filepath `{}` to unicode",
@@ -34,6 +34,16 @@ impl<'a> PrintTodo<'a> {
         })
     }
 
+    fn from_todo<'p>(todo: &'p Todo, file: &'p str) -> PrintTodo<'p> {
+        PrintTodo {
+            file,
+            kind: &todo.tag,
+            line: todo.line,
+            text: &todo.content,
+            users: todo.users().iter().map(|u| &u[1..]).collect(),
+        }
+    }
+
     /// Returns String of TODO serialized in the JSON format
     fn to_json(&self) -> Result<String, Error> {
         Ok(serde_json::to_string(self)?)
@@ -45,6 +55,37 @@ impl<'a> PrintTodo<'a> {
     }
 }
 
+struct PrintTodoIter<'a> {
+    inner: std::slice::Iter<'a, Todo>,
+    file: &'a str,
+}
+
+impl<'a> PrintTodoIter<'a> {
+    fn try_from(tf: &TodoFile) -> Result<PrintTodoIter, Error> {
+        let file = tf.filepath.to_str().ok_or_else(|| {
+            format_err!(
+                "error converting filepath `{}` to unicode",
+                tf.filepath.display()
+            )
+        })?;
+
+        Ok(PrintTodoIter {
+            inner: tf.todos.iter(),
+            file,
+        })
+    }
+}
+
+impl<'a> Iterator for PrintTodoIter<'a> {
+    type Item = PrintTodo<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner
+            .next()
+            .map(|t| PrintTodo::from_todo(t, self.file))
+    }
+}
+
 #[derive(Serialize, Debug)]
 struct PrintTodos<'a> {
     ptodos: Vec<PrintTodo<'a>>,
@@ -53,23 +94,17 @@ struct PrintTodos<'a> {
 impl<'a> PrintTodos<'a> {
     fn from_todo_files(todo_files: &[TodoFile]) -> Result<PrintTodos, Error> {
         let mut ptodos = Vec::new();
-
         for tf in todo_files {
-            ptodos.extend(PrintTodos::from_todo_file(tf)?.ptodos);
+            ptodos.extend(PrintTodoIter::try_from(tf)?);
         }
 
         Ok(PrintTodos { ptodos })
     }
 
     fn from_todo_file(todo_file: &TodoFile) -> Result<PrintTodos, Error> {
-        let filepath = &todo_file.filepath;
-        let ptodos: Result<Vec<_>, Error> = todo_file
-            .todos
-            .iter()
-            .map(|t| PrintTodo::from_todo(t, &filepath))
-            .collect();
+        let ptodos: Vec<PrintTodo> = PrintTodoIter::try_from(todo_file)?.collect();
 
-        Ok(PrintTodos { ptodos: ptodos? })
+        Ok(PrintTodos { ptodos })
     }
 
     /// Returns String of TODOs serialized in the JSON format
@@ -116,8 +151,8 @@ mod test {
     #[test]
     fn json_todo() {
         let todo = Todo::new(2, "TODO", "item");
-        let test_path = Path::new("tests/test.rs");
-        let ptodo = PrintTodo::from_todo(&todo, &test_path).unwrap();
+        let test_path = "tests/test.rs";
+        let ptodo = PrintTodo::from_todo(&todo, test_path);
 
         assert_eq!(
             ptodo.to_json().unwrap(),
@@ -128,8 +163,8 @@ mod test {
     #[test]
     fn json_todo_pretty() {
         let todo = Todo::new(2, "TODO", "item");
-        let test_path = Path::new("tests/test.rs");
-        let ptodo = PrintTodo::from_todo(&todo, &test_path).unwrap();
+        let test_path = "tests/test.rs";
+        let ptodo = PrintTodo::from_todo(&todo, test_path);
 
         assert_eq!(
             ptodo.to_json_pretty().unwrap(),
@@ -146,8 +181,8 @@ mod test {
     #[test]
     fn json_todo_users() {
         let todo = Todo::new(2, "TODO", "@user1 item @user2");
-        let test_path = Path::new("tests/test.rs");
-        let ptodo = PrintTodo::from_todo(&todo, &test_path).unwrap();
+        let test_path = "tests/test.rs";
+        let ptodo = PrintTodo::from_todo(&todo, test_path);
 
         assert_eq!(
             ptodo.to_json().unwrap(),
