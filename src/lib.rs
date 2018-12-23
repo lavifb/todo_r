@@ -305,11 +305,11 @@ impl TodoR {
     /// Returns the number of TODOs currently tracked by TodoR
     pub fn num_filtered_todos<P>(&self, pred: &P) -> usize
     where
-        P: Fn(&Todo) -> bool,
+        P: Fn(&&Todo) -> bool,
     {
         self.todo_files
             .iter()
-            .fold(0, |s, tf| s + tf.todos.iter().filter(|t| pred(*t)).count())
+            .fold(0, |s, tf| s + tf.todos.iter().filter(pred).count())
     }
 
     /// Returns all tracked files that contain TODOs
@@ -429,7 +429,7 @@ impl TodoR {
     /// Prints TODOs to stdout. Only prints TODOs that fulfill pred.
     pub fn print_filtered_todos<P>(&self, pred: &P)
     where
-        P: Fn(&Todo) -> bool,
+        P: Fn(&&Todo) -> bool,
     {
         // lock stdout to print faster
         let stdout = io::stdout();
@@ -442,7 +442,7 @@ impl TodoR {
     /// Writes TODOs to out_buffer. Only writes TODOs that fulfill pred.
     pub fn write_filtered_todos<P>(&self, out_buffer: &mut Write, pred: &P) -> Result<(), Error>
     where
-        P: Fn(&Todo) -> bool,
+        P: Fn(&&Todo) -> bool,
     {
         for todo_file in &self.todo_files {
             write_filtered_file_todos(out_buffer, &todo_file, &self.config.styles, pred)?;

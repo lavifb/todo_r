@@ -118,13 +118,11 @@ pub fn write_filtered_file_todos<P>(
     pred: &P,
 ) -> Result<(), Error>
 where
-    P: Fn(&Todo) -> bool,
+    P: Fn(&&Todo) -> bool,
 {
     let mut tmp: Vec<u8> = Vec::new();
-    for todo in &todo_file.todos {
-        if pred(todo) {
-            writeln!(tmp, "{}", todo.style_string(styles))?;
-        }
+    for todo in todo_file.todos.iter().filter(pred) {
+        writeln!(tmp, "{}", todo.style_string(styles))?;
     }
 
     if !tmp.is_empty() {
