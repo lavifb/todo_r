@@ -77,41 +77,8 @@ impl TodoRStyles {
 
 // TODO: other printing options: json, xml, etc.
 
-#[allow(dead_code)]
-/// Prints file path and a list of Todos to stdout
-pub fn print_file_todos(todo_file: &TodoFile, styles: &TodoRStyles, verbose: bool) {
-    if todo_file.todos.is_empty() && !verbose {
-        return;
-    }
-
-    // lock stdout to print faster
-    let stdout = io::stdout();
-    let lock = stdout.lock();
-    let mut out_buffer = io::BufWriter::new(lock);
-    write_file_todos(&mut out_buffer, todo_file, styles).unwrap();
-}
-
-/// Writes file path and a list of Todos to out_buffer
-pub fn write_file_todos(
-    out_buffer: &mut Write,
-    todo_file: &TodoFile,
-    styles: &TodoRStyles,
-) -> Result<(), Error> {
-    writeln!(
-        out_buffer,
-        "{}",
-        styles
-            .filepath_style
-            .paint(todo_file.filepath.to_string_lossy())
-    )?;
-    for todo in &todo_file.todos {
-        writeln!(out_buffer, "{}", todo.style_string(styles),)?;
-    }
-
-    Ok(())
-}
-
-pub fn write_filtered_file_todos<P>(
+/// Writes file path and a list of Todos to out_buffer.
+pub fn write_file_todos<P>(
     out_buffer: &mut Write,
     todo_file: &TodoFile,
     styles: &TodoRStyles,
@@ -120,12 +87,8 @@ pub fn write_filtered_file_todos<P>(
 where
     P: Fn(&&Todo) -> bool,
 {
-    let mut tmp: Vec<u8> = Vec::new();
-    for todo in todo_file.todos.iter().filter(pred) {
-        writeln!(tmp, "{}", todo.style_string(styles))?;
-    }
-
-    if !tmp.is_empty() {
+    let mut todos = todo_file.todos.iter().filter(pred).peekable();
+    if todos.peek().is_some() {
         writeln!(
             out_buffer,
             "{}",
@@ -134,7 +97,9 @@ where
                 .paint(todo_file.filepath.to_string_lossy())
         )?;
 
-        out_buffer.write_all(&tmp)?;
+        for todo in todos {
+            writeln!(out_buffer, "{}", todo.style_string(styles))?;
+        }
     } else {
         debug!(
             "No filtered TODOs found in `{}`",

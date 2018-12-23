@@ -405,25 +405,12 @@ impl TodoR {
 
     /// Prints TODOs to stdout.
     pub fn print_todos(&self) {
-        // lock stdout to print faster
-        let stdout = io::stdout();
-        let lock = stdout.lock();
-        let mut out_buffer = io::BufWriter::new(lock);
-
-        self.write_todos(&mut out_buffer).unwrap();
+        self.print_filtered_todos(&|_t| true);
     }
 
     /// Writes TODOs to out_buffer.
     pub fn write_todos(&self, out_buffer: &mut Write) -> Result<(), Error> {
-        for todo_file in &self.todo_files {
-            if todo_file.is_empty() {
-                continue;
-            }
-
-            write_file_todos(out_buffer, &todo_file, &self.config.styles)?;
-        }
-
-        Ok(())
+        self.write_filtered_todos(out_buffer, &|_t| true)
     }
 
     /// Prints TODOs to stdout. Only prints TODOs that fulfill pred.
@@ -445,7 +432,7 @@ impl TodoR {
         P: Fn(&&Todo) -> bool,
     {
         for todo_file in &self.todo_files {
-            write_filtered_file_todos(out_buffer, &todo_file, &self.config.styles, pred)?;
+            write_file_todos(out_buffer, &todo_file, &self.config.styles, pred)?;
         }
 
         Ok(())
@@ -460,7 +447,7 @@ impl TodoR {
     ) -> Result<(), Error> {
         for todo_file in &self.todo_files {
             if todo_file.filepath == filepath {
-                write_file_todos(out_buffer, &todo_file, &self.config.styles)?;
+                write_file_todos(out_buffer, &todo_file, &self.config.styles, &|_t| true)?;
                 break;
             }
         }
