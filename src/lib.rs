@@ -479,7 +479,7 @@ impl TodoR {
         out_buffer: &mut impl Write,
         out_format: &ReportFormat,
     ) -> Result<(), Error> {
-        report_todos(out_buffer, &self.todo_files, &out_format)?;
+        report_todos(out_buffer, &self.todo_files, &out_format, &|_t| true)?;
 
         Ok(())
     }
