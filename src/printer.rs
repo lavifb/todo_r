@@ -63,10 +63,11 @@ struct PrintTodoIter<'a, I> {
     file: &'a str,
 }
 
-impl PrintTodoIter<'static, std::slice::Iter<'_, Todo>> {
-    fn try_from<'p>(
-        tf: &'p TodoFile,
-    ) -> Result<PrintTodoIter<'p, std::slice::Iter<'p, Todo>>, Error> {
+type TodoIter<'a> = std::slice::Iter<'a, Todo>;
+type TodoFilter<'a, P> = std::iter::Filter<TodoIter<'a>, &'a P>;
+
+impl PrintTodoIter<'static, TodoIter<'_>> {
+    fn try_from<'p>(tf: &'p TodoFile) -> Result<PrintTodoIter<'p, TodoIter<'p>>, Error> {
         let file = tf.filepath.to_str().ok_or_else(|| {
             format_err!(
                 "error converting filepath `{}` to unicode",
@@ -79,15 +80,17 @@ impl PrintTodoIter<'static, std::slice::Iter<'_, Todo>> {
             file,
         })
     }
+}
 
+impl<P> PrintTodoIter<'static, TodoFilter<'_, P>>
+where
+    P: Fn(&&Todo) -> bool,
+{
     #[allow(dead_code)]
-    fn try_from_with_filter<'p, P>(
+    fn try_from_with_filter<'p>(
         tf: &'p TodoFile,
         pred: &'p P,
-    ) -> Result<PrintTodoIter<'p, std::iter::Filter<std::slice::Iter<'p, Todo>, &'p P>>, Error>
-    where
-        P: Fn(&&Todo) -> bool,
-    {
+    ) -> Result<PrintTodoIter<'p, TodoFilter<'p, P>>, Error> {
         let file = tf.filepath.to_str().ok_or_else(|| {
             format_err!(
                 "error converting filepath `{}` to unicode",
