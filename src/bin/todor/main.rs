@@ -9,13 +9,14 @@ use clap::ArgMatches;
 use config::FileFormat;
 use dirs::home_dir;
 use env_logger;
-use failure::Error;
+use failure::{format_err, Error};
 use ignore::overrides::OverrideBuilder;
 use log::*;
 use std::env::current_dir;
 use std::fs::File;
 use std::path::Path;
 
+use todo_r::printer::ReportFormat;
 use todo_r::todo::Todo;
 use todo_r::TodoRBuilder;
 
@@ -131,6 +132,20 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
         if check && todor.num_filtered_todos(&p) > 0 {
             return Ok(1);
         }
+    // TODO: print filtered formatted output
+    } else if let Some(format) = matches.value_of("FORMAT") {
+        let report_format = match format {
+            "json" => ReportFormat::Json,
+            "prettyjson" => ReportFormat::JsonPretty,
+            _ => {
+                return Err(format_err!(
+                    "invalid output format: {}. Valid inputs: json, prettyjson",
+                    format
+                ))
+            }
+        };
+
+        todor.print_formatted_todos(&report_format)?;
     } else {
         todor.print_todos();
         if check && todor.num_todos() > 0 {

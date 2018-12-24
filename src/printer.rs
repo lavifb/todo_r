@@ -122,13 +122,14 @@ impl<'a> PrintTodos<'a> {
     }
 }
 
+// TODO: add more output formats
 pub enum ReportFormat {
     Json,
     JsonPretty,
 }
 
 /// Writes TODOs in `todo_files` to `out_buffer` in the format provided by `report_format`
-pub fn report_todos(
+pub(crate) fn report_todos(
     out_buffer: &mut Write,
     todo_files: &[TodoFile],
     report_format: &ReportFormat,

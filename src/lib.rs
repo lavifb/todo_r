@@ -3,7 +3,7 @@ mod configs;
 mod custom_tags;
 mod display;
 mod parser;
-mod printer;
+pub mod printer;
 mod remover;
 pub mod todo;
 
@@ -464,7 +464,7 @@ impl TodoR {
     }
 
     // TODO: add documentation
-    pub fn print_formatted_todos(&self, format: &str) -> Result<(), Error> {
+    pub fn print_formatted_todos(&self, format: &ReportFormat) -> Result<(), Error> {
         // lock stdout to print faster
         let stdout = io::stdout();
         let lock = stdout.lock();
@@ -477,20 +477,9 @@ impl TodoR {
     pub fn write_formatted_todos(
         &self,
         out_buffer: &mut impl Write,
-        out_format: &str,
+        out_format: &ReportFormat,
     ) -> Result<(), Error> {
-        let report_format = match out_format {
-            "json" => ReportFormat::Json,
-            "prettyjson" => ReportFormat::JsonPretty,
-            _ => {
-                return Err(TodoRError::InvalidOutputFormat {
-                    message: out_format.to_string(),
-                }
-                .into())
-            }
-        };
-
-        report_todos(out_buffer, &self.todo_files, &report_format)?;
+        report_todos(out_buffer, &self.todo_files, &out_format)?;
 
         Ok(())
     }

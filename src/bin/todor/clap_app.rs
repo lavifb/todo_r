@@ -3,7 +3,6 @@ use clap::{clap_app, App};
 pub fn build_cli() -> App<'static, 'static> {
     // TODO: add subcommand for just content so it can be piped
     clap_app!(todo_r =>
-        // TODO: add command to print using other formats
         (version: env!("CARGO_PKG_VERSION"))
         (author: "Lavi Blumberg <lavifb@gmail.com>")
         (about: "Lists TODO comments in code")
@@ -18,7 +17,8 @@ pub fn build_cli() -> App<'static, 'static> {
         (@arg IGNORE: -i --("ignore") +takes_value +multiple "Paths to be ignored.")
         (@arg VERBOSE: -v --("verbose") "Provide verbose output.")
         (@arg CHECK: --("check") "Exits nicely only if no TODO tags are found.")
-        (@arg DELETE_MODE: -d --("delete") "Interactive delete mode.")
+        (@arg FORMAT: -f --("format") conflicts_with[DELETE_MODE] +takes_value "Outputs TODOs in specified formats.")
+        (@arg DELETE_MODE: -d --("delete") conflicts_with[FORMAT] "Interactive delete mode.")
         (@subcommand init =>
             (about: "Creates example config file")
             (author: "Lavi Blumberg <lavifb@gmail.com>")
