@@ -61,6 +61,7 @@ impl<'a> PrintTodo<'a> {
 struct PrintTodoIter<'a> {
     inner: std::slice::Iter<'a, Todo>,
     file: &'a str,
+    pred: fn(&&Todo) -> bool,
 }
 
 impl<'a> PrintTodoIter<'a> {
@@ -72,9 +73,31 @@ impl<'a> PrintTodoIter<'a> {
             )
         })?;
 
+        let pred = |_t: &&Todo| true;
+
         Ok(PrintTodoIter {
             inner: tf.todos.iter(),
             file,
+            pred,
+        })
+    }
+
+    #[allow(dead_code)]
+    fn try_from_with_filter(
+        tf: &TodoFile,
+        pred: fn(&&Todo) -> bool,
+    ) -> Result<PrintTodoIter, Error> {
+        let file = tf.filepath.to_str().ok_or_else(|| {
+            format_err!(
+                "error converting filepath `{}` to unicode",
+                tf.filepath.display()
+            )
+        })?;
+
+        Ok(PrintTodoIter {
+            inner: tf.todos.iter(),
+            file,
+            pred,
         })
     }
 }
@@ -85,6 +108,7 @@ impl<'a> Iterator for PrintTodoIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         self.inner
             .next()
+            .filter(self.pred)
             .map(|t| PrintTodo::from_todo(t, self.file))
     }
 }
