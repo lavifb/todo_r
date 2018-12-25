@@ -168,6 +168,7 @@ impl<'a> PrintTodos<'a> {
 }
 
 // TODO: add more output formats
+/// Enum holding the different supported output formats.
 pub enum ReportFormat {
     Json,
     JsonPretty,

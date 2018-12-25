@@ -465,21 +465,46 @@ impl TodoR {
 
     // TODO: add documentation
     pub fn print_formatted_todos(&self, format: &ReportFormat) -> Result<(), Error> {
+        self.print_formatted_filtered_todos(format, &|_t| true)
+    }
+
+    // TODO: add documentation
+    pub fn print_formatted_filtered_todos<P>(
+        &self,
+        format: &ReportFormat,
+        pred: &P,
+    ) -> Result<(), Error>
+    where
+        P: Fn(&&Todo) -> bool,
+    {
         // lock stdout to print faster
         let stdout = io::stdout();
         let lock = stdout.lock();
         let mut out_buffer = io::BufWriter::new(lock);
 
-        self.write_formatted_todos(&mut out_buffer, format)
+        self.write_formatted_filtered_todos(&mut out_buffer, format, pred)
     }
 
     // TODO: add documentation
-    pub fn write_formatted_todos(
+    pub fn write_formatted_todos<P>(
         &self,
         out_buffer: &mut impl Write,
         out_format: &ReportFormat,
     ) -> Result<(), Error> {
-        report_todos(out_buffer, &self.todo_files, &out_format, &|_t| true)?;
+        self.write_formatted_filtered_todos(out_buffer, out_format, &|_t| true)
+    }
+
+    // TODO: add documentation
+    pub fn write_formatted_filtered_todos<P>(
+        &self,
+        out_buffer: &mut impl Write,
+        out_format: &ReportFormat,
+        pred: &P,
+    ) -> Result<(), Error>
+    where
+        P: Fn(&&Todo) -> bool,
+    {
+        report_todos(out_buffer, &self.todo_files, &out_format, pred)?;
 
         Ok(())
     }
