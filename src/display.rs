@@ -69,12 +69,12 @@ pub fn write_file_todos<P>(
     out_buffer: &mut Write,
     todo_file: &TodoFile,
     styles: &TodoRStyles,
-    pred: &P,
+    pred: Box<P>,
 ) -> Result<(), Error>
 where
     P: Fn(&&Todo) -> bool,
 {
-    let mut todos = todo_file.todos.iter().filter(pred).peekable();
+    let mut todos = todo_file.todos.iter().filter(*pred).peekable();
     if todos.peek().is_some() {
         writeln!(
             out_buffer,
