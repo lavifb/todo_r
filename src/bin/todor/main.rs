@@ -127,12 +127,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
     let check = matches.is_present("CHECK");
     if matches.is_present("DELETE_MODE") {
         run_delete(&mut todor)?;
-    } else if let Some(p) = pred {
-        todor.print_filtered_todos(&p);
-        if check && todor.num_filtered_todos(&p) > 0 {
-            return Ok(1);
-        }
-    // TODO: print filtered formatted output
     } else if let Some(format) = matches.value_of("FORMAT") {
         let report_format = match format {
             "json" => ReportFormat::Json,
@@ -145,11 +139,28 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
             }
         };
 
-        todor.print_formatted_todos(&report_format)?;
+        if let Some(p) = pred {
+            todor.print_formatted_filtered_todos(&report_format, &p)?;
+            if check && todor.num_filtered_todos(&p) > 0 {
+                return Ok(1);
+            }
+        } else {
+            todor.print_formatted_todos(&report_format)?;
+            if check && todor.num_todos() > 0 {
+                return Ok(1);
+            }
+        }
     } else {
-        todor.print_todos();
-        if check && todor.num_todos() > 0 {
-            return Ok(1);
+        if let Some(p) = pred {
+            todor.print_filtered_todos(&p);
+            if check && todor.num_filtered_todos(&p) > 0 {
+                return Ok(1);
+            }
+        } else {
+            todor.print_todos();
+            if check && todor.num_todos() > 0 {
+                return Ok(1);
+            }
         }
     }
 
