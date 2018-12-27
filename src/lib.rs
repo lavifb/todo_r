@@ -463,12 +463,12 @@ impl TodoR {
         Ok(())
     }
 
-    // TODO: add documentation
+    /// Prints formatted TODOs to stdout.
     pub fn print_formatted_todos(&self, format: &ReportFormat) -> Result<(), Error> {
         self.print_formatted_filtered_todos(format, &|_t| true)
     }
 
-    // TODO: add documentation
+    /// Prints formatted TODOs to stdout. Only prints TODOs that fulfill pred.
     pub fn print_formatted_filtered_todos<P>(
         &self,
         format: &ReportFormat,
@@ -485,7 +485,7 @@ impl TodoR {
         self.write_formatted_filtered_todos(&mut out_buffer, format, pred)
     }
 
-    // TODO: add documentation
+    /// Writes formatted TODOs to out_buffer.
     pub fn write_formatted_todos<P>(
         &self,
         out_buffer: &mut impl Write,
@@ -494,7 +494,7 @@ impl TodoR {
         self.write_formatted_filtered_todos(out_buffer, out_format, &|_t| true)
     }
 
-    // TODO: add documentation
+    /// Writes formatted TODOs to out_buffer. Only writes TODOs that fulfill pred.
     pub fn write_formatted_filtered_todos<P>(
         &self,
         out_buffer: &mut impl Write,
