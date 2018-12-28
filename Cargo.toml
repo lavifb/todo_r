@@ -32,7 +32,7 @@ globset = "0.4"
 dirs = "1"
 
 [dev-dependencies]
-criterion = "0.2"
+criterion = "0.2.6"
 escargot = "0.3"
 assert_cmd = "0.10"
 
