@@ -48,13 +48,15 @@ Comments 1 and 3 are found with `todor -u user1`.
 ## Config files
 Create a .todor file in the root of your workspace with `todor init`.
 
-.todor files can also used as a config file to set custom tags, comments types, output styles, etc.
+`.todor` files can also used as a config file to set custom tags, comments types, output styles, etc.
 
 Todo_r also supports a global config file at `~/.config/todor/todor.conf` for Mac/Linux and `~\AppData\Roaming\lavifb\todor\todor.conf` on Windows.
 
 <!-- TODO: document config file features -->
 
-## Language support
+## Default Language Support
+These common languages are supported by default. 
+More support can be added using config files above.
 
 | Filetype    | Extensions          | Comment Types |
 |-------------|---------------------|---------------|
@@ -84,6 +86,7 @@ Todo_r also supports a global config file at `~/.config/todor/todor.conf` for Ma
 |TypeScript   |`.ts`,`.tsx`         |`//`,`/* */`   |
 |YAML         |`.yaml`,`.yml`       |`#`            |
 
+If there are any more languages/extensions that you feel should supported by default, feel free to submit an issue/pull request.
 
 ---
 written by Lavi Blumberg
