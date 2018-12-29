@@ -67,6 +67,36 @@ This config lists the keywords that are tracked by `todor`. The list items are c
   }
 ]
 ```
+Each item in the list `"comments"` has two parts:
+1. `"ext"` or `"exts"` defines the extensions to which to apply the defined comment type
+2. `"types"` is a list of the types of comments that occur in these extensions
 
+Comments of two types are supported: single-line and block.
 
+#### Single-Line Comments
+Single-line comments have only a prefix, so
+```json
+{
+  "single": "//"
+}
+```
+would match comments like
+```rust
+// TODO: item
+```
+
+#### Block Comments
+Block comments have both a prefix and a suffix, so
+```json
+{
+  "prefix": "/*",
+  "suffix": "*/"
+}
+```
+would match items like
+```rust
+/* TODO: item */
+```
+
+---
 Note that `src/default_config.json` uses the config `"default_comments"` so that adding new comment types only overrides the comment types you want to override.
