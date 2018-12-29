@@ -80,6 +80,7 @@ fn parse_style_color(color: &str) -> Result<Style, Error> {
     Ok(colored_style)
 }
 
+// TODO: modifiers for Fixed() colors
 /// Parses modifier str to modify a Style and return the result
 fn parse_style_modifier(unmodified_style: Style, modifier: &str) -> Result<Style, Error> {
     let style = match modifier.to_uppercase().as_str() {

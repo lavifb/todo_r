@@ -28,10 +28,24 @@ This config lists the keywords that are tracked by `todor`. The list items are c
 }
 ```
 
+ANSI printing styles for raw output of `todor`. Each item except `"tags"` takes either a string that is an ANSI color or a number 0-255 corresponding to the desired ANSI color. ANSI modifiers like bold, italic, and underline can also be added by prepending `b_`, `i_`, or `u_`.
+
+`"tags"` lets you define specific ANSI styles on a tag by tag basis. So if you want `FIXME` comments to be red and `MAYB` comments to be magenta, you can set the config to
+```json
+"styles": {
+  "tags": {
+      "fixme": "red",
+      "mayb": "magenta"
+  }
+}
+```
+
 ### Default Extension
 ```json
 "default_ext": "sh"
 ```
+
+The default extension fallback that `todor` uses if the file extension is not supported. This extension has to be defined by `"comments"` below or by `"default_comments"`.
 
 ### Comment Types
 ```json
