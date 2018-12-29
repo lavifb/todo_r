@@ -25,5 +25,48 @@ This config lists the keywords that are tracked by `todor`. The list items are c
   "content": "cyan",
   "line_number": 8,
   "user": 8
-},
+}
 ```
+
+### Default Extension
+```json
+"default_ext": "sh"
+```
+
+### Comment Types
+```json
+"comments": [
+    {
+      "exts": [
+        "c",
+        "h",
+        "cpp",
+        "rust",
+      ],
+      "types": [
+        {
+          "single": "//"
+        },
+        {
+          "prefix": "/*",
+          "suffix": "*/"
+        }
+      ]
+  },
+  {
+    "ext": "py",
+    "types": [
+      {
+        "single": "#"
+      },
+      {
+        "prefix": "\"\"\"",
+        "suffix": "\"\"\""
+      }
+    ]
+  }
+]
+```
+
+
+Note that `src/default_config.json` uses the config `"default_comments"` so that adding new comment types only overrides the comment types you want to override.
