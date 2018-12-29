@@ -41,12 +41,12 @@ Comments 1 and 3 are found with `todor -u user1`.
 - Custom tags can be searched using the `-t` flag.
 - Interactive mode for deleting comments is launched using the `-d` flag.
 - If files are not provided for input, todo_r searches the entire git repository.
-    - .gitignore files are respected
-    - More ignores can be added using .todorignore files that use the same syntax
-    - If you are not using git, you can instead use a .todor file in the root directory
+    - `.gitignore` files are respected
+    - More ignores can be added using `.todorignore` files that use the same syntax
+    - If you are not using git, you can instead use a `.todor` file in the root directory
 
 ## Config files
-Create a .todor file in the root of your workspace with `todor init`.
+Create a `.todor` file in the root of your workspace with `todor init`.
 
 `.todor` files can also used as a config file to set custom tags, comments types, output styles, etc.
 
@@ -55,7 +55,7 @@ Todo_r also supports a global config file at `~/.config/todor/todor.conf` for Ma
 <!-- TODO: document config file features -->
 
 ## Default Language Support
-These common languages are supported by default. 
+These common languages are supported by default.
 More support can be added using config files above.
 
 | Filetype    | Extensions          | Comment Types |
