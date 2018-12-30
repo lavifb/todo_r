@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 	- Pretty JSON
 
 ### Changed
-- ignore paths are now entired handled by todor bin
+- ignore paths are now entirely handled by `todor` bin
 
 ### Deprecated
 - `ignore` config option
