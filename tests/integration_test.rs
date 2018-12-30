@@ -375,3 +375,46 @@ fn select_users2() {
         )
         .stderr("");
 }
+
+#[test]
+fn json() {
+    todor()
+        .current_dir("tests/inputs")
+        .arg("test1.rs")
+        .arg("-f")
+        .arg("json")
+        .assert()
+        .success()
+        .stdout(r#"[{"file":"test1.rs","kind":"TODO","line":2,"text":"item","users":[]}]"#)
+        .stderr("");
+}
+
+#[test]
+fn json_check1() {
+    todor()
+        .current_dir("tests/inputs")
+        .arg("test1.rs")
+        .arg("-f")
+        .arg("json")
+        .arg("--check")
+        .assert()
+        .failure()
+        .stdout(r#"[{"file":"test1.rs","kind":"TODO","line":2,"text":"item","users":[]}]"#)
+        .stderr("");
+}
+
+#[test]
+fn json_check2() {
+    todor()
+        .current_dir("tests/inputs")
+        .arg("test1.rs")
+        .arg("-f")
+        .arg("json")
+        .arg("-T")
+        .arg("TOO")
+        .arg("--check")
+        .assert()
+        .success()
+        .stdout("[]")
+        .stderr("");
+}
