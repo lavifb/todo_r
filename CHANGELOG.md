@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - completions for bash, zsh, fish, and powershell
 - formula for `brew` package manager
 - global config support
-- formatted output formats usinf `--format` flag
+- formatted output formats using `--format` flag
 	- JSON
 	- Pretty JSON
 
