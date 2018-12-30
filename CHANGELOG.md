@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ignore` config option
 	- use a `.todorignore` file or `-i` flag to ignore paths
 
+### Fixed
+- ANSI style support for numbered ANSI colors
+
 
 ## v0.5.1 (2018-12-19)
 ### Fixed
