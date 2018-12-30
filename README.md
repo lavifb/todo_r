@@ -52,7 +52,7 @@ Create a `.todor` file in the root of your workspace with `todor init`.
 
 Todo_r also supports a global config file at `~/.config/todor/todor.conf` for Mac/Linux and `~\AppData\Roaming\lavifb\todor\todor.conf` on Windows.
 
-<!-- TODO: document config file features -->
+A deeper explanation of config files can be found at [config.md](https://github.com/lavifb/todo_r/blob/master/config.md).
 
 ## Default Language Support
 These common languages are supported by default.
