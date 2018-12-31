@@ -156,6 +156,8 @@ impl<'a> PrintTodos<'a> {
         Ok(PrintTodos { ptodos })
     }
 
+    // TODO: write directly to buffer instead of String
+
     /// Returns String of TODOs serialized in the JSON format
     fn to_json(&self) -> Result<String, Error> {
         Ok(serde_json::to_string(&self.ptodos)?)
@@ -165,6 +167,11 @@ impl<'a> PrintTodos<'a> {
     fn to_json_pretty(&self) -> Result<String, Error> {
         Ok(serde_json::to_string_pretty(&self.ptodos)?)
     }
+
+    // TODO: markdown serealize
+    // fn to_markdown(&self) -> Result<String, Error> {
+    //     Ok(String::from(""))
+    // }
 }
 
 // TODO: add more output formats
