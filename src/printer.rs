@@ -156,16 +156,14 @@ impl<'a> PrintTodos<'a> {
         Ok(PrintTodos { ptodos })
     }
 
-    // TODO: write directly to buffer instead of String
-
-    /// Returns String of TODOs serialized in the JSON format
-    fn to_json(&self) -> Result<String, Error> {
-        Ok(serde_json::to_string(&self.ptodos)?)
+    /// Writes String of TODOs serialized in the JSON format
+    fn write_json(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
+        Ok(serde_json::to_writer(out_buffer, &self.ptodos)?)
     }
 
-    /// Returns String of TODOs serialized in a pretty JSON format
-    fn to_json_pretty(&self) -> Result<String, Error> {
-        Ok(serde_json::to_string_pretty(&self.ptodos)?)
+    /// Writes String of TODOs serialized in a pretty JSON format
+    fn write_json_pretty(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
+        Ok(serde_json::to_writer_pretty(out_buffer, &self.ptodos)?)
     }
 
     // TODO: markdown serealize
@@ -183,7 +181,7 @@ pub enum ReportFormat {
 
 /// Writes TODOs in `todo_files` to `out_buffer` in the format provided by `report_format`
 pub(crate) fn report_todos<P>(
-    out_buffer: &mut Write,
+    out_buffer: &mut impl Write,
     todo_files: &[TodoFile],
     report_format: &ReportFormat,
     pred: &P,
@@ -191,13 +189,13 @@ pub(crate) fn report_todos<P>(
 where
     P: Fn(&&Todo) -> bool,
 {
-    let report = match report_format {
-        ReportFormat::Json => PrintTodos::to_json,
-        ReportFormat::JsonPretty => PrintTodos::to_json_pretty,
+    let formatted_write = match report_format {
+        ReportFormat::Json => PrintTodos::write_json,
+        ReportFormat::JsonPretty => PrintTodos::write_json_pretty,
     };
 
     let ptodos = PrintTodos::from_filtered_todo_files(todo_files, pred)?;
-    write!(out_buffer, "{}", report(&ptodos)?)?;
+    formatted_write(&ptodos, out_buffer)?;
 
     Ok(())
 }
@@ -206,6 +204,7 @@ where
 mod test {
     use super::*;
     use crate::todo::Todo;
+    use std::io::Cursor;
 
     #[test]
     fn json_todo() {
@@ -256,8 +255,12 @@ mod test {
         tf.todos.push(Todo::new(5, "TODO", "item2"));
         let ptodo = PrintTodos::from_todo_file(&tf).unwrap();
 
+        let out_vec: Vec<u8> = Vec::new();
+        let mut out_buf = Cursor::new(out_vec);
+        ptodo.write_json(&mut out_buf).unwrap();
+
         assert_eq!(
-            ptodo.to_json().unwrap(),
+            &String::from_utf8(out_buf.into_inner()).unwrap(),
             r#"[{"file":"tests/test.rs","kind":"TODO","line":2,"text":"item1","users":[]},{"file":"tests/test.rs","kind":"TODO","line":5,"text":"item2","users":[]}]"#,
         );
     }
@@ -272,8 +275,12 @@ mod test {
         let tfs = [tf1, tf2];
         let ptodo = PrintTodos::from_todo_files(&tfs).unwrap();
 
+        let out_vec: Vec<u8> = Vec::new();
+        let mut out_buf = Cursor::new(out_vec);
+        ptodo.write_json(&mut out_buf).unwrap();
+
         assert_eq!(
-            ptodo.to_json().unwrap(),
+            &String::from_utf8(out_buf.into_inner()).unwrap(),
             r#"[{"file":"test1.rs","kind":"TODO","line":2,"text":"item1","users":[]},{"file":"test2.rs","kind":"TODO","line":5,"text":"item2","users":[]}]"#,
         );
     }
