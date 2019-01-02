@@ -167,9 +167,9 @@ impl<'a> PrintTodos<'a> {
     }
 
     // TODO: markdown serealize
-    // fn to_markdown(&self) -> Result<String, Error> {
-    //     Ok(String::from(""))
-    // }
+    fn write_markdown(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
+        Ok(())
+    }
 }
 
 // TODO: add more output formats
@@ -177,6 +177,7 @@ impl<'a> PrintTodos<'a> {
 pub enum ReportFormat {
     Json,
     JsonPretty,
+    Markdown,
 }
 
 /// Writes TODOs in `todo_files` to `out_buffer` in the format provided by `report_format`
@@ -192,6 +193,7 @@ where
     let formatted_write = match report_format {
         ReportFormat::Json => PrintTodos::write_json,
         ReportFormat::JsonPretty => PrintTodos::write_json_pretty,
+        ReportFormat::Markdown => PrintTodos::write_markdown,
     };
 
     let ptodos = PrintTodos::from_filtered_todo_files(todo_files, pred)?;
