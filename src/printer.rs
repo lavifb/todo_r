@@ -2,8 +2,10 @@
 
 use crate::todo::{Todo, TodoFile};
 use failure::{format_err, Error};
+use fnv::FnvHashMap;
 use serde_derive::Serialize;
 use serde_json;
+use std::fmt::Write as StringWrite;
 use std::io::Write;
 use std::path::Path;
 
@@ -166,8 +168,31 @@ impl PrintTodos<'_> {
         Ok(serde_json::to_writer_pretty(out_buffer, &self.ptodos)?)
     }
 
-    // TODO: markdown serealize
+    /// Writes String of TODOs serialized in a markdown format
     fn write_markdown(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
+        let mut tag_tables: FnvHashMap<String, String> = FnvHashMap::default();
+
+        for ptodo in self.ptodos.iter() {
+            let tag = ptodo.kind.to_string();
+
+            let table_string = tag_tables.entry(tag).or_insert_with(|| {
+                format!(
+                    "### {}s\n| Filename | line | {} |\n|:---|:---:|:---|",
+                    ptodo.kind, ptodo.kind,
+                )
+            });
+
+            write!(
+                table_string,
+                "\n| {} | {} | {} |",
+                ptodo.file, ptodo.line, ptodo.text
+            )?;
+        }
+
+        for table_strings in tag_tables.values() {
+            write!(out_buffer, "{}", table_strings)?;
+        }
+
         Ok(())
     }
 }
