@@ -69,7 +69,7 @@ type TodoIter<'a> = std::slice::Iter<'a, Todo>;
 type TodoFilter<'a, P> = std::iter::Filter<TodoIter<'a>, &'a P>;
 
 impl PrintTodoIter<'_, TodoIter<'_>> {
-    fn try_from<'p>(tf: &'p TodoFile) -> Result<PrintTodoIter<'p, TodoIter<'p>>, Error> {
+    fn try_from(tf: &TodoFile) -> Result<PrintTodoIter<TodoIter>, Error> {
         let file = tf.filepath.to_str().ok_or_else(|| {
             format_err!(
                 "error converting filepath `{}` to unicode",
@@ -160,12 +160,14 @@ impl PrintTodos<'_> {
 
     /// Writes String of TODOs serialized in the JSON format
     fn write_json(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
-        Ok(serde_json::to_writer(out_buffer, &self.ptodos)?)
+        serde_json::to_writer(out_buffer, &self.ptodos)?;
+        Ok(())
     }
 
     /// Writes String of TODOs serialized in a pretty JSON format
     fn write_json_pretty(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
-        Ok(serde_json::to_writer_pretty(out_buffer, &self.ptodos)?)
+        serde_json::to_writer_pretty(out_buffer, &self.ptodos)?;
+        Ok(())
     }
 
     /// Writes String of TODOs serialized in a markdown format
@@ -182,15 +184,15 @@ impl PrintTodos<'_> {
                 )
             });
 
-            write!(
+            writeln!(
                 table_string,
-                "| {} | {} | {} |\n",
+                "| {} | {} | {} |",
                 ptodo.file, ptodo.line, ptodo.text
             )?;
         }
 
         for table_strings in tag_tables.values() {
-            write!(out_buffer, "{}\n", table_strings)?;
+            writeln!(out_buffer, "{}", table_strings)?;
         }
 
         Ok(())
