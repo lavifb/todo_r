@@ -16,7 +16,7 @@ struct PrintTodo<'a> {
     users: Vec<&'a str>,
 }
 
-impl<'a> PrintTodo<'a> {
+impl PrintTodo<'_> {
     #[allow(dead_code)]
     fn from_todo_with_path<'p>(todo: &'p Todo, filepath: &'p Path) -> Result<PrintTodo<'p>, Error> {
         let file = filepath.to_str().ok_or_else(|| {
@@ -66,7 +66,7 @@ struct PrintTodoIter<'a, I> {
 type TodoIter<'a> = std::slice::Iter<'a, Todo>;
 type TodoFilter<'a, P> = std::iter::Filter<TodoIter<'a>, &'a P>;
 
-impl PrintTodoIter<'static, TodoIter<'_>> {
+impl PrintTodoIter<'_, TodoIter<'_>> {
     fn try_from<'p>(tf: &'p TodoFile) -> Result<PrintTodoIter<'p, TodoIter<'p>>, Error> {
         let file = tf.filepath.to_str().ok_or_else(|| {
             format_err!(
@@ -82,7 +82,7 @@ impl PrintTodoIter<'static, TodoIter<'_>> {
     }
 }
 
-impl<P> PrintTodoIter<'static, TodoFilter<'_, P>>
+impl<P> PrintTodoIter<'_, TodoFilter<'_, P>>
 where
     P: Fn(&&Todo) -> bool,
 {
@@ -123,7 +123,7 @@ struct PrintTodos<'a> {
     ptodos: Vec<PrintTodo<'a>>,
 }
 
-impl<'a> PrintTodos<'a> {
+impl PrintTodos<'_> {
     #[allow(dead_code)]
     fn from_todo_files(todo_files: &[TodoFile]) -> Result<PrintTodos, Error> {
         let mut ptodos = Vec::new();
