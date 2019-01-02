@@ -131,12 +131,8 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
         let report_format = match format {
             "json" => ReportFormat::Json,
             "prettyjson" => ReportFormat::JsonPretty,
-            _ => {
-                return Err(format_err!(
-                    "invalid output format: {}. Valid inputs: json, prettyjson",
-                    format
-                ))
-            }
+            "markdown" => ReportFormat::Markdown,
+            _ => return Err(format_err!("invalid output format: {}.", format)),
         };
 
         if let Some(p) = pred {

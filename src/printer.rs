@@ -177,20 +177,20 @@ impl PrintTodos<'_> {
 
             let table_string = tag_tables.entry(tag).or_insert_with(|| {
                 format!(
-                    "### {}s\n| Filename | line | {} |\n|:---|:---:|:---|",
+                    "### {}s\n| Filename | line | {} |\n|:---|:---:|:---|\n",
                     ptodo.kind, ptodo.kind,
                 )
             });
 
             write!(
                 table_string,
-                "\n| {} | {} | {} |",
+                "| {} | {} | {} |\n",
                 ptodo.file, ptodo.line, ptodo.text
             )?;
         }
 
         for table_strings in tag_tables.values() {
-            write!(out_buffer, "{}", table_strings)?;
+            write!(out_buffer, "{}\n", table_strings)?;
         }
 
         Ok(())
