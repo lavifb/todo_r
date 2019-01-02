@@ -59,6 +59,10 @@ impl StyleConfig {
 
 /// Parses color str to get a color Style
 fn parse_style_color(color: &str) -> Result<Style, Error> {
+    if let Ok(n) = color.parse::<u8>() {
+        return Ok(Style::from(Color::Fixed(n)));
+    }
+
     let colored_style = match color.to_uppercase().as_str() {
         "BLACK" => Style::from(Color::Black),
         "RED" => Style::from(Color::Red),
@@ -80,6 +84,7 @@ fn parse_style_color(color: &str) -> Result<Style, Error> {
     Ok(colored_style)
 }
 
+// TODO: modifiers for Fixed() colors
 /// Parses modifier str to modify a Style and return the result
 fn parse_style_modifier(unmodified_style: Style, modifier: &str) -> Result<Style, Error> {
     let style = match modifier.to_uppercase().as_str() {

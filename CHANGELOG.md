@@ -1,4 +1,4 @@
-# todor Changelog
+# Todo_r Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -17,16 +17,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - completions for bash, zsh, fish, and powershell
 - formula for `brew` package manager
 - global config support
-- formatted output formats usinf `--format` flag
+- formatted output formats using `-f` flag
 	- JSON
 	- Pretty JSON
+	- Markdown
 
 ### Changed
-- ignore paths are now entired handled by todor bin
+- ignore paths are now entirely handled by `todor` bin
 
 ### Deprecated
 - `ignore` config option
 	- use a `.todorignore` file or `-i` flag to ignore paths
+
+### Fixed
+- ANSI style support for numbered ANSI colors
 
 
 ## v0.5.1 (2018-12-19)
