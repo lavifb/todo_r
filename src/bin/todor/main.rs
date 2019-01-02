@@ -79,12 +79,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
         }
     }
 
-    let mut pred = None;
-    if let Some(users_iter) = matches.values_of("USER") {
-        let users: Vec<&str> = users_iter.collect();
-        pred = Some(move |t: &&Todo| users.iter().any(|u| t.tags_user(*u)));
-    }
-
     let mut todor;
     match matches.values_of("FILE") {
         Some(files) => {
@@ -124,6 +118,12 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
         }
     }
 
+    if let Some(users_iter) = matches.values_of("USER") {
+        let users: Vec<&str> = users_iter.collect();
+        let pred = move |t: &&Todo| users.iter().any(|u| t.tags_user(*u));
+        todor.set_todo_filter(pred);
+    }
+
     let check = matches.is_present("CHECK");
     if matches.is_present("DELETE_MODE") {
         run_delete(&mut todor)?;
@@ -139,16 +139,9 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
             }
         };
 
-        if let Some(p) = pred {
-            todor.print_formatted_filtered_todos(&report_format, &p)?;
-            if check && todor.num_filtered_todos(&p) > 0 {
-                return Ok(1);
-            }
-        } else {
-            todor.print_formatted_todos(&report_format)?;
-            if check && todor.num_todos() > 0 {
-                return Ok(1);
-            }
+        todor.print_formatted_todos(&report_format)?;
+        if check && todor.num_todos() > 0 {
+            return Ok(1);
         }
     } else {
         todor.print_todos();

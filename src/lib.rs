@@ -263,7 +263,7 @@ pub struct TodoR<'a> {
     todo_files: Vec<TodoFile>,
     ext_to_regexs: FnvHashMap<String, Vec<Regex>>,
     // TODO: set filter for todor
-    filter: Option<Box<'a + Fn(&&Todo) -> bool>>,
+    filter: Box<'a + Fn(&&Todo) -> bool>,
 }
 
 impl<'a> Default for TodoR<'a> {
@@ -294,13 +294,13 @@ impl<'a> TodoR<'a> {
             config,
             todo_files: Vec::new(),
             ext_to_regexs: FnvHashMap::default(),
-            filter: None,
+            filter: Box::new(|_t| true),
         }
     }
 
     /// Sets TodoR to only ouput TODOs that satisfy pred
     pub fn set_todo_filter<P: 'a + Fn(&&Todo) -> bool>(&mut self, pred: P) {
-        self.filter = Some(Box::new(pred));
+        self.filter = Box::new(pred);
     }
 
     /// Returns the number of files currently tracked by TodoR
@@ -308,9 +308,18 @@ impl<'a> TodoR<'a> {
         self.todo_files.len()
     }
 
+    /// Returns the number of TODOs currently tracked by TodoR including ones skipped by filter.
+    pub fn num_all_todos(&self) -> usize {
+        self.todo_files.iter().fold(0, |s, tf| s + tf.todos.len())
+    }
+
     /// Returns the number of TODOs currently tracked by TodoR
     pub fn num_todos(&self) -> usize {
-        self.todo_files.iter().fold(0, |s, tf| s + tf.todos.len())
+        let pred = &|t: &&Todo| (&self.filter)(t);
+
+        self.todo_files
+            .iter()
+            .fold(0, |s, tf| s + tf.todos.iter().filter(pred).count())
     }
 
     /// Returns the number of TODOs currently tracked by TodoR
@@ -426,7 +435,7 @@ impl<'a> TodoR<'a> {
 
     /// Writes TODOs to out_buffer.
     pub fn write_todos(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
-        let pred = self.filter.unwrap_or_else(|| Box::new(|_t| true));
+        let pred = &|t: &&Todo| (&self.filter)(t);
 
         for todo_file in &self.todo_files {
             write_file_todos(out_buffer, &todo_file, &self.config.styles, pred)?;
@@ -435,35 +444,6 @@ impl<'a> TodoR<'a> {
         Ok(())
     }
 
-    /// Prints TODOs to stdout. Only prints TODOs that fulfill pred.
-    // pub fn print_filtered_todos<P>(&self, pred: P)
-    // where
-    //     P: Fn(&&Todo) -> bool,
-    // {
-    //     // lock stdout to print faster
-    //     let stdout = io::stdout();
-    //     let lock = stdout.lock();
-    //     let mut out_buffer = io::BufWriter::new(lock);
-
-    //     self.write_filtered_todos(&mut out_buffer, pred).unwrap();
-    // }
-
-    /// Writes TODOs to out_buffer. Only writes TODOs that fulfill pred.
-    // pub fn write_filtered_todos<P>(
-    //     &self,
-    //     out_buffer: &mut impl Write,
-    //     pred: P,
-    // ) -> Result<(), Error>
-    // where
-    //     P: Fn(&&Todo) -> bool,
-    // {
-    //     for todo_file in &self.todo_files {
-    //         write_file_todos(out_buffer, &todo_file, &self.config.styles, pred)?;
-    //     }
-
-    //     Ok(())
-    // }
-
     /// Writes TODOs to out_buffer.
     // MAYB: change self.todo_files to Hashmap for easier finding
     pub fn write_todos_from_file(
@@ -471,7 +451,7 @@ impl<'a> TodoR<'a> {
         filepath: &Path,
         out_buffer: &mut impl Write,
     ) -> Result<(), Error> {
-        let pred = self.filter.unwrap_or_else(|| Box::new(|_t| true));
+        let pred = &|t: &&Todo| (&self.filter)(t);
 
         for todo_file in &self.todo_files {
             if todo_file.filepath == filepath {
