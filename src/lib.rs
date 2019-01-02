@@ -257,12 +257,10 @@ struct TodoRConfig {
 }
 
 /// Parser for finding TODOs in comments and storing them on a per-file basis.
-// #[derive(Debug, Clone)]
 pub struct TodoR<'a> {
     config: TodoRConfig,
     todo_files: Vec<TodoFile>,
     ext_to_regexs: FnvHashMap<String, Vec<Regex>>,
-    // TODO: set filter for todor
     filter: Box<'a + Fn(&&Todo) -> bool>,
 }
 
@@ -298,8 +296,9 @@ impl<'a> TodoR<'a> {
         }
     }
 
-    /// Sets TodoR to only ouput TODOs that satisfy pred
+    /// Sets TodoR to only output TODOs that satisfy pred
     pub fn set_todo_filter<P: 'a + Fn(&&Todo) -> bool>(&mut self, pred: P) {
+        debug!("setting filter for TODO output");
         self.filter = Box::new(pred);
     }
 
@@ -398,6 +397,7 @@ impl<'a> TodoR<'a> {
 
         let file = File::open(filepath)?;
         let mut file_reader = BufReader::new(file);
+        // TODO: use filter when parsing TODOs
         todo_file.set_todos(parse_content(&mut file_reader, &parser_regexs)?);
 
         debug!(

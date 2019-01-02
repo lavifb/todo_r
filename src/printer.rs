@@ -199,7 +199,7 @@ impl PrintTodos<'_> {
     }
 }
 
-// TODO: add more output formats
+// MAYB: add more output formats
 /// Enum holding the different supported output formats.
 pub enum ReportFormat {
     Json,

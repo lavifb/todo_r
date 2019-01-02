@@ -124,7 +124,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
         todor.set_todo_filter(pred);
     }
 
-    let check = matches.is_present("CHECK");
     if matches.is_present("DELETE_MODE") {
         run_delete(&mut todor)?;
     } else if let Some(format) = matches.value_of("FORMAT") {
@@ -136,14 +135,12 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
         };
 
         todor.print_formatted_todos(&report_format)?;
-        if check && todor.num_todos() > 0 {
-            return Ok(1);
-        }
     } else {
         todor.print_todos();
-        if check && todor.num_todos() > 0 {
-            return Ok(1);
-        }
+    }
+
+    if matches.is_present("CHECK") && todor.num_todos() > 0 {
+        return Ok(1);
     }
 
     Ok(0)
