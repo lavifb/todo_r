@@ -1,5 +1,5 @@
 class Todor < Formula
-  version '0.5.1'
+  version '0.6.0'
   desc "Find all your TODO notes with one command!"
   homepage "https://github.com/lavifb/todo_r"
 
