@@ -16,8 +16,8 @@ class Todor < Formula
   def install
     bin.install "todor"
 
-    # bash_completion.install "complete/todor.bash"
-    # fish_completion.install "complete/todor.fish"
-    # zsh_completion.install "complete/_todor"
+    bash_completion.install "complete/todor.bash"
+    fish_completion.install "complete/todor.fish"
+    zsh_completion.install "complete/_todor"
   end
 end
