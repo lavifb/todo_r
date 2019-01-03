@@ -11,6 +11,9 @@ readme = "README.md"
 exclude = [
     "benches/*",
     "tests/*",
+    "ci/*",
+    "HomebrewFormula/*",
+    ".travis.yml",
 ]
 
 [dependencies]
