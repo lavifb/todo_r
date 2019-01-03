@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Fixed -->
 <!-- ### Security -->
 
-## [Unreleased]
+## v0.6.0 (2019-01-03)
 ### Added
 - completions for bash, zsh, fish, and powershell
 - formula for `brew` package manager
@@ -69,10 +69,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Windows]: path walker when files are not specified
 
 
-## v0.4.1 (2018-12-8)
+## v0.4.1 (2018-12-08)
 ### Added
 - releases on Github using Travis CI
 
 
-## v0.4 (2018-12-7)
+## v0.4 (2018-12-07)
 - Initial release
