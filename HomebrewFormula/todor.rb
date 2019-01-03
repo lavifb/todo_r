@@ -5,10 +5,10 @@ class Todor < Formula
 
   if OS.mac?
       url "https://github.com/lavifb/todo_r/releases/download/v#{version}/todor-v#{version}-x86_64-apple-darwin.tar.gz"
-      sha256 "f30862cecb73950a117ca47f9ca6bfe6978bfcc4084228606d6e49627967a1b6"
+      sha256 "3a43293c8576f2ac612fef2f28582f2cc93d7b473dab9cb03cb981a8f3fbc87e"
   elsif OS.linux?
       url "https://github.com/lavifb/todo_r/releases/download/v#{version}/todor-v#{version}-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "b9447ddc722ca97463c100a40932f2a761078e35eb1b6d86eea318bd5900af5f"
+      sha256 "80bf5e63811432cb29927bc3b9051a4123601e0fb749a0382829d73c55650c55"
   end
 
   conflicts_with "todor"
