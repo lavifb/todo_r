@@ -62,18 +62,13 @@ impl TodoRStyles {
 }
 
 /// Writes file path and a list of Todos to out_buffer.
-/// Predicate `pred` is used to determine if a `Todo` should be printed.
 ///
 /// If no there are no `Todo`s that satisfy `pred` in `todo_file`, nothing is printed.
 pub fn write_file_todos(
-    out_buffer: &mut Write,
+    out_buffer: &mut impl Write,
     todo_file: &TodoFile,
     styles: &TodoRStyles,
-    // pred: &P,
-) -> Result<(), Error>
-// where
-//     P: Fn(&&Todo) -> bool,
-{
+) -> Result<(), Error> {
     let mut todos = todo_file.todos.iter().peekable();
     if todos.peek().is_some() {
         writeln!(
@@ -89,7 +84,7 @@ pub fn write_file_todos(
         }
     } else {
         debug!(
-            "No filtered TODOs found in `{}`",
+            "No TODOs found in `{}`",
             todo_file.filepath.to_string_lossy()
         )
     }
