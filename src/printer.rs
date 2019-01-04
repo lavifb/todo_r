@@ -212,11 +212,7 @@ pub(crate) fn report_todos(
     out_buffer: &mut impl Write,
     todo_files: &[TodoFile],
     report_format: &ReportFormat,
-    // pred: &P,
-) -> Result<(), Error>
-// where
-//     P: Fn(&&Todo) -> bool,
-{
+) -> Result<(), Error> {
     let formatted_write = match report_format {
         ReportFormat::Json => PrintTodos::write_json,
         ReportFormat::JsonPretty => PrintTodos::write_json_pretty,
