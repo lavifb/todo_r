@@ -126,7 +126,6 @@ struct PrintTodos<'a> {
 }
 
 impl PrintTodos<'_> {
-    #[allow(dead_code)]
     fn from_todo_files(todo_files: &[TodoFile]) -> Result<PrintTodos, Error> {
         let mut ptodos = Vec::new();
         for tf in todo_files {
@@ -136,6 +135,7 @@ impl PrintTodos<'_> {
         Ok(PrintTodos { ptodos })
     }
 
+    #[allow(dead_code)]
     fn from_filtered_todo_files<'p, P>(
         todo_files: &'p [TodoFile],
         pred: &'p P,
@@ -208,14 +208,14 @@ pub enum ReportFormat {
 }
 
 /// Writes TODOs in `todo_files` to `out_buffer` in the format provided by `report_format`
-pub(crate) fn report_todos<P>(
+pub(crate) fn report_todos(
     out_buffer: &mut impl Write,
     todo_files: &[TodoFile],
     report_format: &ReportFormat,
-    pred: &P,
+    // pred: &P,
 ) -> Result<(), Error>
-where
-    P: Fn(&&Todo) -> bool,
+// where
+//     P: Fn(&&Todo) -> bool,
 {
     let formatted_write = match report_format {
         ReportFormat::Json => PrintTodos::write_json,
@@ -223,7 +223,7 @@ where
         ReportFormat::Markdown => PrintTodos::write_markdown,
     };
 
-    let ptodos = PrintTodos::from_filtered_todo_files(todo_files, pred)?;
+    let ptodos = PrintTodos::from_todo_files(todo_files)?;
     formatted_write(&ptodos, out_buffer)?;
 
     Ok(())

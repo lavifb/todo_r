@@ -108,7 +108,7 @@ impl TodoRBuilder {
     }
 
     /// Consumes self and builds TodoR.
-    pub fn build<'a>(self) -> Result<TodoR<'a>, Error> {
+    pub fn build(self) -> Result<TodoR, Error> {
         let mut config_struct: TodoRConfigFileSerial =
             self.inner_config
                 .try_into()
@@ -257,26 +257,25 @@ struct TodoRConfig {
 }
 
 /// Parser for finding TODOs in comments and storing them on a per-file basis.
-pub struct TodoR<'a> {
+pub struct TodoR {
     config: TodoRConfig,
     todo_files: Vec<TodoFile>,
     ext_to_regexs: FnvHashMap<String, Vec<Regex>>,
-    filter: Box<'a + Fn(&&Todo) -> bool>,
 }
 
-impl<'a> Default for TodoR<'a> {
-    fn default() -> TodoR<'a> {
+impl<'a> Default for TodoR {
+    fn default() -> TodoR {
         TodoRBuilder::new().build().unwrap()
     }
 }
 
-impl<'a> TodoR<'a> {
+impl TodoR {
     /// Creates new TodoR that looks for provided keywords.
-    pub fn new() -> TodoR<'a> {
+    pub fn new() -> TodoR {
         TodoR::default()
     }
 
-    pub fn with_tags<'t, I, S>(tags: I) -> TodoR<'a>
+    pub fn with_tags<'t, I, S>(tags: I) -> TodoR
     where
         I: IntoIterator<Item = S>,
         S: Into<Cow<'t, str>>,
@@ -287,20 +286,19 @@ impl<'a> TodoR<'a> {
     }
 
     /// Creates new TodoR using given configuration.
-    fn with_config(config: TodoRConfig) -> TodoR<'a> {
+    fn with_config(config: TodoRConfig) -> TodoR {
         TodoR {
             config,
             todo_files: Vec::new(),
             ext_to_regexs: FnvHashMap::default(),
-            filter: Box::new(|_t| true),
         }
     }
 
     /// Sets TodoR to only output TODOs that satisfy pred
-    pub fn set_todo_filter<P: 'a + Fn(&&Todo) -> bool>(&mut self, pred: P) {
-        debug!("setting filter for TODO output");
-        self.filter = Box::new(pred);
-    }
+    // pub fn set_todo_filter<P: 'a + Fn(&&Todo) -> bool>(&mut self, pred: P) {
+    //     debug!("setting filter for TODO output");
+    //     self.filter = Box::new(pred);
+    // }
 
     /// Returns the number of files currently tracked by TodoR
     pub fn num_files(&self) -> usize {
@@ -308,17 +306,13 @@ impl<'a> TodoR<'a> {
     }
 
     /// Returns the number of TODOs currently tracked by TodoR including ones skipped by filter.
-    pub fn num_all_todos(&self) -> usize {
-        self.todo_files.iter().fold(0, |s, tf| s + tf.todos.len())
-    }
+    // pub fn num_all_todos(&self) -> usize {
+    //     self.todo_files.iter().fold(0, |s, tf| s + tf.todos.len())
+    // }
 
     /// Returns the number of TODOs currently tracked by TodoR
     pub fn num_todos(&self) -> usize {
-        let pred = &|t: &&Todo| (&self.filter)(t);
-
-        self.todo_files
-            .iter()
-            .fold(0, |s, tf| s + tf.todos.iter().filter(pred).count())
+        self.todo_files.iter().fold(0, |s, tf| s + tf.todos.len())
     }
 
     /// Returns the number of TODOs currently tracked by TodoR
@@ -462,10 +456,8 @@ impl<'a> TodoR<'a> {
 
     /// Writes TODOs to out_buffer.
     pub fn write_todos(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
-        let pred = &|t: &&Todo| (&self.filter)(t);
-
         for todo_file in &self.todo_files {
-            write_file_todos(out_buffer, &todo_file, &self.config.styles, pred)?;
+            write_file_todos(out_buffer, &todo_file, &self.config.styles)?;
         }
 
         Ok(())
@@ -478,11 +470,9 @@ impl<'a> TodoR<'a> {
         filepath: &Path,
         out_buffer: &mut impl Write,
     ) -> Result<(), Error> {
-        let pred = &|t: &&Todo| (&self.filter)(t);
-
         for todo_file in &self.todo_files {
             if todo_file.filepath == filepath {
-                write_file_todos(out_buffer, &todo_file, &self.config.styles, pred)?;
+                write_file_todos(out_buffer, &todo_file, &self.config.styles)?;
                 break;
             }
         }
@@ -492,49 +482,56 @@ impl<'a> TodoR<'a> {
 
     /// Prints formatted TODOs to stdout.
     pub fn print_formatted_todos(&self, format: &ReportFormat) -> Result<(), Error> {
-        self.print_formatted_filtered_todos(format, &|_t| true)
-    }
-
-    /// Prints formatted TODOs to stdout. Only prints TODOs that fulfill pred.
-    pub fn print_formatted_filtered_todos<P>(
-        &self,
-        format: &ReportFormat,
-        pred: &P,
-    ) -> Result<(), Error>
-    where
-        P: Fn(&&Todo) -> bool,
-    {
         // lock stdout to print faster
         let stdout = io::stdout();
         let lock = stdout.lock();
         let mut out_buffer = io::BufWriter::new(lock);
 
-        self.write_formatted_filtered_todos(&mut out_buffer, format, pred)
+        self.write_formatted_todos(&mut out_buffer, format)
     }
 
+    /// Prints formatted TODOs to stdout. Only prints TODOs that fulfill pred.
+    // pub fn print_formatted_filtered_todos<P>(
+    //     &self,
+    //     format: &ReportFormat,
+    //     pred: &P,
+    // ) -> Result<(), Error>
+    // where
+    //     P: Fn(&&Todo) -> bool,
+    // {
+    //     // lock stdout to print faster
+    //     let stdout = io::stdout();
+    //     let lock = stdout.lock();
+    //     let mut out_buffer = io::BufWriter::new(lock);
+
+    //     self.write_formatted_filtered_todos(&mut out_buffer, format, pred)
+    // }
+
     /// Writes formatted TODOs to out_buffer.
-    pub fn write_formatted_todos<P>(
+    pub fn write_formatted_todos(
         &self,
         out_buffer: &mut impl Write,
         out_format: &ReportFormat,
     ) -> Result<(), Error> {
-        self.write_formatted_filtered_todos(out_buffer, out_format, &|_t| true)
-    }
-
-    /// Writes formatted TODOs to out_buffer. Only writes TODOs that fulfill pred.
-    pub fn write_formatted_filtered_todos<P>(
-        &self,
-        out_buffer: &mut impl Write,
-        out_format: &ReportFormat,
-        pred: &P,
-    ) -> Result<(), Error>
-    where
-        P: Fn(&&Todo) -> bool,
-    {
-        report_todos(out_buffer, &self.todo_files, &out_format, pred)?;
+        report_todos(out_buffer, &self.todo_files, &out_format)?;
 
         Ok(())
     }
+
+    /// Writes formatted TODOs to out_buffer. Only writes TODOs that fulfill pred.
+    // pub fn write_formatted_filtered_todos<P>(
+    //     &self,
+    //     out_buffer: &mut impl Write,
+    //     out_format: &ReportFormat,
+    //     pred: &P,
+    // ) -> Result<(), Error>
+    // where
+    //     P: Fn(&&Todo) -> bool,
+    // {
+    //     report_todos(out_buffer, &self.todo_files, &out_format, pred)?;
+
+    //     Ok(())
+    // }
 
     /// Deletes TODO line from given filepath corresponding to the given index.
     pub fn remove_todo(&mut self, filepath: &Path, todo_index: usize) -> Result<(), Error> {

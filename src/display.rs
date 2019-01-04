@@ -6,7 +6,7 @@ use fnv::FnvHashMap;
 use log::debug;
 use std::io::Write;
 
-use crate::todo::{Todo, TodoFile};
+use crate::todo::TodoFile;
 
 /// Struct for holding ansi color printing options
 #[derive(Debug, Clone)]
@@ -65,16 +65,16 @@ impl TodoRStyles {
 /// Predicate `pred` is used to determine if a `Todo` should be printed.
 ///
 /// If no there are no `Todo`s that satisfy `pred` in `todo_file`, nothing is printed.
-pub fn write_file_todos<P>(
+pub fn write_file_todos(
     out_buffer: &mut Write,
     todo_file: &TodoFile,
     styles: &TodoRStyles,
-    pred: &P,
+    // pred: &P,
 ) -> Result<(), Error>
-where
-    P: Fn(&&Todo) -> bool,
+// where
+//     P: Fn(&&Todo) -> bool,
 {
-    let mut todos = todo_file.todos.iter().filter(pred).peekable();
+    let mut todos = todo_file.todos.iter().peekable();
     if todos.peek().is_some() {
         writeln!(
             out_buffer,
