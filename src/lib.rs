@@ -256,6 +256,7 @@ struct TodoRConfig {
 }
 
 /// Parser for finding TODOs in comments and storing them on a per-file basis.
+#[derive(Debug, Clone)]
 pub struct TodoR {
     config: TodoRConfig,
     todo_files: Vec<TodoFile>,
