@@ -58,7 +58,7 @@ use crate::comments::CommentTypes;
 use crate::configs::TodoRConfigFileSerial;
 use crate::display::*;
 use crate::errors::TodoRError;
-use crate::parser::{build_parser_regexs, parse_content};
+use crate::parser::{build_parser_regexs, parse_content, parse_content_with_filter};
 use crate::printer::{report_todos, ReportFormat};
 use crate::todo::{Todo, TodoFile};
 
@@ -371,6 +371,31 @@ impl<'a> TodoR<'a> {
 
     /// Opens file at given filepath and process it by finding all its TODOs.
     pub fn open_todos(&mut self, filepath: &Path) -> Result<(), Error> {
+        // using _p just to set type for open_option_filtered_todos
+        let mut _p = Some(|_t: &Todo| true);
+        _p = None;
+        self.open_option_filtered_todos(filepath, &_p)
+    }
+
+    /// Opens file at given filepath and process it by finding all its TODOs.
+    /// Only TODOs that satisfy pred are added.
+    pub fn open_filtered_todos<P>(&mut self, filepath: &Path, pred: &P) -> Result<(), Error>
+    where
+        P: Fn(&Todo) -> bool,
+    {
+        self.open_option_filtered_todos(filepath, &Some(pred))
+    }
+
+    /// Opens file at given filepath and process it by finding all its TODOs.
+    /// If pred is not None, only TODOs that satisfy pred are added.
+    pub fn open_option_filtered_todos<P>(
+        &mut self,
+        filepath: &Path,
+        pred: &Option<P>,
+    ) -> Result<(), Error>
+    where
+        P: Fn(&Todo) -> bool,
+    {
         let mut todo_file = TodoFile::new(filepath);
 
         // Make sure the file is not a directory
@@ -397,8 +422,10 @@ impl<'a> TodoR<'a> {
 
         let file = File::open(filepath)?;
         let mut file_reader = BufReader::new(file);
-        // TODO: use filter when parsing TODOs
-        todo_file.set_todos(parse_content(&mut file_reader, &parser_regexs)?);
+        todo_file.set_todos(match pred {
+            Some(p) => parse_content_with_filter(&mut file_reader, &parser_regexs, p)?,
+            None => parse_content(&mut file_reader, &parser_regexs)?,
+        });
 
         debug!(
             "found {} TODOs in `{}`",

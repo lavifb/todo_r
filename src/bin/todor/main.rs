@@ -79,6 +79,15 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
         }
     }
 
+    let pred = if let Some(users_iter) = matches.values_of("USER") {
+        let users: Vec<&str> = users_iter.collect();
+        // let pred = move |t: &&Todo| users.iter().any(|u| t.tags_user(*u));
+        // todor.set_todo_filter(pred);
+        Some(move |t: &Todo| users.iter().any(|u| t.tags_user(*u)))
+    } else {
+        None
+    };
+
     let mut todor;
     match matches.values_of("FILE") {
         Some(files) => {
@@ -91,7 +100,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                 let file_path = Path::new(file);
                 if !ignores.matched(file_path, false).is_ignore() {
                     todor
-                        .open_todos(file_path)
+                        .open_option_filtered_todos(file_path, &pred)
                         .unwrap_or_else(|err| warn!("{}", err));
                 }
             }
@@ -116,12 +125,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
                 }
             }
         }
-    }
-
-    if let Some(users_iter) = matches.values_of("USER") {
-        let users: Vec<&str> = users_iter.collect();
-        let pred = move |t: &&Todo| users.iter().any(|u| t.tags_user(*u));
-        todor.set_todo_filter(pred);
     }
 
     if matches.is_present("DELETE_MODE") {
