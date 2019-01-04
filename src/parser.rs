@@ -48,6 +48,43 @@ where
     Ok(todos)
 }
 
+/// Parses content and creates a list of TODOs found in content. Only adds TODOs that satisfy pred.
+pub fn parse_content_with_filter<P>(
+    content_buf: &mut impl BufRead,
+    regexs: &[Regex],
+    pred: P,
+) -> Result<Vec<Todo>, std::io::Error>
+where
+    P: Fn(&Todo) -> bool,
+{
+    trace!("capturing content against {} regexs", regexs.len());
+
+    let mut todos = Vec::new();
+    for (line_num, line_result) in content_buf.lines().enumerate() {
+        let line = line_result?;
+
+        for re in regexs.iter() {
+            if let Some(todo_caps) = re.captures(&line) {
+                let content: Cow<str> = match todo_caps.get(2) {
+                    Some(user) => Cow::Owned(format!(
+                        "@{} {}",
+                        user.as_str(),
+                        todo_caps.get(3).unwrap().as_str()
+                    )),
+                    None => Cow::Borrowed(&todo_caps[3]),
+                };
+
+                let todo = Todo::new(line_num + 1, &todo_caps[1], content);
+                if pred(&todo) {
+                    todos.push(todo);
+                }
+            };
+        }
+    }
+
+    Ok(todos)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
