@@ -81,8 +81,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 
     let pred = if let Some(users_iter) = matches.values_of("USER") {
         let users: Vec<&str> = users_iter.collect();
-        // let pred = move |t: &&Todo| users.iter().any(|u| t.tags_user(*u));
-        // todor.set_todo_filter(pred);
         Some(move |t: &Todo| users.iter().any(|u| t.tags_user(*u)))
     } else {
         None

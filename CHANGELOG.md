@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Fixed -->
 <!-- ### Security -->
 
+## [Unreleased]
+### Changed
+- filtering now occurs at the parsing stage instead of while printing
+
+
 ## v0.6.0 (2019-01-03)
 ### Added
 - completions for bash, zsh, fish, and powershell
