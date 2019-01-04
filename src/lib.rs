@@ -76,7 +76,6 @@ static EXAMPLE_CONFIG: &str = include_str!("example_config.hjson");
 /// Config files are added using `add_config_file()`.
 ///
 /// For an example config file, use `todo_r::write_example_config()`.
-
 #[derive(Debug, Default, Clone)]
 pub struct TodoRBuilder {
     added_tags: Vec<String>,
@@ -302,16 +301,6 @@ impl TodoR {
     /// Returns the number of TODOs currently tracked by TodoR
     pub fn num_todos(&self) -> usize {
         self.todo_files.iter().fold(0, |s, tf| s + tf.todos.len())
-    }
-
-    /// Returns the number of TODOs currently tracked by TodoR
-    pub fn num_filtered_todos<P>(&self, pred: &P) -> usize
-    where
-        P: Fn(&&Todo) -> bool,
-    {
-        self.todo_files
-            .iter()
-            .fold(0, |s, tf| s + tf.todos.iter().filter(pred).count())
     }
 
     /// Returns all tracked files that contain TODOs
