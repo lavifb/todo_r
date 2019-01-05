@@ -1,18 +1,17 @@
 // Module for printing TODOs in various formats
 
 use crate::todo::{Todo, TodoFile};
-use failure::{format_err, Error};
+use failure::Error;
 use fnv::FnvHashMap;
 use serde_derive::Serialize;
 use serde_json;
-use std::borrow::Cow;
 use std::fmt::Write as StringWrite;
 use std::io::Write;
 use std::path::Path;
 
 #[derive(Serialize, Debug)]
 struct PrintTodo<'a> {
-    file: &'a str,
+    file: &'a Path,
     kind: &'a str,
     line: usize,
     text: &'a str,
@@ -20,27 +19,9 @@ struct PrintTodo<'a> {
 }
 
 impl PrintTodo<'_> {
-    #[allow(dead_code)]
-    fn from_todo_with_path<'p>(todo: &'p Todo, filepath: &'p Path) -> Result<PrintTodo<'p>, Error> {
-        let file = filepath.to_str().ok_or_else(|| {
-            format_err!(
-                "error converting filepath `{}` to unicode",
-                filepath.display()
-            )
-        })?;
-
-        Ok(PrintTodo {
-            file,
-            kind: &todo.tag,
-            line: todo.line,
-            text: &todo.content,
-            users: todo.users().iter().map(|u| &u[1..]).collect(),
-        })
-    }
-
-    fn from_todo<'p>(todo: &'p Todo, file: &'p str) -> PrintTodo<'p> {
+    fn from_todo<'p, P: AsRef<Path> + ?Sized>(todo: &'p Todo, file: &'p P) -> PrintTodo<'p> {
         PrintTodo {
-            file,
+            file: file.as_ref(),
             kind: &todo.tag,
             line: todo.line,
             text: &todo.content,
@@ -61,61 +42,23 @@ impl PrintTodo<'_> {
     }
 }
 
-struct PrintTodoIter<'a, I> {
+struct PrintTodoIter<'a, I>
+where
+    I: Iterator<Item = &'a Todo>,
+{
     inner: I,
-    file: Cow<'a, str>,
+    file: &'a Path,
 }
 
 type TodoIter<'a> = std::slice::Iter<'a, Todo>;
-type TodoFilter<'a, P> = std::iter::Filter<TodoIter<'a>, &'a P>;
-
-// impl PrintTodoIter<'_, TodoIter<'_>> {
-//     fn try_from(tf: &TodoFile) -> Result<PrintTodoIter<TodoIter>, Error> {
-//         let file = tf.filepath.to_str().ok_or_else(|| {
-//             format_err!(
-//                 "error converting filepath `{}` to unicode",
-//                 tf.filepath.display()
-//             )
-//         })?;
-
-//         Ok(PrintTodoIter {
-//             inner: tf.todos.iter(),
-//             file,
-//         })
-//     }
-// }
-
 impl<'a> From<&'a TodoFile> for PrintTodoIter<'a, TodoIter<'a>> {
     fn from(tf: &TodoFile) -> PrintTodoIter<'_, TodoIter<'_>> {
         PrintTodoIter {
             inner: tf.todos.iter(),
-            file: tf.filepath.to_string_lossy(),
+            file: &tf.filepath,
         }
     }
 }
-
-// impl<P> PrintTodoIter<'_, TodoFilter<'_, P>>
-// where
-//     P: Fn(&&Todo) -> bool,
-// {
-//     #[allow(dead_code)]
-//     fn try_from_with_filter<'p>(
-//         tf: &'p TodoFile,
-//         pred: &'p P,
-//     ) -> Result<PrintTodoIter<'p, TodoFilter<'p, P>>, Error> {
-//         let file = tf.filepath.to_str().ok_or_else(|| {
-//             format_err!(
-//                 "error converting filepath `{}` to unicode",
-//                 tf.filepath.display()
-//             )
-//         })?;
-
-//         Ok(PrintTodoIter {
-//             inner: tf.todos.iter().filter(pred),
-//             file,
-//         })
-//     }
-// }
 
 impl<'a, I> Iterator for PrintTodoIter<'a, I>
 where
@@ -123,10 +66,10 @@ where
 {
     type Item = PrintTodo<'a>;
 
-    fn next(&mut self) -> Option<PrintTodo<'_>> {
+    fn next(&mut self) -> Option<Self::Item> {
         self.inner
             .next()
-            .map(|t| PrintTodo::from_todo(t, &self.file))
+            .map(|t| PrintTodo::from_todo(t, self.file))
     }
 }
 
@@ -136,36 +79,20 @@ struct PrintTodos<'a> {
 }
 
 impl PrintTodos<'_> {
-    fn from_todo_files(todo_files: &[TodoFile]) -> Result<PrintTodos, Error> {
+    fn from_todo_files(todo_files: &[TodoFile]) -> PrintTodos {
         let mut ptodos = Vec::new();
         for tf in todo_files {
             ptodos.extend(PrintTodoIter::from(tf));
         }
 
-        Ok(PrintTodos { ptodos })
+        PrintTodos { ptodos }
     }
 
-    // #[allow(dead_code)]
-    // fn from_filtered_todo_files<'p, P>(
-    //     todo_files: &'p [TodoFile],
-    //     pred: &'p P,
-    // ) -> Result<PrintTodos<'p>, Error>
-    // where
-    //     P: Fn(&&Todo) -> bool,
-    // {
-    //     let mut ptodos = Vec::new();
-    //     for tf in todo_files {
-    //         ptodos.extend(PrintTodoIter::try_from_with_filter(tf, pred)?);
-    //     }
-
-    //     Ok(PrintTodos { ptodos })
-    // }
-
     #[allow(dead_code)]
-    fn from_todo_file(todo_file: &TodoFile) -> Result<PrintTodos, Error> {
+    fn from_todo_file(todo_file: &TodoFile) -> PrintTodos {
         let ptodos: Vec<PrintTodo> = PrintTodoIter::from(todo_file).collect();
 
-        Ok(PrintTodos { ptodos })
+        PrintTodos { ptodos }
     }
 
     /// Writes String of TODOs serialized in the JSON format
@@ -197,7 +124,9 @@ impl PrintTodos<'_> {
             writeln!(
                 table_string,
                 "| {} | {} | {} |",
-                ptodo.file, ptodo.line, ptodo.text
+                ptodo.file.display(),
+                ptodo.line,
+                ptodo.text
             )?;
         }
 
@@ -229,7 +158,7 @@ pub(crate) fn report_todos(
         ReportFormat::Markdown => PrintTodos::write_markdown,
     };
 
-    let ptodos = PrintTodos::from_todo_files(todo_files)?;
+    let ptodos = PrintTodos::from_todo_files(todo_files);
     formatted_write(&ptodos, out_buffer)?;
 
     Ok(())
@@ -288,7 +217,7 @@ mod test {
         let mut tf = TodoFile::new(Path::new("tests/test.rs"));
         tf.todos.push(Todo::new(2, "TODO", "item1"));
         tf.todos.push(Todo::new(5, "TODO", "item2"));
-        let ptodo = PrintTodos::from_todo_file(&tf).unwrap();
+        let ptodo = PrintTodos::from_todo_file(&tf);
 
         let out_vec: Vec<u8> = Vec::new();
         let mut out_buf = Cursor::new(out_vec);
@@ -308,7 +237,7 @@ mod test {
         tf2.todos.push(Todo::new(5, "TODO", "item2"));
 
         let tfs = [tf1, tf2];
-        let ptodo = PrintTodos::from_todo_files(&tfs).unwrap();
+        let ptodo = PrintTodos::from_todo_files(&tfs);
 
         let out_vec: Vec<u8> = Vec::new();
         let mut out_buf = Cursor::new(out_vec);
