@@ -87,9 +87,9 @@ pub struct TodoFile {
 }
 
 impl TodoFile {
-    pub fn new<'p>(filepath: impl Into<Cow<'p, Path>>) -> TodoFile {
+    pub fn new<P: AsRef<Path>>(filepath: P) -> TodoFile {
         TodoFile {
-            filepath: filepath.into().into_owned(),
+            filepath: filepath.as_ref().to_owned(),
             // do not allocate because it will be replaced
             todos: Vec::with_capacity(0),
         }

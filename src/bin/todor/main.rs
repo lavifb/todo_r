@@ -95,10 +95,9 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
             for file in files {
                 info!("looking at `{}`...", file);
 
-                let file_path = Path::new(file);
-                if !ignores.matched(file_path, false).is_ignore() {
+                if !ignores.matched(file, false).is_ignore() {
                     todor
-                        .open_option_filtered_todos(file_path, &pred)
+                        .open_option_filtered_todos(file, &pred)
                         .unwrap_or_else(|err| warn!("{}", err));
                 }
             }

@@ -343,7 +343,10 @@ impl TodoR {
     }
 
     /// Opens file at given filepath and process it by finding all its TODOs.
-    pub fn open_todos(&mut self, filepath: &Path) -> Result<(), Error> {
+    pub fn open_todos<F>(&mut self, filepath: F) -> Result<(), Error>
+    where
+        F: AsRef<Path>,
+    {
         // using _p just to let the compiler know the correct type for open_option_filtered_todos()
         let mut _p = Some(|_t: &Todo| true);
         _p = None;
@@ -352,9 +355,10 @@ impl TodoR {
 
     /// Opens file at given filepath and process it by finding all its TODOs.
     /// Only TODOs that satisfy pred are added.
-    pub fn open_filtered_todos<P>(&mut self, filepath: &Path, pred: &P) -> Result<(), Error>
+    pub fn open_filtered_todos<P, F>(&mut self, filepath: F, pred: &P) -> Result<(), Error>
     where
         P: Fn(&Todo) -> bool,
+        F: AsRef<Path>,
     {
         self.open_option_filtered_todos(filepath, &Some(pred))
     }
@@ -363,14 +367,16 @@ impl TodoR {
     /// If pred is not None, only TODOs that satisfy pred are added.
     ///
     /// This method is useful for when you are not sure at compile time if a filter is necessary.
-    pub fn open_option_filtered_todos<P>(
+    pub fn open_option_filtered_todos<P, F>(
         &mut self,
-        filepath: &Path,
+        filepath: F,
         pred: &Option<P>,
     ) -> Result<(), Error>
     where
         P: Fn(&Todo) -> bool,
+        F: AsRef<Path>,
     {
+        let filepath = filepath.as_ref();
         let mut todo_file = TodoFile::new(filepath);
 
         // Make sure the file is not a directory
@@ -415,7 +421,7 @@ impl TodoR {
     // MAYB: make open_user_todos() that only searches for todos with user tagged
     /// Finds TODO comments in the given content
     pub fn find_todos(&mut self, content: &str) -> Result<(), Error> {
-        let mut todo_file = TodoFile::new(Path::new(""));
+        let mut todo_file = TodoFile::new("");
         let mut content_buf = Cursor::new(content);
         let parser_regexs = self.get_parser_regexs(".sh");
 
