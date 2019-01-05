@@ -5,6 +5,7 @@ use failure::{format_err, Error};
 use fnv::FnvHashMap;
 use serde_derive::Serialize;
 use serde_json;
+use std::borrow::Cow;
 use std::fmt::Write as StringWrite;
 use std::io::Write;
 use std::path::Path;
@@ -62,50 +63,59 @@ impl PrintTodo<'_> {
 
 struct PrintTodoIter<'a, I> {
     inner: I,
-    file: &'a str,
+    file: Cow<'a, str>,
 }
 
 type TodoIter<'a> = std::slice::Iter<'a, Todo>;
 type TodoFilter<'a, P> = std::iter::Filter<TodoIter<'a>, &'a P>;
 
-impl PrintTodoIter<'_, TodoIter<'_>> {
-    fn try_from(tf: &TodoFile) -> Result<PrintTodoIter<TodoIter>, Error> {
-        let file = tf.filepath.to_str().ok_or_else(|| {
-            format_err!(
-                "error converting filepath `{}` to unicode",
-                tf.filepath.display()
-            )
-        })?;
+// impl PrintTodoIter<'_, TodoIter<'_>> {
+//     fn try_from(tf: &TodoFile) -> Result<PrintTodoIter<TodoIter>, Error> {
+//         let file = tf.filepath.to_str().ok_or_else(|| {
+//             format_err!(
+//                 "error converting filepath `{}` to unicode",
+//                 tf.filepath.display()
+//             )
+//         })?;
 
-        Ok(PrintTodoIter {
+//         Ok(PrintTodoIter {
+//             inner: tf.todos.iter(),
+//             file,
+//         })
+//     }
+// }
+
+impl<'a> From<&'a TodoFile> for PrintTodoIter<'a, TodoIter<'a>> {
+    fn from(tf: &TodoFile) -> PrintTodoIter<'_, TodoIter<'_>> {
+        PrintTodoIter {
             inner: tf.todos.iter(),
-            file,
-        })
+            file: tf.filepath.to_string_lossy(),
+        }
     }
 }
 
-impl<P> PrintTodoIter<'_, TodoFilter<'_, P>>
-where
-    P: Fn(&&Todo) -> bool,
-{
-    #[allow(dead_code)]
-    fn try_from_with_filter<'p>(
-        tf: &'p TodoFile,
-        pred: &'p P,
-    ) -> Result<PrintTodoIter<'p, TodoFilter<'p, P>>, Error> {
-        let file = tf.filepath.to_str().ok_or_else(|| {
-            format_err!(
-                "error converting filepath `{}` to unicode",
-                tf.filepath.display()
-            )
-        })?;
+// impl<P> PrintTodoIter<'_, TodoFilter<'_, P>>
+// where
+//     P: Fn(&&Todo) -> bool,
+// {
+//     #[allow(dead_code)]
+//     fn try_from_with_filter<'p>(
+//         tf: &'p TodoFile,
+//         pred: &'p P,
+//     ) -> Result<PrintTodoIter<'p, TodoFilter<'p, P>>, Error> {
+//         let file = tf.filepath.to_str().ok_or_else(|| {
+//             format_err!(
+//                 "error converting filepath `{}` to unicode",
+//                 tf.filepath.display()
+//             )
+//         })?;
 
-        Ok(PrintTodoIter {
-            inner: tf.todos.iter().filter(pred),
-            file,
-        })
-    }
-}
+//         Ok(PrintTodoIter {
+//             inner: tf.todos.iter().filter(pred),
+//             file,
+//         })
+//     }
+// }
 
 impl<'a, I> Iterator for PrintTodoIter<'a, I>
 where
@@ -113,10 +123,10 @@ where
 {
     type Item = PrintTodo<'a>;
 
-    fn next(&mut self) -> Option<Self::Item> {
+    fn next(&mut self) -> Option<PrintTodo<'_>> {
         self.inner
             .next()
-            .map(|t| PrintTodo::from_todo(t, self.file))
+            .map(|t| PrintTodo::from_todo(t, &self.file))
     }
 }
 
@@ -129,31 +139,31 @@ impl PrintTodos<'_> {
     fn from_todo_files(todo_files: &[TodoFile]) -> Result<PrintTodos, Error> {
         let mut ptodos = Vec::new();
         for tf in todo_files {
-            ptodos.extend(PrintTodoIter::try_from(tf)?);
+            ptodos.extend(PrintTodoIter::from(tf));
         }
 
         Ok(PrintTodos { ptodos })
     }
 
-    #[allow(dead_code)]
-    fn from_filtered_todo_files<'p, P>(
-        todo_files: &'p [TodoFile],
-        pred: &'p P,
-    ) -> Result<PrintTodos<'p>, Error>
-    where
-        P: Fn(&&Todo) -> bool,
-    {
-        let mut ptodos = Vec::new();
-        for tf in todo_files {
-            ptodos.extend(PrintTodoIter::try_from_with_filter(tf, pred)?);
-        }
+    // #[allow(dead_code)]
+    // fn from_filtered_todo_files<'p, P>(
+    //     todo_files: &'p [TodoFile],
+    //     pred: &'p P,
+    // ) -> Result<PrintTodos<'p>, Error>
+    // where
+    //     P: Fn(&&Todo) -> bool,
+    // {
+    //     let mut ptodos = Vec::new();
+    //     for tf in todo_files {
+    //         ptodos.extend(PrintTodoIter::try_from_with_filter(tf, pred)?);
+    //     }
 
-        Ok(PrintTodos { ptodos })
-    }
+    //     Ok(PrintTodos { ptodos })
+    // }
 
     #[allow(dead_code)]
     fn from_todo_file(todo_file: &TodoFile) -> Result<PrintTodos, Error> {
-        let ptodos: Vec<PrintTodo> = PrintTodoIter::try_from(todo_file)?.collect();
+        let ptodos: Vec<PrintTodo> = PrintTodoIter::from(todo_file).collect();
 
         Ok(PrintTodos { ptodos })
     }
