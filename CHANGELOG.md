@@ -15,9 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - filtering now occurs at the parsing stage instead of while printing
+- internal rewrite of formatting printing that may slightly improve performance
 
 ### Library changes
 - all TodoR methods that with `_filtered_` in the name are removed. Instead filter while parsing using `open_filtered_todos()`.
+- Full rewrite of `printer.rs` and iterators of `Todo` and `TodoFile`
 
 
 ## v0.6.0 (2019-01-03)
