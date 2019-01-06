@@ -1,9 +1,13 @@
 // Module for holding Todo types.
 
+use failure::Error;
 use lazy_static::lazy_static;
 use regex::Regex;
+use serde::ser::{Serialize, SerializeSeq, SerializeStruct, Serializer};
+use serde_derive::Serialize;
 use std::borrow::Cow;
 use std::fmt;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use crate::display::TodoRStyles;
@@ -71,6 +75,16 @@ impl Todo {
 
         false
     }
+
+    /// Returns String of TODO serialized in the JSON format
+    pub fn to_json(&self) -> Result<String, Error> {
+        Ok(serde_json::to_string(self)?)
+    }
+
+    /// Returns String of TODO serialized in a pretty JSON format
+    pub fn to_pretty_json(&self) -> Result<String, Error> {
+        Ok(serde_json::to_string_pretty(self)?)
+    }
 }
 
 impl fmt::Display for Todo {
@@ -105,5 +119,88 @@ impl TodoFile {
 
     pub fn len(&self) -> usize {
         self.todos.len()
+    }
+
+    /// Writes TODOs in a file serialized in the JSON format
+    pub fn write_json(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
+        serde_json::to_writer(out_buffer, &self)?;
+        Ok(())
+    }
+
+    /// Writes TODOs in a file serialized in a pretty JSON format
+    pub fn write_pretty_json(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
+        serde_json::to_writer_pretty(out_buffer, &self)?;
+        Ok(())
+    }
+}
+
+impl Serialize for Todo {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Todo", 4)?;
+        state.serialize_field("line", &self.line)?;
+        state.serialize_field("tag", &self.tag)?;
+        state.serialize_field("text", &self.content)?;
+        state.serialize_field("users", &self.users())?;
+        state.end()
+    }
+}
+
+#[derive(Serialize)]
+struct PathedTodo<'a> {
+    file: &'a Path,
+    #[serde(flatten)]
+    todo: &'a Todo,
+}
+
+impl Serialize for TodoFile {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for todo in &self.todos {
+            let ptodo = PathedTodo {
+                file: &self.filepath,
+                todo,
+            };
+            seq.serialize_element(&ptodo)?;
+        }
+        seq.end()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use serde_json;
+    use std::io::Cursor;
+
+    #[test]
+    fn json_todo() {
+        let todo = Todo::new(2, "TODO", "item");
+
+        assert_eq!(
+            todo.to_json().unwrap(),
+            r#"{"line":2,"tag":"TODO","text":"item","users":[]}"#,
+        );
+    }
+
+    #[test]
+    fn json_todos() {
+        let mut tf = TodoFile::new(Path::new("tests/test.rs"));
+        tf.todos.push(Todo::new(2, "TODO", "item1"));
+        tf.todos.push(Todo::new(5, "TODO", "item2 @u1"));
+
+        let out_vec: Vec<u8> = Vec::new();
+        let mut out_buf = Cursor::new(out_vec);
+        tf.write_json(&mut out_buf).unwrap();
+
+        assert_eq!(
+            &String::from_utf8(out_buf.into_inner()).unwrap(),
+            r#"[{"file":"tests/test.rs","line":2,"tag":"TODO","text":"item1","users":[]},{"file":"tests/test.rs","line":5,"tag":"TODO","text":"item2 @u1","users":["@u1"]}]"#,
+        );
     }
 }
