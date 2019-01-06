@@ -60,7 +60,8 @@ use crate::display::*;
 use crate::errors::TodoRError;
 use crate::parser::{build_parser_regexs, parse_content, parse_content_with_filter};
 use crate::printer::{report_todos, ReportFormat};
-use crate::todo::{Todo, TodoFile};
+use crate::todo::{PathedTodo, Todo, TodoFile};
+use serde::ser::{Serialize, SerializeSeq, Serializer};
 
 static DEFAULT_CONFIG: &str = include_str!("default_config.json");
 static EXAMPLE_CONFIG: &str = include_str!("example_config.hjson");
@@ -483,9 +484,14 @@ impl TodoR {
         out_buffer: &mut impl Write,
         out_format: &ReportFormat,
     ) -> Result<(), Error> {
-        report_todos(out_buffer, &self.todo_files, &out_format)?;
+        report_todos(out_buffer, self, &out_format)?;
 
         Ok(())
+    }
+
+    /// Returns an iterator that Iterates over tracked TODOs along with the
+    pub fn iter(&self) -> impl Iterator<Item = PathedTodo> {
+        self.todo_files.iter().flat_map(|tf| tf.into_iter())
     }
 
     /// Deletes TODO line from given filepath corresponding to the given index.
@@ -517,5 +523,18 @@ impl TodoR {
             filepath: filepath.to_string_lossy().to_string(),
         }
         .into())
+    }
+}
+
+impl Serialize for TodoR {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.todo_files.len()))?;
+        for ptodo in self.iter() {
+            seq.serialize_element(&ptodo)?;
+        }
+        seq.end()
     }
 }

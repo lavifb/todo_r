@@ -385,7 +385,7 @@ fn json() {
         .arg("json")
         .assert()
         .success()
-        .stdout(r#"[{"file":"test1.rs","kind":"TODO","line":2,"text":"item","users":[]}]"#)
+        .stdout(r#"[{"file":"test1.rs","line":2,"tag":"TODO","text":"item","users":[]}]"#)
         .stderr("");
 }
 
@@ -399,7 +399,7 @@ fn json_check1() {
         .arg("--check")
         .assert()
         .failure()
-        .stdout(r#"[{"file":"test1.rs","kind":"TODO","line":2,"text":"item","users":[]}]"#)
+        .stdout(r#"[{"file":"test1.rs","line":2,"tag":"TODO","text":"item","users":[]}]"#)
         .stderr("");
 }
 

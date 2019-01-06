@@ -1,14 +1,12 @@
 // Module for holding Todo types.
 
 use failure::Error;
-use fnv::FnvHashMap;
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::ser::{Serialize, SerializeSeq, SerializeStruct, Serializer};
 use serde_derive::Serialize;
 use std::borrow::Cow;
 use std::fmt;
-use std::fmt::Write as StringWrite;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
@@ -82,11 +80,6 @@ impl Todo {
     pub fn to_json(&self) -> Result<String, Error> {
         Ok(serde_json::to_string(self)?)
     }
-
-    /// Returns String of TODO serialized in a pretty JSON format
-    pub fn to_pretty_json(&self) -> Result<String, Error> {
-        Ok(serde_json::to_string_pretty(self)?)
-    }
 }
 
 impl fmt::Display for Todo {
@@ -128,40 +121,6 @@ impl TodoFile {
         serde_json::to_writer(out_buffer, &self)?;
         Ok(())
     }
-
-    /// Writes TODOs in a file serialized in a pretty JSON format
-    pub fn write_pretty_json(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
-        serde_json::to_writer_pretty(out_buffer, &self)?;
-        Ok(())
-    }
-
-    /// Writes String of TODOs serialized in a markdown format
-    pub fn write_markdown(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
-        let mut tag_tables: FnvHashMap<String, String> = FnvHashMap::default();
-
-        for todo in self.todos.iter() {
-            let table_string = tag_tables.entry(todo.tag.clone()).or_insert_with(|| {
-                format!(
-                    "### {}s\n| Filename | line | {} |\n|:---|:---:|:---|\n",
-                    todo.tag, todo.tag,
-                )
-            });
-
-            writeln!(
-                table_string,
-                "| {} | {} | {} |",
-                self.filepath.display(),
-                todo.line,
-                todo.content,
-            )?;
-        }
-
-        for table_strings in tag_tables.values() {
-            writeln!(out_buffer, "{}", table_strings)?;
-        }
-
-        Ok(())
-    }
 }
 
 impl Serialize for Todo {
@@ -181,9 +140,9 @@ impl Serialize for Todo {
 /// Helper struct for printing filename along with other TODO information.
 #[derive(Serialize)]
 pub struct PathedTodo<'a> {
-    file: &'a Path,
+    pub(crate) file: &'a Path,
     #[serde(flatten)]
-    todo: &'a Todo,
+    pub(crate) todo: &'a Todo,
 }
 
 impl PathedTodo<'_> {
@@ -192,7 +151,7 @@ impl PathedTodo<'_> {
     }
 }
 
-pub struct PathedTodoIter<'a, I>
+pub struct TodoFileIter<'a, I>
 where
     I: Iterator<Item = &'a Todo>,
 {
@@ -201,16 +160,16 @@ where
 }
 
 type TodoIter<'a> = std::slice::Iter<'a, Todo>;
-impl<'a> From<&'a TodoFile> for PathedTodoIter<'a, TodoIter<'a>> {
-    fn from(tf: &TodoFile) -> PathedTodoIter<'_, TodoIter<'_>> {
-        PathedTodoIter {
+impl<'a> From<&'a TodoFile> for TodoFileIter<'a, TodoIter<'a>> {
+    fn from(tf: &TodoFile) -> TodoFileIter<'_, TodoIter<'_>> {
+        TodoFileIter {
             inner: tf.todos.iter(),
             file: &tf.filepath,
         }
     }
 }
 
-impl<'a, I> Iterator for PathedTodoIter<'a, I>
+impl<'a, I> Iterator for TodoFileIter<'a, I>
 where
     I: Iterator<Item = &'a Todo>,
 {
@@ -218,6 +177,10 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|t| PathedTodo::new(t, self.file))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
     }
 }
 
@@ -240,9 +203,9 @@ impl Serialize for TodoFile {
 
 impl<'a> IntoIterator for &'a TodoFile {
     type Item = PathedTodo<'a>;
-    type IntoIter = PathedTodoIter<'a, TodoIter<'a>>;
+    type IntoIter = TodoFileIter<'a, TodoIter<'a>>;
 
-    fn into_iter(self) -> PathedTodoIter<'a, TodoIter<'a>> {
+    fn into_iter(self) -> TodoFileIter<'a, TodoIter<'a>> {
         self.into()
     }
 }
