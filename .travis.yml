@@ -52,8 +52,9 @@ env:
   global:
     - PROJECT_NAME=todor
 
-cache: 
-  cargo: true
+cache:
+  directories:
+    - /home/travis/.cargo
 
 script:
   - cargo build --verbose --all --target $TARGET
@@ -61,6 +62,7 @@ script:
 
 before_deploy:
   - sh ci/before_deploy.sh
+  - rm -rf /home/travis/.cargo/registry
 
 deploy:
   provider: releases
