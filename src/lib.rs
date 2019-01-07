@@ -302,7 +302,7 @@ impl TodoR {
 
     /// Returns the number of TODOs currently tracked by TodoR
     pub fn num_todos(&self) -> usize {
-        self.todo_files.iter().fold(0, |s, tf| s + tf.todos.len())
+        self.todo_files.iter().map(|tf| tf.todos.len()).sum()
     }
 
     /// Returns all tracked files that contain TODOs
@@ -490,7 +490,7 @@ impl TodoR {
 
     /// Returns an iterator that Iterates over tracked TODOs along with the
     pub fn iter(&self) -> impl Iterator<Item = PathedTodo> {
-        self.todo_files.iter().flat_map(|tf| tf.into_iter())
+        self.todo_files.iter().flatten()
     }
 
     /// Deletes TODO line from given filepath corresponding to the given index.

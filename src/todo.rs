@@ -184,6 +184,28 @@ where
     }
 }
 
+impl<'a, I> DoubleEndedIterator for TodoFileIter<'a, I>
+where
+    I: Iterator<Item = &'a Todo>,
+    I: DoubleEndedIterator,
+{
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.inner
+            .next_back()
+            .map(|t| PathedTodo::new(t, self.file))
+    }
+}
+
+impl<'a, I> ExactSizeIterator for TodoFileIter<'a, I>
+where
+    I: Iterator<Item = &'a Todo>,
+    I: ExactSizeIterator,
+{
+    fn len(&self) -> usize {
+        self.inner.len()
+    }
+}
+
 impl Serialize for TodoFile {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
