@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Security -->
 
 ## [Unreleased]
+### Added
+- `default` option for `-f` flag
+
 ### Changed
 - filtering now occurs at the parsing stage instead of while printing
 - internal rewrite of formatting printing that may slightly improve performance
