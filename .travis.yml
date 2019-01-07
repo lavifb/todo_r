@@ -54,7 +54,7 @@ env:
 
 cache:
   directories:
-    - /home/travis/.cargo
+    - ${TRAVIS_HOME}/.cargo
 
 script:
   - cargo build --verbose --all --target $TARGET
@@ -62,7 +62,7 @@ script:
 
 before_deploy:
   - sh ci/before_deploy.sh
-  - rm -rf /home/travis/.cargo/registry
+  - rm -rf ${TRAVIS_HOME}/.cargo/registry
 
 deploy:
   provider: releases
