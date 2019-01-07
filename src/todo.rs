@@ -213,10 +213,7 @@ impl Serialize for TodoFile {
     {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for todo in &self.todos {
-            let ptodo = PathedTodo {
-                file: &self.filepath,
-                todo,
-            };
+            let ptodo = PathedTodo::new(todo, &self.filepath);
             seq.serialize_element(&ptodo)?;
         }
         seq.end()

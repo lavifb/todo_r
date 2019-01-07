@@ -60,7 +60,7 @@ pub enum ReportFormat {
 }
 
 /// Writes TODOs in `todo_files` to `out_buffer` in the format provided by `report_format`
-pub(crate) fn report_todos<'a>(
+pub(crate) fn report_todos(
     out_buffer: &mut impl Write,
     todor: &TodoR,
     report_format: &ReportFormat,
