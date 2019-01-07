@@ -151,6 +151,8 @@ impl PathedTodo<'_> {
     }
 }
 
+/// Iterator for `Todo`s in a `TodoFile` obtained by running `into_iter` on `&TodoFile`.
+/// Items returned give the filepath of the `Todo` as well as the underlying `Todo`
 pub struct TodoFileIter<'a, I>
 where
     I: Iterator<Item = &'a Todo>,

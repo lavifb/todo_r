@@ -5,7 +5,16 @@ use failure::Error;
 use fnv::FnvHashMap;
 use serde_json;
 use std::fmt::Write as StringWrite;
-use std::io::Write;
+use std::io::{self, Write};
+
+// MAYB: add more output formats
+/// Enum holding the different supported output formats.
+pub enum ReportFormat {
+    Json,
+    JsonPretty,
+    Markdown,
+    Default,
+}
 
 impl TodoR {
     /// Writes TODOs in TodoR serialized in the JSON format
@@ -48,29 +57,30 @@ impl TodoR {
 
         Ok(())
     }
-}
 
-// MAYB: add more output formats
-/// Enum holding the different supported output formats.
-pub enum ReportFormat {
-    Json,
-    JsonPretty,
-    Markdown,
-    Default,
-}
+    /// Prints formatted TODOs to stdout.
+    pub fn print_formatted_todos(&self, format: &ReportFormat) -> Result<(), Error> {
+        // lock stdout to print faster
+        let stdout = io::stdout();
+        let lock = stdout.lock();
+        let mut out_buffer = io::BufWriter::new(lock);
 
-/// Writes TODOs in `todo_files` to `out_buffer` in the format provided by `report_format`
-pub(crate) fn report_todos(
-    out_buffer: &mut impl Write,
-    todor: &TodoR,
-    report_format: &ReportFormat,
-) -> Result<(), Error> {
-    let formatted_write = match report_format {
-        ReportFormat::Json => TodoR::write_json,
-        ReportFormat::JsonPretty => TodoR::write_pretty_json,
-        ReportFormat::Markdown => TodoR::write_markdown,
-        ReportFormat::Default => TodoR::write_todos,
-    };
+        self.write_formatted_todos(&mut out_buffer, format)
+    }
 
-    formatted_write(todor, out_buffer)
+    /// Writes formatted TODOs to out_buffer in the format provided by `report_format`
+    pub fn write_formatted_todos(
+        &self,
+        out_buffer: &mut impl Write,
+        out_format: &ReportFormat,
+    ) -> Result<(), Error> {
+        let formatted_write = match out_format {
+            ReportFormat::Json => TodoR::write_json,
+            ReportFormat::JsonPretty => TodoR::write_pretty_json,
+            ReportFormat::Markdown => TodoR::write_markdown,
+            ReportFormat::Default => TodoR::write_todos,
+        };
+
+        formatted_write(self, out_buffer)
+    }
 }

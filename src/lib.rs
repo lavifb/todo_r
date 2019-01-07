@@ -59,7 +59,6 @@ use crate::configs::TodoRConfigFileSerial;
 use crate::display::*;
 use crate::errors::TodoRError;
 use crate::parser::{build_parser_regexs, parse_content, parse_content_with_filter};
-use crate::printer::{report_todos, ReportFormat};
 use crate::todo::{PathedTodo, Todo, TodoFile};
 use serde::ser::{Serialize, SerializeSeq, Serializer};
 
@@ -463,27 +462,6 @@ impl TodoR {
                 break;
             }
         }
-
-        Ok(())
-    }
-
-    /// Prints formatted TODOs to stdout.
-    pub fn print_formatted_todos(&self, format: &ReportFormat) -> Result<(), Error> {
-        // lock stdout to print faster
-        let stdout = io::stdout();
-        let lock = stdout.lock();
-        let mut out_buffer = io::BufWriter::new(lock);
-
-        self.write_formatted_todos(&mut out_buffer, format)
-    }
-
-    /// Writes formatted TODOs to out_buffer.
-    pub fn write_formatted_todos(
-        &self,
-        out_buffer: &mut impl Write,
-        out_format: &ReportFormat,
-    ) -> Result<(), Error> {
-        report_todos(out_buffer, self, &out_format)?;
 
         Ok(())
     }
