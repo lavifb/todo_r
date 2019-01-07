@@ -56,6 +56,7 @@ pub enum ReportFormat {
     Json,
     JsonPretty,
     Markdown,
+    Default,
 }
 
 /// Writes TODOs in `todo_files` to `out_buffer` in the format provided by `report_format`
@@ -68,9 +69,8 @@ pub(crate) fn report_todos<'a>(
         ReportFormat::Json => TodoR::write_json,
         ReportFormat::JsonPretty => TodoR::write_pretty_json,
         ReportFormat::Markdown => TodoR::write_markdown,
+        ReportFormat::Default => TodoR::write_todos,
     };
 
-    formatted_write(todor, out_buffer)?;
-
-    Ok(())
+    formatted_write(todor, out_buffer)
 }
