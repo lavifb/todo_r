@@ -5,7 +5,7 @@ pub fn build_cli() -> App<'static, 'static> {
     clap_app!(todo_r =>
         (version: env!("CARGO_PKG_VERSION"))
         (author: "Lavi Blumberg <lavifb@gmail.com>")
-        (about: "Lists TODO comments in code")
+        (about: "Lists TODO comments in code.")
         (@arg FILE: ... "File to search for TODO items.")
         (@arg CONFIG: -c --("config") +takes_value "Takes configuration from file.")
         (@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
@@ -22,7 +22,7 @@ pub fn build_cli() -> App<'static, 'static> {
             "Outputs TODOs in specified formats.")
         (@arg DELETE_MODE: -d --("delete") conflicts_with[FORMAT] "Interactive delete mode.")
         (@subcommand init =>
-            (about: "Creates example config file")
+            (about: "Creates .todor config file and defines todor workspace.")
             (author: "Lavi Blumberg <lavifb@gmail.com>")
         )
     )
