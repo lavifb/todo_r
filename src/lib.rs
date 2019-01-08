@@ -2,8 +2,8 @@ pub mod comments;
 mod configs;
 mod custom_tags;
 mod display;
+pub mod format;
 mod parser;
-pub mod printer;
 mod remover;
 pub mod todo;
 

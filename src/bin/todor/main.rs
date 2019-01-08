@@ -16,7 +16,7 @@ use std::env::current_dir;
 use std::fs::File;
 use std::path::Path;
 
-use todo_r::printer::ReportFormat;
+use todo_r::format::ReportFormat;
 use todo_r::todo::Todo;
 use todo_r::TodoRBuilder;
 
