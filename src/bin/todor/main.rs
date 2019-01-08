@@ -132,6 +132,7 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
             "prettyjson" => ReportFormat::JsonPretty,
             "markdown" => ReportFormat::Markdown,
             "usermarkdown" => ReportFormat::UserMarkdown,
+            "csv" => ReportFormat::Csv,
             "default" => ReportFormat::Default,
             _ => return Err(format_err!("invalid output format: {}.", format)),
         };

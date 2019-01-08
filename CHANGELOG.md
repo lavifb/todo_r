@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - More formatting options for `-f` flag
 	- `default` prints in the normal ANSI style
 	- `usermarkdown` prints a markdown tables organized by tagged users
+	- `csv` prints a csv table
 
 ### Changed
 - filtering now occurs at the parsing stage instead of while printing

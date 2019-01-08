@@ -12,9 +12,9 @@ use std::io::{self, Write};
 pub enum ReportFormat {
     Json,
     JsonPretty,
-    // TODO: add CSV
     Markdown,
     UserMarkdown,
+    Csv,
     Default,
 }
 
@@ -116,6 +116,25 @@ impl TodoR {
         Ok(())
     }
 
+    /// Writes TODOs in TodoR serialized in a csv format
+    fn write_csv(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
+        writeln!(out_buffer, "Filename, line, type, content")?;
+
+        for ptodo in self.iter() {
+            let todo = ptodo.todo;
+            writeln!(
+                out_buffer,
+                "{}, {}, {}, {}",
+                ptodo.file.display(),
+                todo.line,
+                todo.tag,
+                todo.content,
+            )?;
+        }
+
+        Ok(())
+    }
+
     /// Prints formatted TODOs to stdout.
     pub fn print_formatted_todos(&self, format: &ReportFormat) -> Result<(), Error> {
         // lock stdout to print faster
@@ -137,6 +156,7 @@ impl TodoR {
             ReportFormat::JsonPretty => TodoR::write_pretty_json,
             ReportFormat::Markdown => TodoR::write_markdown,
             ReportFormat::UserMarkdown => TodoR::write_user_markdown,
+            ReportFormat::Csv => TodoR::write_csv,
             // TODO: make default print have no colors
             ReportFormat::Default => TodoR::write_todos,
         };
