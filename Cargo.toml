@@ -36,7 +36,7 @@ dirs = "1"
 
 [dev-dependencies]
 criterion = "0.2.6"
-escargot = "0.3"
+escargot = "0.4"
 assert_cmd = "0.10"
 
 [build-dependencies]
