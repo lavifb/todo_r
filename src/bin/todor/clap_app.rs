@@ -17,10 +17,10 @@ pub fn build_cli() -> App<'static, 'static> {
         (@arg IGNORE: -i --("ignore") +takes_value +multiple "Paths to be ignored.")
         (@arg VERBOSE: -v --("verbose") "Provide verbose output.")
         (@arg CHECK: --("check") "Exits nicely only if no TODO tags are found.")
-        (@arg FORMAT: -f --("format") conflicts_with[DELETE_MODE] conflicts_with[PIPE_MODE] +takes_value
+        (@arg FORMAT: -f --("format") conflicts_with[DELETE_MODE] +takes_value
             possible_values(&["json", "prettyjson", "markdown", "usermarkdown", "csv", "default"])
             "Outputs TODOs in specified formats.")
-        (@arg DELETE_MODE: -d --("delete") conflicts_with[FORMAT] conflicts_with[PIPE_MODE]
+        (@arg DELETE_MODE: -d --("delete") conflicts_with[FORMAT] conflicts_with[EXT]
             "Interactive delete mode.")
         (@arg EXT: -e --("ext") conflicts_with[DELETE_MODE] +takes_value
             "Reads piped content as if it has the provided extantion.")
