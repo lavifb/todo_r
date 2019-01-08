@@ -1,6 +1,7 @@
 use clap::{clap_app, App};
 
 pub fn build_cli() -> App<'static, 'static> {
+    // TODO: rewrite to not use the clunky macro
     clap_app!(todo_r =>
         (version: env!("CARGO_PKG_VERSION"))
         (author: "Lavi Blumberg <lavifb@gmail.com>")
