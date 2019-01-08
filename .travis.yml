@@ -59,10 +59,10 @@ cache:
 script:
   - cargo build --verbose --all --target $TARGET
   - cargo test --verbose --all --target $TARGET
+  - rm -rf ${TRAVIS_HOME}/.cargo/registry
 
 before_deploy:
   - sh ci/before_deploy.sh
-  - rm -rf ${TRAVIS_HOME}/.cargo/registry
 
 deploy:
   provider: releases
