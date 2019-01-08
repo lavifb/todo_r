@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 	- `default` prints in the normal ANSI style
 	- `usermarkdown` prints a markdown tables organized by tagged users
 	- `csv` prints a csv table
+- `-e` tag for reading piped content from stdin
 
 ### Changed
 - filtering now occurs at the parsing stage instead of while printing

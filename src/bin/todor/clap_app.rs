@@ -1,7 +1,6 @@
 use clap::{clap_app, App};
 
 pub fn build_cli() -> App<'static, 'static> {
-    // TODO: add subcommand for just content so it can be piped
     clap_app!(todo_r =>
         (version: env!("CARGO_PKG_VERSION"))
         (author: "Lavi Blumberg <lavifb@gmail.com>")
