@@ -419,10 +419,10 @@ impl TodoR {
     }
 
     /// Finds TODO comments in the given content
-    pub fn find_todos(&mut self, content: &str) -> Result<(), Error> {
+    pub fn find_todos(&mut self, content: &str, ext: &str) -> Result<(), Error> {
         let mut todo_file = TodoFile::new("");
         let mut content_buf = Cursor::new(content);
-        let parser_regexs = self.get_parser_regexs(".sh");
+        let parser_regexs = self.get_parser_regexs(ext);
 
         todo_file.set_todos(parse_content(&mut content_buf, &parser_regexs)?);
 

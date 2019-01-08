@@ -5,6 +5,7 @@ mod logger;
 mod select;
 mod walk;
 
+use atty;
 use clap::ArgMatches;
 use config::FileFormat;
 use dirs::home_dir;
@@ -14,6 +15,7 @@ use ignore::overrides::OverrideBuilder;
 use log::*;
 use std::env::current_dir;
 use std::fs::File;
+use std::io::{stdin, Read};
 use std::path::Path;
 
 use todo_r::format::ReportFormat;
@@ -87,38 +89,48 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
     };
 
     let mut todor;
-    match matches.values_of("FILE") {
-        Some(files) => {
-            let ignores = ignore_builder.build()?;
-            todor = builder.build()?;
-            debug!("todor parser built");
-            for file in files {
-                info!("looking at `{}`...", file);
+    if let Some(ext) = matches.value_of("EXT") {
+        todor = builder.build()?;
+        if atty::isnt(atty::Stream::Stdin) {
+            let mut buffer = String::new();
+            stdin().read_to_string(&mut buffer).unwrap();
 
-                if !ignores.matched(file, false).is_ignore() {
-                    todor
-                        .open_option_filtered_todos(file, &pred)
-                        .unwrap_or_else(|err| warn!("{}", err));
+            todor.find_todos(&buffer, ext)?;
+        }
+    } else {
+        match matches.values_of("FILE") {
+            Some(files) => {
+                let ignores = ignore_builder.build()?;
+                todor = builder.build()?;
+                debug!("todor parser built");
+                for file in files {
+                    info!("looking at `{}`...", file);
+
+                    if !ignores.matched(file, false).is_ignore() {
+                        todor
+                            .open_option_filtered_todos(file, &pred)
+                            .unwrap_or_else(|err| warn!("{}", err));
+                    }
                 }
             }
-        }
-        None => {
-            info!("Looking for .git or .todor to use as workspace root...");
-            let walk = build_walker(&mut builder, ignore_builder)?;
-            todor = builder.build()?;
-            debug!("todor parser built");
+            None => {
+                info!("Looking for .git or .todor to use as workspace root...");
+                let walk = build_walker(&mut builder, ignore_builder)?;
+                todor = builder.build()?;
+                debug!("todor parser built");
 
-            for entry in walk {
-                let dir_entry = entry?;
-                let path = dir_entry.path().strip_prefix(".").unwrap();
+                for entry in walk {
+                    let dir_entry = entry?;
+                    let path = dir_entry.path().strip_prefix(".").unwrap();
 
-                debug!("found {} in walk", path.display());
+                    debug!("found {} in walk", path.display());
 
-                if path.is_file() {
-                    info!("looking at `{}`...", path.display());
-                    todor
-                        .open_todos(path)
-                        .unwrap_or_else(|err| warn!("{}", err));
+                    if path.is_file() {
+                        info!("looking at `{}`...", path.display());
+                        todor
+                            .open_todos(path)
+                            .unwrap_or_else(|err| warn!("{}", err));
+                    }
                 }
             }
         }
