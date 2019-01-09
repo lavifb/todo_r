@@ -78,6 +78,16 @@ impl<K: Hash + Eq> CommentRegexMultiMap<K> {
         self.regexs.push(None);
     }
 
+    /// Inserts value `v` for all keys in `ks`
+    pub fn insert_keys(&mut self, ks: impl IntoIterator<Item = K>, v: CommentTypes) {
+        let i = self.comment_types.len();
+        for k in ks {
+            self.map.insert(k, i);
+        }
+        self.comment_types.push(v);
+        self.regexs.push(None);
+    }
+
     /// Gets the the Vec<Regex> built from the inserted CommentTypes for key `k`.
     /// The Vec<Regex> is cached so the regexs do not need to be rebuilt.
     /// If `k` has not been inserted, fallback value is returned
