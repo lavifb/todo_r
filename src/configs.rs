@@ -5,8 +5,7 @@ use failure::Error;
 use fnv::FnvHashMap;
 use serde::Deserialize;
 
-use crate::comments::CommentType;
-use crate::comments::CommentTypes;
+use crate::comments::{CommentType, CommentTypes};
 use crate::errors::TodoRError::InvalidConfigFile;
 
 /// Comments configuration as read from the config file

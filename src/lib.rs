@@ -3,6 +3,7 @@ mod configs;
 mod custom_tags;
 mod display;
 pub mod format;
+mod maps;
 mod parser;
 mod remover;
 pub mod todo;

@@ -2,10 +2,10 @@
 
 use ansi_term::Style;
 use failure::Error;
-use fnv::FnvHashMap;
 use log::debug;
 use std::io::Write;
 
+use crate::maps::FallbackHashMap;
 use crate::todo::TodoFile;
 
 /// Struct for holding ansi color printing options
@@ -15,11 +15,11 @@ pub struct TodoRStyles {
     pub line_number_style: Style,
     pub user_style: Style,
     pub content_style: Style,
-    default_tag_style: Style,
-    tag_styles: FnvHashMap<String, Style>,
+    tag_styles: FallbackHashMap<String, Style>,
 }
 
 impl TodoRStyles {
+    /// Creates new StyleConfig
     pub fn new(
         filepath_style: Style,
         line_number_style: Style,
@@ -32,8 +32,7 @@ impl TodoRStyles {
             line_number_style,
             user_style,
             content_style,
-            default_tag_style,
-            tag_styles: FnvHashMap::default(),
+            tag_styles: FallbackHashMap::new(default_tag_style),
         }
     }
 
@@ -44,8 +43,7 @@ impl TodoRStyles {
             line_number_style: Style::new(),
             user_style: Style::new(),
             content_style: Style::new(),
-            default_tag_style: Style::new(),
-            tag_styles: FnvHashMap::default(),
+            tag_styles: FallbackHashMap::new(Style::new()),
         }
     }
 
@@ -57,7 +55,7 @@ impl TodoRStyles {
 
     /// Returns tag style for given tag.
     pub fn tag_style(&self, tag: &str) -> &Style {
-        self.tag_styles.get(tag).unwrap_or(&self.default_tag_style)
+        self.tag_styles.get(tag)
     }
 }
 
