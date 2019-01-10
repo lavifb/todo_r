@@ -22,12 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - filtering now occurs at the parsing stage instead of while printing
+- rewrite of hashmap that handles extensions for a small performance gain.
 - internal rewrite of formatting printing that may slightly improve performance
 
 ### Library changes
 - all TodoR methods that with `_filtered_` in the name are removed. Instead filter while parsing using `open_filtered_todos()`.
 - full rewrite of `printer.rs` and iterators of `Todo` and `TodoFile`
 - renamed what is left of `printer` mod as `format`
+- added `maps.rs` to handle specialized HashMaps
 
 
 ## v0.6.0 (2019-01-03)

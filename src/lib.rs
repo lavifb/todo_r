@@ -371,7 +371,7 @@ impl TodoR {
         let file_ext = match filepath.extension() {
             Some(ext) => ext.to_str().unwrap(),
             // lots of shell files have no extension
-            None => ".sh",
+            None => "sh",
         };
         let parser_regexs = self.config.ext_to_regexs.get(file_ext, &self.config.tags);
 
