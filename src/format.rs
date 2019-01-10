@@ -7,6 +7,8 @@ use serde_json;
 use std::fmt::Write as StringWrite;
 use std::io::{self, Write};
 
+use crate::display::{write_file_todos, TodoRStyles};
+
 // MAYB: add more output formats
 /// Enum holding the different supported output formats.
 pub enum ReportFormat {
@@ -135,6 +137,17 @@ impl TodoR {
         Ok(())
     }
 
+    /// Writes TODOs to out_buffer with no styles.
+    fn write_default_todos(&self, out_buffer: &mut impl Write) -> Result<(), Error> {
+        let styles = TodoRStyles::no_style();
+
+        for todo_file in &self.todo_files {
+            write_file_todos(out_buffer, &todo_file, &styles)?;
+        }
+
+        Ok(())
+    }
+
     /// Prints formatted TODOs to stdout.
     pub fn print_formatted_todos(&self, format: &ReportFormat) -> Result<(), Error> {
         // lock stdout to print faster
@@ -157,8 +170,7 @@ impl TodoR {
             ReportFormat::Markdown => TodoR::write_markdown,
             ReportFormat::UserMarkdown => TodoR::write_user_markdown,
             ReportFormat::Csv => TodoR::write_csv,
-            // TODO: make default print have no colors
-            ReportFormat::Default => TodoR::write_todos,
+            ReportFormat::Default => TodoR::write_default_todos,
         };
 
         formatted_write(self, out_buffer)
