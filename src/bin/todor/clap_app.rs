@@ -23,6 +23,38 @@ pub fn build_cli() -> App<'static, 'static> {
                 .short("s")
                 .long("no-style")
                 .help("Prints output with no ansi colors or styles."),
+        )
+        .arg(
+            Arg::with_name("TAGS")
+                .short("t")
+                .long("tag")
+                .takes_value(true)
+                .multiple(true)
+                .help("Additional TODO tags to search for."),
+        )
+        .arg(
+            Arg::with_name("OVERRIDE_TAGS")
+                .short("T")
+                .long("override-tag")
+                .takes_value(true)
+                .multiple(true)
+                .help("Overrides default TODO tags to only search custom ones."),
+        )
+        .arg(
+            Arg::with_name("USER")
+                .short("u")
+                .long("user")
+                .takes_value(true)
+                .multiple(true)
+                .help("Filter TODOs to only feature ones that are tagged with users."),
+        )
+        .arg(
+            Arg::with_name("IGNORE")
+                .short("i")
+                .long("ignore")
+                .takes_value(true)
+                .multiple(true)
+                .help("Paths to be ignored."),
         );
 
     clap_app!(todo_r =>
@@ -32,8 +64,8 @@ pub fn build_cli() -> App<'static, 'static> {
         (@arg FILE: ... "File to search for TODO items.")
         (@arg CONFIG: -c --("config") +takes_value "Takes configuration from file.")
         (@arg NOSTYLE: -s --("no-style") "Prints output with no ansi colors or styles.")
-        (@arg TAGS: -t --("tag") +takes_value +multiple "TODO tags to search for.")
-        (@arg OVERRIDE_TAGS: -T --("override-tags") +takes_value +multiple
+        (@arg TAGS: -t --("tag") +takes_value +multiple "Additional TODO tags to search for.")
+        (@arg OVERRIDE_TAGS: -T --("override-tag") +takes_value +multiple
             "Overrides default TODO tags to only search custom ones.")
         (@arg USER: -u --("user") +takes_value +multiple
             "Filter output to only feature provided users.")
