@@ -1,7 +1,30 @@
-use clap::{clap_app, App};
+use clap::{clap_app, App, Arg};
 
 pub fn build_cli() -> App<'static, 'static> {
     // TODO: rewrite to not use the clunky macro
+    App::new("Todo_r")
+        .version(env!("CARGO_PKG_VERSION"))
+        .author("Lavi Blumberg <lavifb@gmail.com>")
+        .about("Lists TODO comments in code.")
+        .arg(
+            Arg::with_name("FILE")
+                .multiple(true)
+                .help("File to search for TODO items."),
+        )
+        .arg(
+            Arg::with_name("CONFIG")
+                .short("c")
+                .long("config")
+                .takes_value(true)
+                .help("Takes configuration from file."),
+        )
+        .arg(
+            Arg::with_name("NOSTYLE")
+                .short("s")
+                .long("no-style")
+                .help("Prints output with no ansi colors or styles."),
+        );
+
     clap_app!(todo_r =>
         (version: env!("CARGO_PKG_VERSION"))
         (author: "Lavi Blumberg <lavifb@gmail.com>")
