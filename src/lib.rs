@@ -130,8 +130,6 @@ impl TodoRBuilder {
             .unwrap_or(config_styles.into_todo_r_styles()?);
 
         let mut ext_to_regexs = CommentRegexMultiMap::new(CommentTypes::new().add_single("#"));
-        let ext_to_comment_types: FnvHashMap<String, CommentTypes> = FnvHashMap::default();
-
         // Iter over default comment types
         for comment_config in config_struct
             .default_comments
@@ -142,18 +140,9 @@ impl TodoRBuilder {
             let (config_ext, config_exts, comment_types) = comment_config.break_apart();
             let exts = config_exts.into_iter().flatten().chain(config_ext);
 
-            // for ext in exts {
-            //     ext_to_comment_types.insert(ext, comment_types.clone());
-            // }
+            // Add all extensions into ext_to_regexs
             ext_to_regexs.insert_keys(exts, comment_types);
         }
-
-        // let default_comment_types = ext_to_comment_types
-        //     .get(&default_ext)
-        //     .ok_or(TodoRError::InvalidDefaultExtension { ext: default_ext })?
-        //     .clone();
-
-        // let default_comment_types = ext_to_comment_types.get_without_fallback()
 
         ext_to_regexs
             .reset_fallback_key(&default_ext)
@@ -162,8 +151,6 @@ impl TodoRBuilder {
         let config = TodoRConfig {
             tags,
             styles,
-            ext_to_comment_types,
-            // default_comment_types,
             ext_to_regexs,
         };
 
@@ -260,9 +247,7 @@ pub fn write_example_config(out_buffer: &mut impl Write) -> Result<(), Error> {
 struct TodoRConfig {
     tags: Vec<String>,
     styles: TodoRStyles,
-    ext_to_comment_types: FnvHashMap<String, CommentTypes>,
     ext_to_regexs: CommentRegexMultiMap<String>,
-    // default_comment_types: CommentTypes,
 }
 
 /// Parser for finding TODOs in comments and storing them on a per-file basis.
