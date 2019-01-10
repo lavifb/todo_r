@@ -56,7 +56,7 @@ use std::path::Path;
 
 use crate::comments::CommentTypes;
 use crate::configs::TodoRConfigFileSerial;
-use crate::display::*;
+use crate::display::{write_file_todos, TodoRStyles};
 use crate::errors::TodoRError;
 use crate::maps::CommentRegexMultiMap;
 use crate::parser::{parse_content, parse_content_with_filter};
