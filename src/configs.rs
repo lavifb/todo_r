@@ -11,16 +11,14 @@ use crate::errors::TodoRError::InvalidConfigFile;
 /// Comments configuration as read from the config file
 #[derive(Debug, Default, Clone, Deserialize)]
 pub(crate) struct CommentsConfig {
-    #[serde(default)]
-    ext: String,
-    #[serde(default)]
-    exts: Vec<String>,
+    ext: Option<String>,
+    exts: Option<Vec<String>>,
     types: Vec<CommentType>,
 }
 
 impl CommentsConfig {
     /// Consume the CommentsConfig type and return its parts
-    pub fn break_apart(self) -> (String, Vec<String>, CommentTypes) {
+    pub fn break_apart(self) -> (Option<String>, Option<Vec<String>>, CommentTypes) {
         (self.ext, self.exts, self.types.into())
     }
 }
