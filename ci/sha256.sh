@@ -14,7 +14,7 @@ version="$1"
 # Linux and Darwin builds.
 for arch in x86_64; do
   for target in apple-darwin unknown-linux-gnu; do
-    url="https://github.com/lavifb/todo_r/releases/download/v$version/todor-v$version-$arch-$target.tar.gz"
+    url="https://github.com/lavifb/todo_r/releases/download/$version/todor-$version-$arch-$target.tar.gz"
     sha=$(curl -sfSL "$url" | shasum -a 256)
     echo "$version-$arch-$target $sha"
   done
@@ -22,7 +22,7 @@ done
 
 # Source.
 for ext in zip tar.gz; do
-  url="https://github.com/lavifb/todo_r/archive/v$version.$ext"
+  url="https://github.com/lavifb/todo_r/archive/$version.$ext"
   sha=$(curl -sfSL "$url" | shasum -a 256)
   echo "source.$ext $sha"
 done
