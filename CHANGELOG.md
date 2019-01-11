@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Fixed -->
 <!-- ### Security -->
 
-## [Unreleased]
+## v0.7.0 (2019-01-11)
 ### Added
 - More formatting options for `-f` flag
 	- `default` prints in the normal ANSI style
