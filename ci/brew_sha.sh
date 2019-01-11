@@ -19,10 +19,10 @@ class Todor < Formula
 
   if OS.mac?
       url "${MAC_URL}"
-      sha256 "${MAC_SHA}"
+      sha256 "${MAC_SHA%  -}"
   elsif OS.linux?
       url "${LIN_URL}"
-      sha256 "${LIN_SHA}"
+      sha256 "${LIN_SHA%  -}"
   end
 
   conflicts_with "todor"
