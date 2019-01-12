@@ -1,5 +1,18 @@
 use clap::{App, Arg};
 
+#[cfg(windows)]
+macro_rules! global_config_path {
+    () => {
+        r"~\AppData\Roaming\lavifb\todor\todor.conf"
+    };
+}
+#[cfg(unix)]
+macro_rules! global_config_path {
+    () => {
+        r"~/.config/todor/todor.conf"
+    };
+}
+
 pub fn build_cli() -> App<'static, 'static> {
     App::new("Todo_r")
         .version(env!("CARGO_PKG_VERSION"))
@@ -8,20 +21,30 @@ pub fn build_cli() -> App<'static, 'static> {
         .arg(
             Arg::with_name("FILE")
                 .multiple(true)
-                .help("File to search for TODO items."),
+                .help("Sets todor to only search in provided files."),
         )
         .arg(
             Arg::with_name("CONFIG")
                 .short("c")
                 .long("config")
                 .takes_value(true)
-                .help("Takes configuration from file."),
+                .help("Takes config from file.")
+                .long_help(concat!(
+                    "Takes configuration from file. This file should be in a JSON format and \
+                    allows todor to be customized by adding new comment types for extensions and \
+                    custom colors. An example file called .todor can be created by using the \
+                    `todor init` command. \
+                    \n\n\
+                    You can also set a global config file at `",
+                    global_config_path!(),
+                    "`.")
+                )
         )
         .arg(
             Arg::with_name("NOSTYLE")
                 .short("s")
                 .long("no-style")
-                .help("Prints output with no ansi colors or styles."),
+                .help("Prints output with no ANSI colors or styles."),
         )
         .arg(
             Arg::with_name("TAGS")
@@ -29,7 +52,13 @@ pub fn build_cli() -> App<'static, 'static> {
                 .long("tag")
                 .takes_value(true)
                 .multiple(true)
-                .help("Additional TODO tags to search for."),
+                .help("Additional TODO tags to search for.")
+                .long_help(
+                    "Adds additional tags to search for over the ones provided by default and any \
+                    config files. \nFor example, to add MAYB and NOW tags to your search, use \n\n\
+                    \t> todor -t mayb now\n\n\
+                    to find them. This will also find tags defined in any config files."
+                ),
         )
         .arg(
             Arg::with_name("OVERRIDE_TAGS")
@@ -37,7 +66,11 @@ pub fn build_cli() -> App<'static, 'static> {
                 .long("override-tag")
                 .takes_value(true)
                 .multiple(true)
-                .help("Overrides default TODO tags to only search custom ones."),
+                .help("Overrides default TODO tags to only search custom ones.")
+                .long_help(
+                    "Works the same as `-t` except tags in default and config are not searched for.\
+                    Thus, only tags explicitly passed after this flag are considered."
+                ),
         )
         .arg(
             Arg::with_name("USER")

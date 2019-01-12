@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Fixed -->
 <!-- ### Security -->
 
+## [Unreleased]
+### Added
+- improved help when using `-h` and `--help` tags
+
+
 ## v0.7.0 (2019-01-11)
 ### Added
 - More formatting options for `-f` flag
