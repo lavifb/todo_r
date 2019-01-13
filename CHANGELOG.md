@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- __UNFINISHED!__ improved help when using `-h` and `--help` tags
+- improved help when using `-h` and `--help` tags
 
 
 ## v0.7.0 (2019-01-11)

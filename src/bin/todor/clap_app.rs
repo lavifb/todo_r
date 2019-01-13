@@ -78,7 +78,12 @@ pub fn build_cli() -> App<'static, 'static> {
                 .long("user")
                 .takes_value(true)
                 .multiple(true)
-                .help("Filter TODOs to only feature ones that are tagged with users."),
+                .help("Filter TODOs to only feature ones that are tagged with users.")
+                .long_help(
+                    "Only searches for TODOs that include provided users.\n\
+                    For example, to only print TODOs with user1 and user2, use \n\n\
+                    \t> todor -u user1 user2\n\n"
+                ),
         )
         .arg(
             Arg::with_name("IGNORE")
@@ -112,14 +117,27 @@ pub fn build_cli() -> App<'static, 'static> {
                     "csv",
                     "default",
                 ])
-                .help("Outputs in specified format."),
+                .help("Outputs in specified format.")
+                .long_help(
+                    "Outputs in specified format. The following formats are supported:\n\n\
+                    json: compacted JSON\n\
+                    prettyjson: nicely formatted JSON\n\
+                    markdown: Markdown tables with a table for each tag type\n\
+                    usermarkdown: Markdown tables for each user\n\
+                    csv: Comma separated values table\n\
+                    default: regular output with no ANSI colors for "
+                ),
         )
         .arg(
             Arg::with_name("DELETE_MODE")
                 .short("d")
                 .long("delete")
                 .conflicts_with("FORMAT")
-                .help("Interactive delete mode."),
+                .help("Interactive delete mode.")
+                .long_help(
+                    "Runs todor and lets you delete TODO comments interactively. First you select \
+                    which file to delete from and then pick which comment to delete."
+                ),
         )
         .arg(
             Arg::with_name("EXT")
@@ -127,7 +145,12 @@ pub fn build_cli() -> App<'static, 'static> {
                 .long("ext")
                 .takes_value(true)
                 .conflicts_with("DELETE_MODE")
-                .help("Reads piped content as if it has the provided extention."),
+                .help("Reads piped content as if it has the provided extention.")
+                .long_help(
+                    "Reads piped content as if it has the provided extention. For example, \n\n\
+                    \t> cat test.rs | todor -e rs\n\n\
+                    will take the piped output from cat and read using the .rs comment styles."
+                ),
         )
         .subcommand(
             App::new("init")
