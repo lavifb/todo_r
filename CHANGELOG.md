@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Fixed -->
 <!-- ### Security -->
 
-## [Unreleased]
+## v0.7.1 (2019-01-14)
 ### Added
 - improved help when using `-h` and `--help` tags
 
