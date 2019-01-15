@@ -78,7 +78,7 @@ pub fn write_file_todos(
         )?;
 
         for todo in todos {
-            writeln!(out_buffer, "{}", todo.style_string(styles))?;
+            todo.write_style_string(out_buffer, styles)?;
         }
     } else {
         debug!(
