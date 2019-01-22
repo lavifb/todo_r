@@ -34,6 +34,7 @@ serde_json = "1"
 globset = "0.4"
 dirs = "1"
 atty = "0.2"
+jemallocator = "0.1.8"
 
 [dev-dependencies]
 criterion = "0.2.6"

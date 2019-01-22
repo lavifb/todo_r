@@ -263,7 +263,7 @@ impl<'a> IntoIterator for &'a TodoFile {
 #[cfg(test)]
 mod test {
     use super::*;
-    use serde_json;
+    // use serde_json;
     use std::io::Cursor;
 
     #[test]

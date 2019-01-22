@@ -9,7 +9,7 @@ use atty;
 use clap::ArgMatches;
 use config::FileFormat;
 use dirs::home_dir;
-use env_logger;
+// use env_logger;
 use failure::{format_err, Error};
 use ignore::overrides::OverrideBuilder;
 use log::*;
