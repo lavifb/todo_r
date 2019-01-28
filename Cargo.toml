@@ -37,7 +37,7 @@ atty = "0.2"
 jemallocator = "0.1.8"
 
 [dev-dependencies]
-criterion = "0.2.6"
+criterion = "0.2.9"
 escargot = "0.4"
 assert_cmd = "0.10"
 
