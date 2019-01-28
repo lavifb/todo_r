@@ -74,7 +74,7 @@ fn parse_style_color(color: &str) -> Result<Style, Error> {
             return Err(InvalidConfigFile {
                 message: format!("'{}' is not a valid ANSI color.", color),
             }
-            .into())
+            .into());
         }
     };
 
@@ -94,7 +94,7 @@ fn parse_style_modifier(unmodified_style: Style, modifier: &str) -> Result<Style
                     modifier
                 ),
             }
-            .into())
+            .into());
         }
     };
 
