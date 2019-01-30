@@ -1,6 +1,3 @@
-#[global_allocator]
-static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
-
 pub mod comments;
 mod configs;
 mod custom_tags;
