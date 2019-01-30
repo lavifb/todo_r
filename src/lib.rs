@@ -1,5 +1,4 @@
 #[global_allocator]
-#[cfg(not(windows))]
 static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 pub mod comments;
