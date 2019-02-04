@@ -25,6 +25,7 @@ where
     trace!("capturing content against {} regexs", regexs.len());
 
     let mut todos = Vec::new();
+    // TODO: use byte_lines from bytelines crate
     for (line_num, line_result) in content_buf.lines().enumerate() {
         let line = line_result?;
 
