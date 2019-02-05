@@ -1,8 +1,6 @@
 // Integratino tests for todor
 
 use assert_cmd::prelude::*;
-use escargot::CargoRun;
-use lazy_static::lazy_static;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
