@@ -45,9 +45,7 @@ pub mod errors {
 }
 
 use failure::Error;
-use fnv::FnvHashMap;
 use log::debug;
-use regex::Regex;
 use serde::ser::{Serialize, SerializeSeq, Serializer};
 use std::borrow::Cow;
 use std::fs::File;
@@ -255,7 +253,6 @@ struct TodoRConfig {
 pub struct TodoR {
     config: TodoRConfig,
     todo_files: Vec<TodoFile>,
-    ext_to_regexs: FnvHashMap<String, Vec<Regex>>,
 }
 
 impl<'a> Default for TodoR {
@@ -285,7 +282,6 @@ impl TodoR {
         TodoR {
             config,
             todo_files: Vec::new(),
-            ext_to_regexs: FnvHashMap::default(),
         }
     }
 

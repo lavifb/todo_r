@@ -1,20 +1,9 @@
 // Integratino tests for todor
 
 use assert_cmd::prelude::*;
-use escargot::CargoRun;
-use lazy_static::lazy_static;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
-
-lazy_static! {
-    static ref CARGO_RUN: CargoRun = escargot::CargoBuild::new()
-        .bin("todor")
-        .current_release()
-        .current_target()
-        .run()
-        .unwrap();
-}
 
 fn dir_sep() -> &'static str {
     if cfg!(windows) {
@@ -25,7 +14,7 @@ fn dir_sep() -> &'static str {
 }
 
 fn todor() -> Command {
-    let mut cmd = CARGO_RUN.command();
+    let mut cmd = Command::cargo_bin("todor").unwrap();
     cmd.current_dir(format!("tests{0}inputs", dir_sep()));
     cmd.arg("--no-style");
     cmd
@@ -46,7 +35,7 @@ fn basic() {
 
 #[test]
 fn colors() {
-    let mut cmd = CARGO_RUN.command();
+    let mut cmd = Command::cargo_bin("todor").unwrap();
     cmd.current_dir("tests/inputs")
         .arg("test1.rs")
         .assert()
@@ -226,7 +215,7 @@ fn ignore() {
 
 #[test]
 fn init() {
-    let mut cmd = CARGO_RUN.command();
+    let mut cmd = Command::cargo_bin("todor").unwrap();
     cmd.current_dir("tests/inputs")
         .arg("init")
         .assert()
@@ -329,7 +318,7 @@ fn users() {
 
 #[test]
 fn users_color() {
-    let mut cmd = CARGO_RUN.command();
+    let mut cmd = Command::cargo_bin("todor").unwrap();
     cmd.current_dir("tests/inputt")
         .arg("ignore_this.rs")
         .assert()
