@@ -8,15 +8,18 @@ mod walk;
 use atty;
 use clap::ArgMatches;
 use config::FileFormat;
+#[cfg(not(target_os = "macos"))]
+use dirs::config_dir;
 use dirs::home_dir;
 // use env_logger;
 use failure::{format_err, Error};
 use ignore::overrides::OverrideBuilder;
 use log::*;
+use std::env;
 use std::env::current_dir;
 use std::fs::File;
 use std::io::{stdin, Read};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use todo_r::format::ReportFormat;
 use todo_r::todo::Todo;
@@ -162,17 +165,23 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
 }
 
 fn load_global_config(builder: &mut TodoRBuilder) -> Result<(), Error> {
-    if let Some(mut global_conf) = home_dir() {
-        if cfg!(windows) {
-            global_conf.push(r"AppData\Roaming\lavifb\todor\todor.conf");
-        } else {
-            global_conf.push(".config/todor/todor.conf");
-        }
+    #[cfg(target_os = "macos")]
+    let config_dir_op = env::var_os("XDG_CONFIG_HOME")
+        .map(PathBuf::from)
+        .filter(|p| p.is_absolute())
+        .or_else(|| home_dir().map(|d| d.join(".config")));
 
-        info!("searching for global config in '{}'", global_conf.display());
-        if global_conf.exists() && global_conf.metadata().unwrap().len() > 2 {
+    #[cfg(not(target_os = "macos"))]
+    let config_dir_op = config_dir();
+
+    if let Some(global_config) = config_dir_op.map(|d| d.join("todor/todor.conf")) {
+        info!(
+            "searching for global config in '{}'",
+            global_config.display()
+        );
+        if global_config.exists() && global_config.metadata().unwrap().len() > 2 {
             info!("adding global config file...");
-            builder.add_config_file_with_format(global_conf, FileFormat::Hjson)?;
+            builder.add_config_file_with_format(global_config, FileFormat::Hjson)?;
         }
     }
 

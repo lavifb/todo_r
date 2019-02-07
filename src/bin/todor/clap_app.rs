@@ -9,7 +9,7 @@ macro_rules! global_config_path {
 #[cfg(unix)]
 macro_rules! global_config_path {
     () => {
-        r"~/.config/todor/todor.conf"
+        r"$XDG_CONFIG_HOME/todor/todor.conf or ~/.config/todor/todor.conf"
     };
 }
 

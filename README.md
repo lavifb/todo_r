@@ -50,7 +50,7 @@ Create a `.todor` file in the root of your workspace with `todor init`.
 
 `.todor` files can also used as a config file to set custom tags, comments types, output styles, etc.
 
-Todo_r also supports a global config file at `~/.config/todor/todor.conf` for Mac/Linux and `~\AppData\Roaming\lavifb\todor\todor.conf` on Windows.
+Todo_r also supports a global config file at `$XDG_CONFIG_HOME/todor/todor.conf` (default `~/.config/todor/todor.conf`) for Mac/Linux and `~\AppData\Roaming\lavifb\todor\todor.conf` on Windows.
 
 A deeper explanation of config files can be found at [config.md](https://github.com/lavifb/todo_r/blob/master/config.md).
 
