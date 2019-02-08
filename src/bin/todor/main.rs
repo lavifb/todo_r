@@ -1,31 +1,28 @@
 // Binary for finding TODOs in specified files
 
 mod clap_app;
+mod global_config;
 mod logger;
 mod select;
 mod walk;
 
 use atty;
 use clap::ArgMatches;
-use config::FileFormat;
-#[cfg(not(target_os = "macos"))]
-use dirs::config_dir;
-use dirs::home_dir;
 // use env_logger;
 use failure::{format_err, Error};
 use ignore::overrides::OverrideBuilder;
 use log::*;
-use std::env;
 use std::env::current_dir;
 use std::fs::File;
 use std::io::{stdin, Read};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use todo_r::format::ReportFormat;
 use todo_r::todo::Todo;
 use todo_r::TodoRBuilder;
 
 use self::clap_app::build_cli;
+use self::global_config::load_global_config;
 use self::logger::init_logger;
 use self::select::run_delete;
 use self::walk::build_walker;
@@ -162,30 +159,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
     }
 
     Ok(0)
-}
-
-fn load_global_config(builder: &mut TodoRBuilder) -> Result<(), Error> {
-    #[cfg(target_os = "macos")]
-    let config_dir_op = env::var_os("XDG_CONFIG_HOME")
-        .map(PathBuf::from)
-        .filter(|p| p.is_absolute())
-        .or_else(|| home_dir().map(|d| d.join(".config")));
-
-    #[cfg(not(target_os = "macos"))]
-    let config_dir_op = config_dir();
-
-    if let Some(global_config) = config_dir_op.map(|d| d.join("todor/todor.conf")) {
-        info!(
-            "searching for global config in '{}'",
-            global_config.display()
-        );
-        if global_config.exists() && global_config.metadata().unwrap().len() > 2 {
-            info!("adding global config file...");
-            builder.add_config_file_with_format(global_config, FileFormat::Hjson)?;
-        }
-    }
-
-    Ok(())
 }
 
 fn run_init() -> i32 {
