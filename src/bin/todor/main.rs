@@ -1,14 +1,13 @@
 // Binary for finding TODOs in specified files
 
 mod clap_app;
+mod global_config;
 mod logger;
 mod select;
 mod walk;
 
 use atty;
 use clap::ArgMatches;
-use config::FileFormat;
-use dirs::home_dir;
 // use env_logger;
 use failure::{format_err, Error};
 use ignore::overrides::OverrideBuilder;
@@ -23,6 +22,7 @@ use todo_r::todo::Todo;
 use todo_r::TodoRBuilder;
 
 use self::clap_app::build_cli;
+use self::global_config::load_global_config;
 use self::logger::init_logger;
 use self::select::run_delete;
 use self::walk::build_walker;
@@ -159,24 +159,6 @@ fn run(matches: &ArgMatches) -> Result<i32, Error> {
     }
 
     Ok(0)
-}
-
-fn load_global_config(builder: &mut TodoRBuilder) -> Result<(), Error> {
-    if let Some(mut global_conf) = home_dir() {
-        if cfg!(windows) {
-            global_conf.push(r"AppData\Roaming\lavifb\todor\todor.conf");
-        } else {
-            global_conf.push(".config/todor/todor.conf");
-        }
-
-        info!("searching for global config in '{}'", global_conf.display());
-        if global_conf.exists() && global_conf.metadata().unwrap().len() > 2 {
-            info!("adding global config file...");
-            builder.add_config_file_with_format(global_conf, FileFormat::Hjson)?;
-        }
-    }
-
-    Ok(())
 }
 
 fn run_init() -> i32 {
