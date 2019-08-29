@@ -4,15 +4,17 @@ on: [push]
 
 jobs:
   build:
-
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node_version: [8, 10, 12]
+        rust: [stable, beta, nightly]
         os: [ubuntu-latest, windows-latest, macOS-latest]
+    
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: lavifb/todor@master
+      with:
+        rust-version: ${{ matrix.rust }}
     - name: Build
       run: cargo build --verbose
     - name: Run tests
