@@ -1,0 +1,40 @@
+name: Test Master
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    # setting to every hour while testing
+    - cron: '0 * * * *'
+    # Saturday
+    #- cron:  '* 17 * * 6'
+
+jobs:
+  test:
+
+    strategy:
+      matrix:
+        rust: [stable, beta]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Install latest ${{ matrix.rust }} on ${{ matrix.os }}
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        components: rustfmt, clippy
+
+    - name: Format
+      run: cargo fmt -- --check
+
+    - name: Build
+      run: cargo build --verbose
+
+    - name: Run tests
+      run: cargo test --verbose
