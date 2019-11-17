@@ -1,5 +1,6 @@
 Todo_r
 ======
+[![Actions Status](https://github.com/lavifb/todo_r/workflows/Test%20Master/badge.svg)](https://github.com/lavifb/todo_r/actions)
 [![Build Status](https://travis-ci.org/lavifb/todo_r.svg?branch=master)](https://travis-ci.org/lavifb/todo_r)
 
 ### Find all your notes with one command!
