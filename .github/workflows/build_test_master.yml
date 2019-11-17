@@ -5,10 +5,8 @@ on:
     branches:
       - master
   schedule:
-    # setting to every hour while testing
-    - cron: '0 * * * *'
     # Saturday
-    #- cron:  '* 17 * * 6'
+    - cron:  '* 17 * * 6'
 
 jobs:
   test:
