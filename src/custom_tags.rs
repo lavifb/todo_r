@@ -27,12 +27,12 @@ where
     let tags_string = custom_tags.join("|");
 
     Regex::new(&format!(
-        r"(?i)^\s*{}\s*({})\s?{}[:\s]?\s+{}\s*{}", // whitespace and optional colon
-        comment_type.prefix(),                     // comment prefix token
-        tags_string,                               // custom tags
-        r"(?:\(@?(\S+)\))?",                       // optional user tag in ()`s
-        r"(.*?)",                                  // content
-        comment_type.suffix(),                     // comment prefix token
+        r"(?i)^\s*{}\s*({})\s?{}[:\s]?(?:\s+{})?\s*{}", // whitespace and optional colon
+        comment_type.prefix(),                          // comment prefix token
+        tags_string,                                    // custom tags
+        r"(?:\(@?(\S+)\))?",                            // optional user tag in ()`s
+        r"(.*?)",                                       // content
+        comment_type.suffix(),                          // comment suffix token
     ))
 }
 
@@ -46,7 +46,7 @@ mod tests {
         let todo_content = re.captures(content);
         match todo_content {
             Some(todo_content) => {
-                assert_eq!(exp_result, Some(todo_content[3].trim()));
+                assert_eq!(exp_result, todo_content.get(3).map(|s| s.as_str()));
                 assert_eq!(None, todo_content.get(2).or(todo_content.get(4)));
             }
             None => assert_eq!(exp_result, None),
@@ -63,7 +63,7 @@ mod tests {
         let todo_content = re.captures(content);
         match todo_content {
             Some(todo_content) => {
-                assert_eq!(exp_content, Some(todo_content[3].trim()));
+                assert_eq!(exp_content, todo_content.get(3).map(|s| s.as_str()));
                 assert_eq!(exp_user, todo_content.get(2).map(|s| s.as_str()));
             }
             None => {
@@ -203,6 +203,16 @@ mod tests {
             Some("item"),
             &CommentType::new_block("/*", "*/"),
         );
+    }
+
+    #[test]
+    fn regex_no_todo_content_with_space() {
+        test_regex("// TODO: ", Some(""), &CommentType::new_single("//"));
+    }
+
+    #[test]
+    fn regex_no_todo_content() {
+        test_regex("// TODO:", None, &CommentType::new_single("//"));
     }
 
     #[test]

@@ -36,7 +36,7 @@ where
                         user.as_str(),
                         todo_caps.get(3).unwrap().as_str()
                     )),
-                    None => Cow::Borrowed(&todo_caps[3]),
+                    None => Cow::Borrowed(&todo_caps.get(3).map_or_else(|| "", |s| s.as_str())),
                 };
 
                 let todo = Todo::new(line_num + 1, &todo_caps[1], content);
@@ -71,7 +71,7 @@ where
                         user.as_str(),
                         todo_caps.get(3).unwrap().as_str()
                     )),
-                    None => Cow::Borrowed(&todo_caps[3]),
+                    None => Cow::Borrowed(&todo_caps.get(3).map_or_else(|| "", |s| s.as_str())),
                 };
 
                 let todo = Todo::new(line_num + 1, &todo_caps[1], content);
