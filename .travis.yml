@@ -11,7 +11,7 @@ matrix:
       env: TARGET=x86_64-apple-darwin
     - os: windows
       rust: stable
-      env: TARGET=x86_64-pc-windows-msvc
+      env: TARGET=x86_64-pc-windows-gnu
 
     # Beta test
     - os: linux
@@ -22,7 +22,7 @@ matrix:
       env: TARGET=x86_64-apple-darwin
     - os: windows
       rust: beta
-      env: TARGET=x86_64-pc-windows-msvc
+      env: TARGET=x86_64-pc-windows-gnu
 
     # Nightly test
     - os: linux
@@ -33,7 +33,7 @@ matrix:
       env: TARGET=x86_64-apple-darwin
     - os: windows
       rust: nightly
-      env: TARGET=x86_64-pc-windows-msvc
+      env: TARGET=x86_64-pc-windows-gnu
 
     # Code formatting check
     - name: rustfmt
