@@ -1,14 +1,14 @@
 class Todor < Formula
-  version '0.7.2'
+  version '0.7.3'
   desc "Find all your TODO notes with one command!"
   homepage "https://github.com/lavifb/todo_r"
 
   if OS.mac?
-      url "https://github.com/lavifb/todo_r/releases/download/v0.7.2/todor-v0.7.2-x86_64-apple-darwin.tar.gz"
-      sha256 "e33c3389fc9893c6b1caa83c73b9fb00ecf6a56ed076b34dcb4f2e7f1c3c089e"
+      url "https://github.com/lavifb/todo_r/releases/download/v0.7.3/todor-v0.7.3-x86_64-apple-darwin.tar.gz"
+      sha256 "8f64d6c85af4650420148dc015fc34ec2d8930cacd5ccdf6014686d0d59771c8"
   elsif OS.linux?
-      url "https://github.com/lavifb/todo_r/releases/download/v0.7.2/todor-v0.7.2-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "fe64b859bc23ab34ac7a1849e32b3787a2fb399906dca672361c9e119ee5c717"
+      url "https://github.com/lavifb/todo_r/releases/download/v0.7.3/todor-v0.7.3-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "6041d4c42f31e8c538c95f4d5e6094a0393e9d4d78bda940b0736ff247706ef0"
   end
 
   conflicts_with "todor"
