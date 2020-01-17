@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Fixed -->
 <!-- ### Security -->
 
+## [Unreleased]
+
+## v0.7.3 (2020-01-17)
+### Added
+- Support for empty TODOs
+
+
 ## v0.7.2 (2019-02-10)
 ### Changed
 - Global config file on MacOS now follows XDG standard so its location can be changed by setting `XDG_CONFIG_HOME`
