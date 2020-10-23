@@ -3,8 +3,8 @@
 use failure::Error;
 use lazy_static::lazy_static;
 use regex::Regex;
-use serde::ser::{Serialize, SerializeSeq, SerializeStruct, Serializer};
-use serde_derive::Serialize;
+use serde::ser::{SerializeSeq, SerializeStruct, Serializer};
+use serde::Serialize;
 use std::borrow::Cow;
 use std::fmt;
 use std::io::Write;
