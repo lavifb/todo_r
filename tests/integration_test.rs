@@ -225,7 +225,7 @@ fn init() {
 
     let todor_config = Path::new("tests/inputs/.todor");
     // check that file is created
-    assert!(todor_config.is_file(), true);
+    assert!(todor_config.is_file(), "{}", true);
 
     // remove file
     fs::remove_file(todor_config).unwrap();
