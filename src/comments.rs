@@ -6,8 +6,8 @@ use serde::{Deserialize, Deserializer};
 /// An enum for custom comment types.
 ///
 /// There are two types of comments:
-/// 	SingleLine: for single line comments like `// comment`
-/// 	Block: for block comments like `/* comment */`
+///     SingleLine: for single line comments like `// comment`
+///     Block: for block comments like `/* comment */`
 ///
 #[derive(Debug, Clone, Deserialize)]
 #[serde(untagged)]
